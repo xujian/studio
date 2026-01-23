@@ -32,6 +32,10 @@ CREATE POLICY "Users can update own profile"
   ON profiles FOR UPDATE
   USING (auth.uid() = id);
 
+CREATE POLICY "Users can insert own profile"
+  ON profiles FOR INSERT
+  WITH CHECK (auth.uid() = id);
+
 -- RLS Policies for generations
 ALTER TABLE generations ENABLE ROW LEVEL SECURITY;
 
@@ -49,9 +53,13 @@ CREATE POLICY "Users can delete own generations"
 
 -- Function to create profile on signup
 CREATE OR REPLACE FUNCTION create_profile()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
 BEGIN
-  INSERT INTO profiles (id, name, avatar)
+  INSERT INTO public.profiles (id, name, avatar)
   VALUES (
     NEW.id,
     NEW.raw_user_meta_data->>'full_name',
@@ -59,7 +67,7 @@ BEGIN
   );
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- Trigger to auto-create profile
 CREATE TRIGGER on_auth_user_created
