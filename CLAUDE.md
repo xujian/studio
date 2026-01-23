@@ -40,6 +40,8 @@ The project uses **three separate Supabase client instances** depending on conte
 - Server Components/API Routes → `import { createClient } from '@/lib/supabase/server'`
 - Middleware → `import { updateSession } from '@/lib/supabase/middleware'`
 
+All clients use the **publishable key** (format: `sb_publishable_xxx`) which respects Row Level Security policies. The service role key is NOT used in this codebase as all operations work through authenticated user sessions with RLS enforcement.
+
 ### Authentication & Route Protection
 
 - Authentication is handled via `proxy.ts` (imported in Next.js middleware pattern)
@@ -125,11 +127,12 @@ Required in `.env.local`:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=      # Only used in server-side code
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=   # New format: sb_publishable_xxx
 GEMINI_API_KEY=
-NEXT_PUBLIC_APP_URL=             # For OAuth redirects
+NEXT_PUBLIC_APP_URL=                    # For OAuth redirects
 ```
+
+**Note:** Supabase has transitioned to publishable keys (`sb_publishable_xxx`) which replace the older anon keys. If you have an older project, you can find your publishable key in the Supabase Dashboard under Settings → API → API Keys. During the transition period, both key types work, but new projects should use publishable keys.
 
 ## Supabase Setup Requirements
 
