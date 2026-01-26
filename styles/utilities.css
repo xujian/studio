@@ -35,7 +35,7 @@
   .text-neutral {
     @apply text-neutral-500;
   }
-  .border {
+  .border, .border-b {
     border-color: var(--color-border);
   }
   .grid-auto {
