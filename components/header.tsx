@@ -6,18 +6,16 @@ import { useRouter } from 'next/navigation'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { useUser } from '@/hooks/use-user'
-import { createClient } from '@/lib/supabase/client'
+import { useAuth } from '@/context/auth-provider'
 import { Sparkles, Image as ImageIcon } from 'lucide-react'
 
 export const Header = () => {
   const pathname = usePathname()
-  const { user } = useUser()
-  const supabase = createClient()
   const router = useRouter()
+  const { user, signOut } = useAuth()
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
+    await signOut()
     router.push('/login')
   }
 
