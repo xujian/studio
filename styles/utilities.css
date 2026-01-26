@@ -1,0 +1,83 @@
+@layer utilities {
+  h1 {
+    @apply my-4 text-4xl font-bold leading-8;
+  }
+  h2 {
+    @apply my-4 text-2xl font-bold leading-8;
+  }
+  h3 {
+    @apply my-4 text-xl font-bold leading-4;
+  }
+  .p {
+    @apply p-4;
+  }
+  h1 + .caption,
+  h2 + .caption,
+  h3 + .caption {
+    @apply -mt-4;
+  }
+
+  .gap {
+    @apply gap-4;
+  }
+  .mt {
+    @apply mt-4;
+  }
+  .rounded {
+    @apply rounded-md;
+  }
+  .glass {
+    @apply backdrop-blur-lg backdrop-saturate-100 backdrop-contrast-100;
+  }
+  .bg-gradient {
+    @apply bg-[radial-gradient(circle_500px_at_50%_200px,#3e3e3e,transparent)]
+  }
+  .text-neutral {
+    @apply text-neutral-500;
+  }
+  .border {
+    border-color: var(--color-border);
+  }
+  .grid-auto {
+    @apply grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4;
+  }
+  .nav-button {
+    @apply w-12 h-12 [&>svg]:size-5 rounded-full;
+  }
+  .logo {
+    display: inline-block;
+    background-color: currentColor;
+    mask-image: url('/logo.svg');
+    mask-repeat: no-repeat;
+    mask-size: contain;
+    mask-position: center;
+    -webkit-mask-image: url('/logo.svg');
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-size: contain;
+    -webkit-mask-position: center;
+  }
+}
+
+
+.cover-image {
+  @apply h-[calc(50vh-4rem)];
+}
+
+.cover-image img {
+  @apply h-full w-full object-cover;
+}
+
+.full-bleed {
+  @apply -mx-4;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  transition: all 0s ease 0s, background-color 0s 600000s !important;
+}
+
+br::selection {
+  background-color: transparent !important;
+}

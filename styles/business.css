@@ -1,0 +1,22 @@
+.page-body {
+  @apply px-4 max-w-[1280px] min-h-[calc(100vh-8rem)] mx-auto w-full flex flex-col;
+}
+.page-body section {
+  @apply mb-16;
+}
+
+.footer {
+  padding-top: 4rem;
+}
+
+.caption {
+  @apply text-neutral-500;
+}
+
+.contain {
+  @apply bg-contain bg-no-repeat bg-center;
+}
+
+.response-grid {
+  @apply grid gap-4 grid-cols-1 md:grid-cols-2 items-center content-center justify-center auto-rows-fr md:auto-cols-fr
+}
