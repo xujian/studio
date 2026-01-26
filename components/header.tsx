@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useUser } from '@/hooks/use-user'
 import { useRouter } from 'next/navigation'
 import { Sparkles, Image as ImageIcon } from 'lucide-react'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 export const Header = () => {
   const pathname = usePathname()
@@ -53,10 +54,11 @@ export const Header = () => {
         </div>
 
         <div className="flex items-center gap-4">
+          <ThemeToggle />
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.user_metadata?.avatar_url} />
+            <AvatarImage src={user.userMetadata?.avatar_url} />
             <AvatarFallback>
-              {user.user_metadata?.full_name?.[0] || user.email?.[0]}
+              {user.userMetadata?.fullName?.[0] || user.email?.[0]}
             </AvatarFallback>
           </Avatar>
           <Button variant="ghost" size="sm" onClick={handleSignOut}>
