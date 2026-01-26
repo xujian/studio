@@ -3,16 +3,17 @@
 import { useState } from 'react'
 import { GenerationCard } from '@/components/generation-card'
 import { GenerationModal } from '@/components/generation-modal'
-import { useGenerations, useDeleteGeneration } from '@/hooks/use-generations'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Sparkles } from 'lucide-react'
+import { useGenerations, useDeleteGeneration } from '@/hooks/use-generations'
 import type { Generation } from '@/lib/types'
+import { Sparkles } from 'lucide-react'
 
 export const GalleryGrid = () => {
   const { data: generations, isLoading } = useGenerations()
   const deleteMutation = useDeleteGeneration()
-  const [selectedGeneration, setSelectedGeneration] = useState<Generation | null>(null)
+  const [selectedGeneration, setSelectedGeneration] =
+    useState<Generation | null>(null)
 
   if (isLoading) {
     return (
@@ -43,7 +44,7 @@ export const GalleryGrid = () => {
   return (
     <>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {generations.map((generation) => (
+        {generations.map(generation => (
           <GenerationCard
             key={generation.id}
             generation={generation}
@@ -56,7 +57,7 @@ export const GalleryGrid = () => {
       <GenerationModal
         generation={selectedGeneration}
         open={!!selectedGeneration}
-        onOpenChange={(open) => !open && setSelectedGeneration(null)}
+        onOpenChange={open => !open && setSelectedGeneration(null)}
         onDelete={deleteMutation.mutate}
       />
     </>
