@@ -1,8 +1,9 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
-import type { User } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/client'
+import type { User } from '@/lib/types'
+import { camelizeKeys } from '@/lib/utils/case'
 
 export function useUser() {
   const [user, setUser] = useState<User | null>(null)
@@ -12,7 +13,7 @@ export function useUser() {
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
+      setUser(user ? camelizeKeys(user) : null)
       setLoading(false)
     }
 
@@ -20,7 +21,7 @@ export function useUser() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
-        setUser(session?.user ?? null)
+        setUser(session?.user ? camelizeKeys(session.user) : null)
         setLoading(false)
       }
     )
