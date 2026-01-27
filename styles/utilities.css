@@ -26,9 +26,6 @@
   .rounded {
     @apply rounded-md;
   }
-  .glass {
-    @apply backdrop-blur-lg backdrop-saturate-100 backdrop-contrast-100;
-  }
   .bg-gradient {
     @apply bg-[radial-gradient(circle_500px_at_50%_200px,#3e3e3e,transparent)]
   }

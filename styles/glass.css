@@ -1,0 +1,159 @@
+/* Vision Pro Glass System */
+
+:root {
+  /* Glass Material System - Dramatic intensity */
+  --glass-blur-light: 24px;
+  --glass-blur-medium: 40px;
+  --glass-blur-heavy: 60px;
+
+  /* Glass Background Opacity */
+  --glass-background: 0.5;
+  --glass-border: oklch(0 0 0 / 0.4);
+
+  /* Vibrancy (backdrop saturation boost) */
+  --vibrancy-subtle: 110%;
+  --vibrancy-medium: 130%;
+  --vibrancy-strong: 150%;
+
+  /* Glow Effects for hover/focus */
+  --glow-primary: oklch(0.7 0.15 264 / 0.5);
+  --glow-accent: oklch(0.8 0.12 180 / 0.4);
+  --glow-spread-sm: 0 0 20px;
+  --glow-spread-md: 0 0 32px;
+  --glow-spread-lg: 0 0 48px;
+
+  /* Elevation System (z-depth) */
+  --elevation-1: 2px;
+  --elevation-2: 6px;
+  --elevation-3: 12px;
+  --elevation-4: 20px;
+
+  /* Vision Pro Shadows - Colored, soft, layered */
+  --shadow-glass-sm:
+    0 2px 12px -2px oklch(0 0 0 / 0.15),
+    0 4px 20px -4px oklch(0 0 0 / 0.1);
+  --shadow-glass-md:
+    0 4px 24px -4px oklch(0 0 0 / 0.18),
+    0 8px 40px -8px oklch(0 0 0 / 0.12);
+  --shadow-glass-lg:
+    0 8px 40px -8px oklch(0 0 0 / 0.22),
+    0 16px 64px -16px oklch(0 0 0 / 0.15);
+  --shadow-glass-xl:
+    0 12px 60px -12px oklch(0 0 0 / 0.28),
+    0 24px 96px -24px oklch(0 0 0 / 0.2);
+}
+
+.dark {
+  --glass-background: 0.45;
+  --glass-border: oklch(77.311% 0.00009 271.152 / 0.4);
+
+  /* Stronger glows in dark mode */
+  --glow-primary: oklch(0.65 0.2 264 / 0.6);
+  --glow-accent: oklch(0.75 0.16 180 / 0.5);
+
+  /* Adjust shadows for dark backgrounds */
+  --shadow-glass-sm:
+    0 2px 12px -2px oklch(0 0 0 / 0.4),
+    0 4px 20px -4px oklch(0.5 0.08 264 / 0.2);
+  --shadow-glass-md:
+    0 4px 24px -4px oklch(0 0 0 / 0.5),
+    0 8px 40px -8px oklch(0.5 0.1 264 / 0.25);
+  --shadow-glass-lg:
+    0 8px 40px -8px oklch(0 0 0 / 0.6),
+    0 16px 64px -16px oklch(0.5 0.12 264 / 0.3);
+  --shadow-glass-xl:
+    0 12px 60px -12px oklch(0 0 0 / 0.7),
+    0 24px 96px -24px oklch(0.5 0.15 264 / 0.35);
+}
+
+@theme inline {
+  /* Glass system */
+  --glass-blur-light: var(--glass-blur-light);
+  --glass-blur-medium: var(--glass-blur-medium);
+  --glass-blur-heavy: var(--glass-blur-heavy);
+  --shadow-glass-sm: var(--shadow-glass-sm);
+  --shadow-glass-md: var(--shadow-glass-md);
+  --shadow-glass-lg: var(--shadow-glass-lg);
+  --shadow-glass-xl: var(--shadow-glass-xl);
+
+  /* Glass animations */
+  @keyframes float-up {
+    from { opacity: 0; transform: translateY(20px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% { box-shadow: var(--glow-spread-sm) var(--glow-primary); }
+    50% { box-shadow: var(--glow-spread-md) var(--glow-primary); }
+  }
+
+  --animate-float-up: float-up 0.5s ease-out;
+  --animate-glow-pulse: glow-pulse 2s ease-in-out infinite;
+}
+
+@layer utilities {
+  /* Glass Material */
+  .glass {
+    backdrop-filter: blur(var(--glass-blur-medium)) saturate(var(--vibrancy-medium));
+    background-color: color-mix(in oklch, var(--color-card), transparent calc(100% - var(--glass-background) * 100%));
+    border: 1px solid color-mix(in oklch, var(--glass-border), transparent 40%);
+  }
+
+  /* Elevation Classes (depth + shadows) */
+  .elevation-1 {
+    box-shadow: var(--shadow-glass-sm);
+    transform: translateZ(var(--elevation-1));
+  }
+
+  .elevation-2 {
+    box-shadow: var(--shadow-glass-md);
+    transform: translateZ(var(--elevation-2));
+  }
+
+  .elevation-3 {
+    box-shadow: var(--shadow-glass-lg);
+    transform: translateZ(var(--elevation-3));
+  }
+
+  .elevation-4 {
+    box-shadow: var(--shadow-glass-xl);
+    transform: translateZ(var(--elevation-4));
+  }
+
+  /* Glow Effects for Interactive Elements */
+  .glow-primary-hover {
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+
+  .glow-primary-hover:hover {
+    box-shadow: var(--glow-spread-md) var(--glow-primary);
+  }
+
+  .glow-primary-focus:focus-visible {
+    box-shadow: var(--glow-spread-md) var(--glow-primary);
+  }
+
+  /* Floating Panel Effect (3D hover) */
+  .float-panel {
+    transform-style: preserve-3d;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .float-panel:hover {
+    transform: translateY(-4px) translateZ(8px) scale(1.01);
+  }
+
+  /* Vibrancy Layer (for text over glass) */
+  .vibrancy-text {
+    text-shadow: 0 0 12px color-mix(in oklch, currentColor, transparent 60%);
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .float-panel, .glow-primary-hover, .elevation-1, .elevation-2, .elevation-3, .elevation-4 {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+}

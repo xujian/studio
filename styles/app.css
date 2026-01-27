@@ -2,6 +2,7 @@
 @plugin "tailwindcss-animate";
 @import "./root.css";
 @import "./theme.css";
+@import "./glass.css";
 @import "./utilities.css";
 @import "./business.css";
 
