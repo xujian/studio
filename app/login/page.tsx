@@ -2,6 +2,8 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
 
 export default function LoginPage() {
   const supabase = createClient()
@@ -24,19 +26,29 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="w-full max-w-md space-y-8 px-4">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold tracking-tight">Kanojo Studio</h1>
-          <p className="mt-2 text-muted-foreground">
-            AI-Powered Portrait Photography
-          </p>
-        </div>
+    <div className="flex min-h-screen items-center justify-center p-4">
+      <Card
+        className={cn(
+          "w-full max-w-md",
+          "elevation-3 animate-float-up"
+        )}
+      >
+        <CardContent className="space-y-8 p-8">
+          <div className="text-center">
+            <h1 className={cn(
+              "text-4xl font-bold tracking-tight",
+              "glow-primary-hover vibrancy-text"
+            )}>
+              Kanojo Studio
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              AI-Powered Portrait Photography
+            </p>
+          </div>
 
-        <div className="mt-8">
           <Button
             onClick={handleGoogleLogin}
-            className="w-full"
+            className="w-full glow-primary-hover"
             size="lg"
           >
             <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24">
@@ -59,8 +71,8 @@ export default function LoginPage() {
             </svg>
             Continue with Google
           </Button>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

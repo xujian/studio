@@ -11,6 +11,8 @@ coverage
 out/
 build
 dist
+public/gallery
+public/community
 
 # Production
 *.log*

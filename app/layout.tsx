@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import { Providers } from '@/context/providers'
 import { Header } from '@/components/header'
+import { cn } from '@/lib/utils'
 import '@/styles/app.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -21,10 +22,12 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/logo.svg" type="image/svg+xml" />
       </head>
-      <body className={inter.className}>
+      <body className={cn(inter.className, "min-h-screen antialiased")}>
         <Providers>
           <Header />
-          {children}
+          <main className="container min-h-[calc(100vh-6rem)] mx-auto pt-8">
+            {children}
+          </main>
         </Providers>
       </body>
     </html>

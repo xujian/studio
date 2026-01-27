@@ -1,15 +1,13 @@
 'use client'
 
-import { useState } from 'react'
-import { PromptForm } from '@/components/prompt-form'
+import { useState, useEffect } from 'react'
+import { FabricBox } from '@/components/fabric-box'
 import { ImageDisplay } from '@/components/image-display'
-import { RecentPrompts } from '@/components/recent-prompts'
-import { useGenerateMutation } from '@/hooks/use-generations'
-import { useRouter } from 'next/navigation'
 import type { PromptInput } from '@/lib/validations'
+import { useGenerateMutation } from '@/hooks/use-generations'
+import Image from 'next/image'
 
 export default function StudioPage() {
-  const router = useRouter()
   const [currentImage, setCurrentImage] = useState<{
     url: string
     prompt: string
@@ -24,16 +22,11 @@ export default function StudioPage() {
       const result = await generateMutation.mutateAsync(data.prompt)
       setCurrentImage({
         url: result.url,
-        prompt: result.prompt,
+        prompt: result.prompt
       })
-    } catch (error) {
+    } catch {
       // Error handled by mutation
     }
-  }
-
-  const handleSelectPrompt = (prompt: string) => {
-    setCurrentPrompt(prompt)
-    router.push(`/studio?prompt=${encodeURIComponent(prompt)}`)
   }
 
   const handleRegenerate = () => {
@@ -42,33 +35,43 @@ export default function StudioPage() {
     }
   }
 
+  const [photos, setPhotos] = useState<{ url: string }[]>([])
+
+  useEffect(() => {
+    fetch('/photos.json')
+      .then(res => res.json())
+      .then(data => setPhotos(data))
+      .catch(err => console.error('Failed to load photos:', err))
+  }, [])
+
   return (
-    <div className="container mx-auto h-[calc(100vh-4rem)] p-4">
-      <div className="grid h-full gap-4 lg:grid-cols-5">
-        {/* Left Panel */}
-        <div className="space-y-4 lg:col-span-2">
-          <PromptForm
-            onSubmit={handleSubmit}
-            isLoading={generateMutation.isPending}
-            defaultValue={currentPrompt}
-          />
-
-          <RecentPrompts onSelectPrompt={handleSelectPrompt} />
-        </div>
-
-        {/* Right Panel */}
-        <div className="lg:col-span-3">
-          <div className="h-full rounded-lg border bg-card p-4">
-            <ImageDisplay
-              imageUrl={currentImage?.url || null}
-              prompt={currentImage?.prompt || null}
-              isLoading={generateMutation.isPending}
-              error={generateMutation.error?.message || null}
-              onRegenerate={handleRegenerate}
-            />
+    <section className="w-full flex items-center justify-center">
+      <div className="photos flex flex-row flex-wrap justify-center gap animate-float-up"
+        style={{ animationDelay: '0.1s' }}>
+        { photos.map((photo, index) => (
+          <div
+            className="w-[270px]"
+            key={index}>
+            <Image 
+              className="aspect-9/16 w-full rounded object-cover"
+              src={photo.url}
+              width={270}
+              height={480}
+              alt="Generated image" />
           </div>
-        </div>
+        ))}
+        {/* <ImageDisplay
+          imageUrl={currentImage?.url || null}
+          prompt={currentImage?.prompt || null}
+          isLoading={generateMutation.isPending}
+          error={generateMutation.error?.message || null}
+          onRegenerate={handleRegenerate}
+        /> */}
       </div>
-    </div>
+      <FabricBox
+        onSubmit={handleSubmit}
+        isLoading={generateMutation.isPending}
+        defaultValue={currentPrompt} />
+    </section>
   )
 }
