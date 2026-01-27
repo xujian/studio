@@ -6,7 +6,7 @@ AI-powered portrait photography platform built with Next.js, Supabase, and Googl
 
 - Google OAuth authentication
 - Text-to-image generation with Gemini API
-- Generation history gallery
+- Generation history store
 - Download and regenerate images
 
 ## Tech Stack
@@ -64,7 +64,7 @@ Open [http://localhost:3000](http://localhost:3000)
 ```
 /app                  # Next.js app router
   /studio            # Generation interface
-  /gallery           # Generation history
+  /store             # Generation history
   /login             # Authentication
   /api/generate      # Image generation endpoint
 /components          # React components
@@ -83,7 +83,7 @@ Open [http://localhost:3000](http://localhost:3000)
 3. Enter a prompt describing your desired portrait
 4. Click Generate
 5. View, download, or regenerate images
-6. Access all generations in Gallery
+6. Access all generations in Store
 
 ## Development Notes
 

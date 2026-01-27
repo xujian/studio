@@ -9,7 +9,7 @@ import { useGenerations, useDeleteGeneration } from '@/hooks/use-generations'
 import type { Generation } from '@/lib/types'
 import { Sparkles } from 'lucide-react'
 
-export const GalleryGrid = () => {
+export const StoreGrid = () => {
   const { data: generations, isLoading } = useGenerations()
   const deleteMutation = useDeleteGeneration()
   const [selectedGeneration, setSelectedGeneration] =

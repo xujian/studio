@@ -54,13 +54,13 @@ export const Header = () => {
                   Studio
                 </Button>
               </Link>
-              <Link href="/gallery">
+              <Link href="/store">
                 <Button
-                  variant={pathname === '/gallery' ? 'default' : 'ghost'}
+                  variant={pathname === '/store' ? 'default' : 'ghost'}
                   size="sm"
                 >
                   <ImageIcon className="mr-2 h-4 w-4" />
-                  Gallery
+                  Store
                 </Button>
               </Link>
             </nav>

@@ -58,7 +58,7 @@
 ### Key Screens
 1. **Dashboard**: Recent generations, quick actions, usage stats.
 2. **Studio**: Main creation interface with Mixer and preview.
-3. **Gallery**: Grid view of all generations with filters.
+3. **Store**: Grid view of all generations with filters.
 4. **Templates**: Saved configurations library.
 5. **Settings**: Account, preferences, API usage.
 
