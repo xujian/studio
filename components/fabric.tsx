@@ -9,19 +9,19 @@ import { cn } from '@/lib/utils'
 import { promptSchema, type PromptInput } from '@/lib/validations'
 import { Loader2 } from 'lucide-react'
 
-interface FabricBoxProps {
+interface FabricProps {
   onSubmit: (data: PromptInput) => void
   isLoading: boolean
   defaultValue?: string
   className?: string
 }
 
-export function FabricBox({
+export function Fabric({
   onSubmit,
   isLoading,
   defaultValue,
   className
-}: FabricBoxProps) {
+}: FabricProps) {
   const {
     register,
     handleSubmit,

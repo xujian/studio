@@ -99,6 +99,12 @@
     border: 1px solid color-mix(in oklch, var(--glass-border), transparent 40%);
   }
 
+  .glass {
+    .border {
+      border-color: var(--glass-border);
+    }
+  }
+
   /* Elevation Classes (depth + shadows) */
   .elevation-1 {
     box-shadow: var(--shadow-glass-sm);

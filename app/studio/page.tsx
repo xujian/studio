@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { FabricBox } from '@/components/fabric-box'
+import { Fabric } from '@/components/fabric'
 import { ImageDisplay } from '@/components/image-display'
 import type { PromptInput } from '@/lib/validations'
 import { useGenerateMutation } from '@/hooks/use-generations'
@@ -68,7 +68,7 @@ export default function StudioPage() {
           onRegenerate={handleRegenerate}
         /> */}
       </div>
-      <FabricBox
+      <Fabric
         onSubmit={handleSubmit}
         isLoading={generateMutation.isPending}
         defaultValue={currentPrompt} />
