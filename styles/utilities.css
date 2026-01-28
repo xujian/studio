@@ -41,6 +41,9 @@
   .nav-button {
     @apply w-12 h-12 [&>svg]:size-5 rounded-full;
   }
+  .text-xs {
+    font-size: 11px;
+  }
   .logo {
     display: inline-block;
     background-color: currentColor;

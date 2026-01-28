@@ -20,3 +20,11 @@
 .response-grid {
   @apply grid gap-4 grid-cols-1 md:grid-cols-2 items-center content-center justify-center auto-rows-fr md:auto-cols-fr
 }
+
+.button {
+  @apply cursor-pointer h-8 text-xs rounded-full hover:bg-accent px-4;
+}
+
+.icon-button {
+  @apply cursor-pointer rounded-full size-8 hover:bg-accent;
+}
