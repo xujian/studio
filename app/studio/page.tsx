@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Fabric } from '@/components/fabric'
-import { ImageDisplay } from '@/components/image-display'
+import { Producer } from '@/components/producer'
 import type { PromptInput } from '@/lib/validations'
 import { useGenerateMutation } from '@/hooks/use-generations'
 import Image from 'next/image'
@@ -68,7 +67,7 @@ export default function StudioPage() {
           onRegenerate={handleRegenerate}
         /> */}
       </div>
-      <Fabric
+      <Producer
         onSubmit={handleSubmit}
         isLoading={generateMutation.isPending}
         defaultValue={currentPrompt} />

@@ -19,19 +19,19 @@ import {
   GripHorizontal,
 } from 'lucide-react'
 
-interface FabricProps {
+interface ProducerProps {
   onSubmit: (data: PromptInput) => void
   isLoading: boolean
   defaultValue?: string
   className?: string
 }
 
-export function Fabric({
+export function Producer ({
   onSubmit,
   isLoading,
   defaultValue,
   className
-}: FabricProps) {
+}: ProducerProps) {
   const [expanded, setExpanded] = useState(false)
 
   const toggleExpanded = () => {
@@ -52,7 +52,7 @@ export function Fabric({
   return (
     <div
       className={cn(
-        'fabric fixed bottom-4 left-1/2 z-50 w-full max-w-2xl -translate-x-1/2',
+        'producer fixed bottom-4 left-1/2 z-50 w-full max-w-2xl -translate-x-1/2',
         'glass animate-float-up rounded-4xl bg-accent/80',
         'transition-all duration-300',
         'overflow-hidden',
