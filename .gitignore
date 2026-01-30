@@ -13,6 +13,7 @@ build
 dist
 public/gallery
 public/community
+public/photos.json
 
 # Production
 *.log*

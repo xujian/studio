@@ -3,6 +3,7 @@
 import { useTheme } from 'next-themes'
 import { useSyncExternalStore } from 'react'
 import { Moon, Sun } from 'lucide-react'
+import { Button } from './ui'
 
 export const ThemeToggle = () => {
   const { theme, setTheme, resolvedTheme } = useTheme()
@@ -21,15 +22,15 @@ export const ThemeToggle = () => {
   const currentTheme = theme === 'system' ? resolvedTheme : theme
 
   return (
-    <button
+    <Button
       onClick={() => setTheme(currentTheme === 'dark' ? 'light' : 'dark')}
-      className="flex size-9 items-center justify-center rounded-lg border border-border bg-background transition-colors hover:bg-accent"
+      className="flex size-9 items-center justify-center rounded-full border border-border bg-background transition-colors glass"
       aria-label="Toggle theme">
       {currentTheme === 'dark' ? (
         <Sun className="size-5 text-foreground" />
       ) : (
         <Moon className="size-5 text-foreground" />
       )}
-    </button>
+    </Button>
   )
 }

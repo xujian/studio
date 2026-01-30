@@ -45,7 +45,7 @@ export default function StudioPage() {
   }, [])
 
   return (
-    <section className="w-full flex items-center justify-center">
+    <section className="w-full flex items-center justify-center pb-52">
       <div className="photos flex flex-row flex-wrap justify-center gap animate-float-up"
         style={{ animationDelay: '0.1s' }}>
         { photos.map((photo, index) => (

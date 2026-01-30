@@ -4,6 +4,7 @@ import { Providers } from '@/context/providers'
 import { Header } from '@/components/header'
 import { cn } from '@/lib/utils'
 import '@/styles/app.css'
+import Sidebar from '@/components/sidebar'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -28,6 +29,7 @@ export default function RootLayout({
           <main className="container min-h-[calc(100vh-6rem)] mx-auto pt-8">
             {children}
           </main>
+          <Sidebar />
         </Providers>
       </body>
     </html>

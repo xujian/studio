@@ -44,6 +44,9 @@
   .text-xs {
     font-size: 11px;
   }
+  .icon {
+    @apply flex items-center justify-center p-1 w-10 h-10 rounded-full;
+  }
   .logo {
     display: inline-block;
     background-color: currentColor;
