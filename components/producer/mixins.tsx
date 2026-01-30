@@ -24,27 +24,29 @@ import {
   Trash2Icon
 } from 'lucide-react'
 
-export function Toolbar() {
+const mixins = [
+  { name: 'Face', tooltip: 'Face' },
+  { name: 'Makeup', tooltip: 'Makeup' },
+  { name: 'Hair', tooltip: 'Hair' },
+  { name: 'Attire', tooltip: 'Attire' },
+  { name: 'Expression', tooltip: 'Expression' },
+  { name: 'Scene', tooltip: 'Scene' },
+  { name: 'Lighting', tooltip: 'Lighting' },
+  { name: 'Camera', tooltip: 'Camera' },
+]
+
+export function Mixins () {
   return (
     <ButtonGroup className="-mt-px h-7 rounded-none bg-white/20">
-      <Button
-        type="button"
-        variant="outline"
-        className="h-7 rounded-none text-xs">
-        Face
-      </Button>
-      <Button
-        type="button"
-        variant="outline"
-        className="h-7 rounded-none text-xs">
-        Makeup
-      </Button>
-      <Button
-        type="button"
-        variant="outline"
-        className="h-7 rounded-none text-xs">
-        Body
-      </Button>
+      {mixins.map((mixin) => (
+        <Button
+          key={mixin.name}
+          type="button"
+          variant="outline"
+          className="h-7 rounded-none text-xs px-2">
+          {mixin.name}
+        </Button>
+      ))}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button

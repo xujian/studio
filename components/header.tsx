@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/context/auth-provider'
 import { cn } from '@/lib/utils'
-import { Aperture, ShoppingBag } from 'lucide-react'
+import { Aperture, ShoppingBag, Earth } from 'lucide-react'
 
 export const Header = () => {
   const pathname = usePathname()
@@ -23,6 +23,7 @@ export const Header = () => {
   const routes = [
     { href: '/studio', label: 'Studio', icon: Aperture },
     { href: '/store', label: 'Store', icon: ShoppingBag },
+    { href: '/community', label: 'Community', icon: Earth },
   ]
 
   if (!user) return (
@@ -30,7 +31,7 @@ export const Header = () => {
   )
 
   return (
-    <header className="sticky top-4 z-50 h-16 flex w-full items-center justify-between px-8">
+    <header className="fixed top-4 z-50 h-16 flex w-full items-center justify-between px-8">
       <div className="flex flex-1 items-center">
         <Link
           href="/studio"
@@ -46,7 +47,7 @@ export const Header = () => {
           <Link key={route.href} href={route.href}>
             <Button
               variant={pathname === route.href ? 'default' : 'ghost'}
-              className={cn('h-12 rounded-full w-30 justify-start p-1 gap-1',
+              className={cn('h-12 rounded-full min-w-30 justify-start gap-1 pl-1 pr-6',
                 pathname === route.href ? 'bg-white': ''
               )}>
               <div className="icon">

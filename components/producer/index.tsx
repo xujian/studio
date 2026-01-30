@@ -11,7 +11,7 @@ import {
 } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { promptSchema, type PromptInput } from '@/lib/validations'
-import { Toolbar } from './toobar'
+import { Mixins } from './mixins'
 import {
   Loader2,
   ArrowUp,
@@ -62,7 +62,7 @@ export function Producer ({
         className={cn('-mb-8 flex px-8 opacity-0 transition-all duration-300', {
           'mb-0 opacity-100': expanded
         })}>
-        <Toolbar />
+        <Mixins />
       </div>
       <div className="-m-px flex flex-col rounded-4xl border border-white/50 bg-black/20 p-4">
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
