@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { motion } from 'motion/react'
+import { motion, AnimatePresence } from 'motion/react'
 import { cn } from '@/lib/utils'
 
 interface StaggerGridProps {
@@ -30,6 +30,13 @@ const item = {
       stiffness: 300,
       damping: 20
     }
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.8,
+    transition: {
+      duration: 0.2
+    }
   }
 }
 
@@ -41,11 +48,23 @@ export function StaggerGrid({ children, className }: StaggerGridProps) {
       initial="hidden"
       animate="show"
     >
-      {React.Children.map(children, (child) => (
-        <motion.div variants={item} layout>
-          {child}
-        </motion.div>
-      ))}
+      <AnimatePresence mode="popLayout">
+        {React.Children.map(children, (child) => {
+          // Extract key from child for AnimatePresence
+          const key = React.isValidElement(child) ? child.key : undefined
+
+          return (
+            <motion.div
+              key={key}
+              variants={item}
+              layout
+              exit="exit"
+            >
+              {child}
+            </motion.div>
+          )
+        })}
+      </AnimatePresence>
     </motion.div>
   )
 }
