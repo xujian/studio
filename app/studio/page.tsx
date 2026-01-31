@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import type { PromptInput } from '@/lib/validations'
 import { useGenerateMutation } from '@/hooks/use-generations'
 import { useMoments } from '@/hooks/use-moments'
-import { MomentView, StaggerGrid, MagneticCard } from '@/components/motion-exports'
+import { MomentView, StaggerGrid, MagneticCard, MomentSkeleton } from '@/components/motion-exports'
 import type { Photo } from '@/lib/types'
 import { motion, LayoutGroup } from 'motion/react'
 
@@ -60,7 +60,11 @@ export default function StudioPage() {
     <section className="flex w-full flex-col items-start justify-center px-16 pb-52">
       <h1 className="mb-6 text-2xl font-semibold">Moments</h1>
       {isLoading && (
-        <div className="text-muted-foreground">Loading moments...</div>
+        <StaggerGrid className="w-full grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-5">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <MomentSkeleton key={i} />
+          ))}
+        </StaggerGrid>
       )}
       {error && (
         <div className="text-destructive">
