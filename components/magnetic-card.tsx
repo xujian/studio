@@ -10,6 +10,16 @@ interface MagneticCardProps {
 
 export function MagneticCard({ children, strength = 1 }: MagneticCardProps) {
   const ref = React.useRef<HTMLDivElement>(null)
+  const [isTouchDevice, setIsTouchDevice] = React.useState(false)
+
+  React.useEffect(() => {
+    setIsTouchDevice('ontouchstart' in window)
+  }, [])
+
+  // If touch device, render children without motion effects
+  if (isTouchDevice) {
+    return <div ref={ref}>{children}</div>
+  }
 
   const x = useMotionValue(0)
   const y = useMotionValue(0)
