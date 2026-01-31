@@ -14,6 +14,8 @@ interface MomentViewProps {
 }
 
 export function MomentView({ photo, prompt, onClose }: MomentViewProps) {
+  const [isDragging, setIsDragging] = React.useState(false)
+
   // ESC key listener
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -33,7 +35,7 @@ export function MomentView({ photo, prompt, onClose }: MomentViewProps) {
         <motion.div
           className="absolute inset-0 bg-black/80"
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          animate={{ opacity: isDragging ? 0.5 : 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
         />
@@ -41,7 +43,17 @@ export function MomentView({ photo, prompt, onClose }: MomentViewProps) {
         {/* Photo Container */}
         <motion.div
           layoutId={photo.id}
-          className="relative z-10 max-h-[90vh] max-w-[90vw] aspect-9/16 overflow-hidden rounded-lg"
+          className="relative z-10 max-h-[90vh] max-w-[90vw] aspect-9/16 overflow-hidden rounded-lg cursor-grab active:cursor-grabbing"
+          drag="y"
+          dragConstraints={{ top: 0, bottom: 300 }}
+          dragElastic={0.2}
+          onDragStart={() => setIsDragging(true)}
+          onDragEnd={(e, info) => {
+            setIsDragging(false)
+            if (info.offset.y > 150) {
+              onClose()
+            }
+          }}
         >
           <Image
             src={photo.url}
