@@ -71,9 +71,9 @@ export default function StudioPage() {
       {allMoments.length === 0 && !isLoading && !error && (
         <div className="text-muted-foreground">No moments yet</div>
       )}
-      <div
-        className="grid w-full animate-float-up grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-5"
-        style={{ animationDelay: '0.1s' }}>
+      <StaggerGrid
+        className="w-full grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-5"
+      >
         {allMoments.map(moment =>
           moment.photos.map(photo => (
             <div
@@ -105,7 +105,7 @@ export default function StudioPage() {
             </Button>
           </div>
         )}
-      </div>
+      </StaggerGrid>
 
       <Producer
         onSubmit={handleSubmit}
