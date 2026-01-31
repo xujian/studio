@@ -23,22 +23,12 @@ import {
   TagIcon,
   Trash2Icon
 } from 'lucide-react'
-
-const mixins = [
-  { name: 'Face', tooltip: 'Face' },
-  { name: 'Makeup', tooltip: 'Makeup' },
-  { name: 'Hair', tooltip: 'Hair' },
-  { name: 'Attire', tooltip: 'Attire' },
-  { name: 'Expression', tooltip: 'Expression' },
-  { name: 'Scene', tooltip: 'Scene' },
-  { name: 'Lighting', tooltip: 'Lighting' },
-  { name: 'Camera', tooltip: 'Camera' },
-]
+import { assetTypes } from '@/lib/constants'
 
 export function Mixins () {
   return (
     <ButtonGroup className="-mt-px h-7 rounded-none bg-white/20">
-      {mixins.map((mixin) => (
+      {assetTypes.map((mixin) => (
         <Button
           key={mixin.name}
           type="button"

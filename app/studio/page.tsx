@@ -1,10 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import Image from 'next/image'
+import { useState } from 'react'
 import { Producer } from '@/components/producer'
+import { Button } from '@/components/ui/button'
 import type { PromptInput } from '@/lib/validations'
 import { useGenerateMutation } from '@/hooks/use-generations'
-import Image from 'next/image'
+import { useMoments } from '@/hooks/use-moments'
 
 export default function StudioPage() {
   const [currentImage, setCurrentImage] = useState<{
@@ -14,6 +16,14 @@ export default function StudioPage() {
   const [currentPrompt, setCurrentPrompt] = useState('')
 
   const generateMutation = useGenerateMutation()
+  const {
+    data,
+    isLoading,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+  } = useMoments()
 
   const handleSubmit = async (data: PromptInput) => {
     setCurrentPrompt(data.prompt)
@@ -34,43 +44,64 @@ export default function StudioPage() {
     }
   }
 
-  const [photos, setPhotos] = useState<{ url: string }[]>([])
-
-  useEffect(() => {
-    fetch('/photos.json')
-      .then(res => res.json())
-      .then(data => setPhotos(data))
-      .catch(err => console.error('Failed to load photos:', err))
-  }, [])
+  // Flatten all pages into single array
+  const allMoments = data?.pages.flatMap(page => page.moments) || []
 
   return (
-    <section className="w-full flex items-center justify-center pb-52">
-      <div className="photos flex flex-row flex-wrap justify-center gap animate-float-up"
+    <section className="flex w-full flex-col items-start justify-center px-16 pb-52">
+      <h1 className="mb-6 text-2xl font-semibold">Moments</h1>
+      {isLoading && (
+        <div className="text-muted-foreground">Loading moments...</div>
+      )}
+      {error && (
+        <div className="text-destructive">
+          Failed to load moments: {error.message}
+        </div>
+      )}
+      {allMoments.length === 0 && !isLoading && !error && (
+        <div className="text-muted-foreground">No moments yet</div>
+      )}
+      <div
+        className="grid w-full animate-float-up grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-5"
         style={{ animationDelay: '0.1s' }}>
-        { photos.map((photo, index) => (
+        {allMoments.map(moment =>
+          moment.photos.map(photo => (
+            <div
+              className="relative aspect-9/16 w-full overflow-hidden rounded bg-muted"
+              key={photo.id}
+              title={moment.prompt}>
+              <Image
+                className="object-cover"
+                src={photo.url}
+                alt={moment.prompt}
+                fill
+                sizes="(min-width: 1280px) 16vw, (min-width: 768px) 25vw, 50vw"
+                loading="lazy"
+                unoptimized
+              />
+            </div>
+          ))
+        )}
+        {hasNextPage && (
           <div
-            className="w-[270px]"
-            key={index}>
-            <Image 
-              className="aspect-9/16 w-full rounded object-cover"
-              src={photo.url}
-              width={270}
-              height={480}
-              alt="Generated image" />
+            className="relative flex aspect-9/16 w-full items-center justify-center rounded bg-muted p-4"
+            key="load-more">
+            <Button
+              className="w-full rounded-full"
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              variant="outline">
+              {isFetchingNextPage ? 'Loading...' : 'Load More'}
+            </Button>
           </div>
-        ))}
-        {/* <ImageDisplay
-          imageUrl={currentImage?.url || null}
-          prompt={currentImage?.prompt || null}
-          isLoading={generateMutation.isPending}
-          error={generateMutation.error?.message || null}
-          onRegenerate={handleRegenerate}
-        /> */}
+        )}
       </div>
+
       <Producer
         onSubmit={handleSubmit}
         isLoading={generateMutation.isPending}
-        defaultValue={currentPrompt} />
+        defaultValue={currentPrompt}
+      />
     </section>
   )
 }
