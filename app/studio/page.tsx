@@ -11,6 +11,7 @@ import { MomentView } from '@/components/moment-view'
 import { StaggerGrid } from '@/components/stagger-grid'
 import { MagneticCard } from '@/components/magnetic-card'
 import type { Photo } from '@/lib/types'
+import { motion } from 'motion/react'
 
 export default function StudioPage() {
   const [currentImage, setCurrentImage] = useState<{
@@ -76,20 +77,23 @@ export default function StudioPage() {
       >
         {allMoments.map(moment =>
           moment.photos.map(photo => (
-            <div
-              className="relative aspect-9/16 w-full overflow-hidden rounded bg-muted"
-              key={photo.id}
-              title={moment.prompt}>
-              <Image
-                className="object-cover"
-                src={photo.url}
-                alt={moment.prompt}
-                fill
-                sizes="(min-width: 1280px) 16vw, (min-width: 768px) 25vw, 50vw"
-                loading="lazy"
-                unoptimized
-              />
-            </div>
+            <MagneticCard key={photo.id}>
+              <motion.div
+                layoutId={photo.id}
+                className="relative aspect-9/16 w-full overflow-hidden rounded bg-muted cursor-pointer"
+                onClick={() => setSelectedPhoto({ photo, prompt: moment.prompt })}
+              >
+                <Image
+                  className="object-cover"
+                  src={photo.url}
+                  alt={moment.prompt}
+                  fill
+                  sizes="(min-width: 1280px) 16vw, (min-width: 768px) 25vw, 50vw"
+                  loading="lazy"
+                  unoptimized
+                />
+              </motion.div>
+            </MagneticCard>
           ))
         )}
         {hasNextPage && (
@@ -106,6 +110,14 @@ export default function StudioPage() {
           </div>
         )}
       </StaggerGrid>
+
+      {selectedPhoto && (
+        <MomentView
+          photo={selectedPhoto.photo}
+          prompt={selectedPhoto.prompt}
+          onClose={() => setSelectedPhoto(null)}
+        />
+      )}
 
       <Producer
         onSubmit={handleSubmit}
