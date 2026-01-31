@@ -14,6 +14,18 @@ interface MomentViewProps {
 }
 
 export function MomentView({ photo, prompt, onClose }: MomentViewProps) {
+  // ESC key listener
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
+
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-50 flex items-center justify-center">
