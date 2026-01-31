@@ -7,6 +7,10 @@ import { Button } from '@/components/ui/button'
 import type { PromptInput } from '@/lib/validations'
 import { useGenerateMutation } from '@/hooks/use-generations'
 import { useMoments } from '@/hooks/use-moments'
+import { MomentView } from '@/components/moment-view'
+import { StaggerGrid } from '@/components/stagger-grid'
+import { MagneticCard } from '@/components/magnetic-card'
+import type { Photo } from '@/lib/types'
 
 export default function StudioPage() {
   const [currentImage, setCurrentImage] = useState<{
@@ -14,6 +18,12 @@ export default function StudioPage() {
     prompt: string
   } | null>(null)
   const [currentPrompt, setCurrentPrompt] = useState('')
+
+  // Add this new state
+  const [selectedPhoto, setSelectedPhoto] = useState<{
+    photo: Photo
+    prompt: string
+  } | null>(null)
 
   const generateMutation = useGenerateMutation()
   const {
