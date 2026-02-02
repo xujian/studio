@@ -9,6 +9,10 @@ export const assetTypeNames = assetTypes.map(t => t.type)
  */
 export type AssetType = typeof assetTypeNames[number]
 
+export type AssetValue = {
+  [k in AssetType]?: string
+}
+
 /**
  * seperate type for supabase user
  */

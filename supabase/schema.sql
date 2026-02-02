@@ -388,3 +388,19 @@ CREATE TRIGGER on_asset_purchased
   AFTER INSERT ON purchases
   FOR EACH ROW
   EXECUTE FUNCTION process_asset_purchase();
+
+-- Function to get user's accessible assets (own + purchased)
+CREATE OR REPLACE FUNCTION get_user_assets(user_uuid uuid)
+RETURNS SETOF assets
+LANGUAGE SQL
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  SELECT DISTINCT a.*
+  FROM public.assets a
+  LEFT JOIN public.purchases p ON p.asset_id = a.id AND p.buyer_id = user_uuid
+  WHERE a.user_id = user_uuid
+     OR p.id IS NOT NULL
+  ORDER BY a.created_at DESC;
+$$;

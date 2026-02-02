@@ -11,13 +11,16 @@ import {
 } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { promptSchema, type PromptInput } from '@/lib/validations'
-import { Mixins } from './mixins'
+import { Mixins, MixinsProps } from './mixins'
 import {
   Loader2,
   ArrowUp,
   Plus,
   GripHorizontal,
 } from 'lucide-react'
+import { Asset, AssetType, AssetValue } from '@/lib/types'
+import { FacePicker } from '../face-picker'
+import { useAssets } from '@/hooks/use-assets'
 
 interface ProducerProps {
   onSubmit: (data: PromptInput) => void
@@ -33,6 +36,7 @@ export function Producer ({
   className
 }: ProducerProps) {
   const [expanded, setExpanded] = useState(false)
+  const { data: assets = [] } = useAssets()
 
   const toggleExpanded = () => {
     setExpanded(!expanded)
@@ -49,28 +53,39 @@ export function Producer ({
     }
   })
 
+  const [mixins] = useState<AssetValue>({
+    hair: 'Short Curly Hair',
+  })
+
+  const filterAssets = (type?: AssetType) => {
+    if (!type) return assets
+    return assets.filter(asset => asset.type === type)
+  }
+
   return (
     <div
       className={cn(
         'producer fixed bottom-4 left-1/2 z-50 w-full max-w-2xl -translate-x-1/2',
         'glass animate-float-up rounded-4xl bg-accent/80',
         'transition-all duration-300',
-        'overflow-hidden',
         className
       )}>
       <div
-        className={cn('-mb-8 flex px-8 opacity-0 transition-all duration-300', {
+        className={cn('-mb-7 flex px-8 opacity-0 transition-all duration-300', {
           'mb-0 opacity-100': expanded
         })}>
-        <Mixins />
+        <Mixins value={mixins} />
       </div>
-      <div className="-m-px flex flex-col rounded-4xl border border-white/50 bg-black/20 p-4">
+      <div className="-m-px flex flex-col rounded-4xl border border-white/50 bg-black/20 p-4 overflow-hidden">
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
           <div className="flex-1 rounded">
             <Textarea
               {...register('prompt')}
               placeholder="Describe the portrait you want to create..."
-              className="min-h-[100px] resize-none border-none bg-transparent! focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="min-h-25 resize-none border-none bg-transparent! focus-visible:ring-0 focus-visible:ring-offset-0"
+              style={{
+                marginLeft: '48px',
+              }}
               disabled={isLoading}
             />
           </div>
@@ -107,6 +122,9 @@ export function Producer ({
             </div>
           </div>
         </form>
+      </div>
+      <div className="absolute h-12 bottom-26 left-3">
+        <FacePicker faces={filterAssets('face')} />
       </div>
     </div>
   )

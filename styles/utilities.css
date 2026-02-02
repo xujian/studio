@@ -1,4 +1,5 @@
 @layer utilities {
+  
   h1 {
     @apply my-4 text-4xl font-bold leading-8;
   }
@@ -83,4 +84,13 @@ input:-webkit-autofill:active {
 
 br::selection {
   background-color: transparent !important;
+}
+
+.rounded-top {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.tooltip {
+  @apply text-xs bg-black text-white rounded-full p-2;
 }

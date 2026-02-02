@@ -1,0 +1,14 @@
+:root {
+  --tube: rgba(255, 234, 0, 0.804);
+  --glow: rgba(45,255,196,0.31);
+}
+
+.tube.on {
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 100%, var(--tube), transparent 75%),
+    transparent;
+}
+
+.glow.on {
+  box-shadow:0px 0px 7px 1px var(--glow);
+}

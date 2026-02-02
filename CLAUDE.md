@@ -61,14 +61,90 @@ All clients use the **publishable key** (format: `sb_publishable_xxx`) which res
 
 **Note:** The Gemini integration (`lib/gemini.ts`) contains placeholder logic for image extraction - verify API response format when implementing.
 
-### Data Fetching
+### Data Fetching Pattern
 
-- **TanStack Query** for all client-side data fetching
-- Custom hooks in `/hooks`:
-  - `useGenerations()` - Fetch user's generation history
-  - `useGenerateMutation()` - Create new generation, auto-invalidates query cache
-  - `useDeleteGeneration()` - Delete generation
-  - `useUser()` - Fetch current user profile
+**Philosophy:** Keep database logic on the server, not in client code.
+
+**TanStack Query Hooks:** All client-side data fetching uses custom hooks in `/hooks`:
+- `useGenerations()` - Fetch user's generation history
+- `useGenerateMutation()` - Create new generation, auto-invalidates query cache
+- `useDeleteGeneration()` - Delete generation
+- `useUser()` - Fetch current user profile
+- `useAssets()` - Fetch user's own assets + purchased assets
+
+**When to Use Postgres Functions:**
+
+For **complex queries** involving:
+- Multiple table JOINs
+- Subqueries or CTEs
+- Business logic that spans multiple tables
+- Data aggregation or transformations
+
+Create a Postgres function and call via RPC instead of writing complex client-side queries.
+
+**Pattern Example (useAssets):**
+
+```typescript
+// ❌ BAD: Multiple queries + business logic in client
+const { data: ownAssets } = await supabase.from('assets').select('*').eq('user_id', userId)
+const { data: purchases } = await supabase.from('purchases').select('asset_id').eq('buyer_id', userId)
+// ... then merge and deduplicate in client code
+
+// ✅ GOOD: Single RPC call to server-side function
+const { data } = await supabase.rpc('get_user_assets', { user_uuid: userId })
+```
+
+**Hook Structure:**
+
+```typescript
+'use client'
+
+import { useQuery } from '@tanstack/react-query'
+import { createClient } from '@/lib/supabase/client'
+import type { Asset } from '@/lib/types'
+
+export const useAssets = () => {
+  const supabase = createClient()
+
+  return useQuery({
+    queryKey: ['assets'],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return []
+
+      const { data, error } = await supabase.rpc('get_user_assets', {
+        user_uuid: session.user.id
+      })
+
+      if (error) throw error
+      return (data || []) as Asset[]
+    },
+    staleTime: 5 * 60 * 1000 // Cache duration
+  })
+}
+```
+
+**Corresponding Postgres Function:**
+
+```sql
+CREATE OR REPLACE FUNCTION get_user_assets(user_uuid uuid)
+RETURNS SETOF assets
+LANGUAGE SQL STABLE SECURITY DEFINER
+AS $$
+  SELECT DISTINCT a.*
+  FROM assets a
+  LEFT JOIN purchases p ON p.asset_id = a.id AND p.buyer_id = user_uuid
+  WHERE a.user_id = user_uuid OR p.id IS NOT NULL
+  ORDER BY a.created_at DESC;
+$$;
+```
+
+**Benefits:**
+- Single database round trip
+- Database logic stays in schema.sql (version controlled, reviewable)
+- Client code stays simple and declarative
+- Easier to optimize queries (indexes, query plans)
+- Better security (SECURITY DEFINER ensures proper RLS)
 
 ### Database Schema
 
