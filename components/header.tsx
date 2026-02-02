@@ -42,12 +42,12 @@ export const Header = () => {
           <img src="/kanojo.svg" className='h-12' alt="Kanojo Studio" />
         </Link>
       </div>
-      <nav className="flex items-center elevation-2 rounded-full gap-2 glass h-12">
+      <nav className="flex items-center elevation-2 rounded-full gap-0 glass h-10">
         {routes.map(route => (
           <Link key={route.href} href={route.href}>
             <Button
               variant={pathname === route.href ? 'default' : 'ghost'}
-              className={cn('h-12 rounded-full min-w-30 justify-start gap-1 pl-1 pr-6',
+              className={cn('h-10 rounded-full min-w-30 justify-start gap-1 pl-1 pr-6 cursor-pointer',
                 pathname === route.href ? 'bg-white': ''
               )}>
               <div className="icon">

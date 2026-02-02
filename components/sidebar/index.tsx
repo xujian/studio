@@ -61,7 +61,8 @@ export default function Sidebar() {
                 </TooltipTrigger>
                 <TooltipContent
                   side="right"
-                  className="rounded-xl border-white/20 bg-white/10 px-3 py-1.5 text-sm text-white backdrop-blur-2xl glass">
+                  sideOffset={8}
+                  className="tooltip">
                   {tool.label}
                 </TooltipContent>
               </Tooltip>
@@ -84,7 +85,8 @@ export default function Sidebar() {
                 </TooltipTrigger>
                 <TooltipContent
                   side="right"
-                  className="rounded-xl border-white/20 bg-white/10 px-3 py-1.5 text-sm text-white shadow-[0_4px_16px_rgba(0,0,0,0.3)] backdrop-blur-2xl">
+                  sideOffset={8}
+                  className="tooltip">
                   {action.label}
                 </TooltipContent>
               </Tooltip>

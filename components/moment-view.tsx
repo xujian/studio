@@ -30,7 +30,7 @@ export function MomentView({ photo, prompt, onClose }: MomentViewProps) {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="fixed inset-0 z-100 flex items-center justify-center">
         {/* Backdrop */}
         <motion.div
           className="absolute inset-0 bg-black/80"
@@ -43,7 +43,7 @@ export function MomentView({ photo, prompt, onClose }: MomentViewProps) {
         {/* Photo Container */}
         <motion.div
           layoutId={photo.id}
-          className="relative z-10 max-h-[90vh] max-w-[90vw] aspect-9/16 overflow-hidden rounded-lg cursor-grab active:cursor-grabbing"
+          className="relative z-10 max-h-[90vh] max-w-[90vw] h-full aspect-9/16 overflow-hidden rounded-lg cursor-grab active:cursor-grabbing"
           drag="y"
           dragConstraints={{ top: 0, bottom: 300 }}
           dragElastic={0.2}
@@ -59,7 +59,7 @@ export function MomentView({ photo, prompt, onClose }: MomentViewProps) {
             src={photo.url}
             alt={prompt}
             fill
-            className="object-cover"
+            className="object-cover w-full h-full"
             priority
             unoptimized
           />
