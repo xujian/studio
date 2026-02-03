@@ -30,16 +30,23 @@ export const engine = {
       throw new Error('No face ID provided and FALLBACK_FACE_ID not configured')
     }
 
-    // 2. Retrieve face asset from database
+    // 2. Retrieve face asset from database and verify user access
     const supabase = await createClient()
-    const { data: faceAsset, error: assetError } = await supabase
-      .from('assets')
-      .select('url')
-      .eq('id', faceId)
-      .single()
 
-    if (assetError || !faceAsset) {
-      throw new Error(`Face asset not found: ${faceId}`)
+    // Use get_user_assets RPC to ensure user has access to this face
+    const { data: userAssets, error: assetsError } = await supabase.rpc('get_user_assets', {
+      user_uuid: userId
+    })
+
+    if (assetsError) {
+      throw new Error(`Failed to fetch user assets: ${assetsError.message}`)
+    }
+
+    // Find the requested face in user's accessible assets
+    const faceAsset = userAssets?.find((asset: any) => asset.id === faceId && asset.type === 'face')
+
+    if (!faceAsset) {
+      throw new Error(`Face asset not found or user does not have access: ${faceId}`)
     }
 
     if (!faceAsset.url) {
