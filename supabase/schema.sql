@@ -52,6 +52,8 @@ CREATE TABLE photos (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   moment_id uuid REFERENCES moments(id) ON DELETE CASCADE,
   url text NOT NULL,
+  storage_path text,
+  mixins jsonb,
   created_at timestamptz DEFAULT now()
 );
 
@@ -110,6 +112,7 @@ CREATE INDEX idx_mixins_moment_id ON mixins(moment_id);
 CREATE INDEX idx_mixins_asset_id ON mixins(asset_id);
 
 CREATE INDEX idx_photos_moment_id ON photos(moment_id);
+CREATE INDEX IF NOT EXISTS idx_photos_mixins ON photos USING GIN (mixins);
 
 CREATE INDEX idx_posts_user_id ON posts(user_id);
 CREATE INDEX idx_posts_created_at ON posts(created_at DESC);
@@ -404,3 +407,23 @@ AS $$
      OR p.id IS NOT NULL
   ORDER BY a.created_at DESC;
 $$;
+
+-- =============================================
+-- Storage Policies
+-- =============================================
+
+-- Allow users to upload photos to their own folders
+CREATE POLICY IF NOT EXISTS "Users can upload own photos"
+ON storage.objects FOR INSERT
+WITH CHECK (
+  bucket_id = 'photos' AND
+  auth.uid()::text = (storage.foldername(name))[1]
+);
+
+-- Allow users to read their own photos
+CREATE POLICY IF NOT EXISTS "Users can read own photos"
+ON storage.objects FOR SELECT
+USING (
+  bucket_id = 'photos' AND
+  auth.uid()::text = (storage.foldername(name))[1]
+);
