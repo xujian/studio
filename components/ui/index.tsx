@@ -15,3 +15,5 @@ export * from './button-group'
 export * from './tabs'
 export * from './tooltip'
 export * from './popover'
+export * from './carousel'
+

@@ -1,18 +1,17 @@
 'use client'
 
-import Image from 'next/image'
 import { useState } from 'react'
 import { Producer } from '@/components/producer'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui'
 import { useMoments } from '@/hooks/use-moments'
-import { MomentView, StaggerGrid, MagneticCard, MomentSkeleton } from '@/components/motion-exports'
-import type { Photo, MomentWithPhotos } from '@/lib/types'
-import { motion, LayoutGroup } from 'motion/react'
+import { MomentView, MomentCard, StaggerGrid, MomentSkeleton } from '@/components/motion-exports'
+import type { MomentWithPhotos } from '@/lib/types'
+import { LayoutGroup } from 'motion/react'
 
 export default function StudioPage() {
-  const [selectedPhoto, setSelectedPhoto] = useState<{
-    photo: Photo
-    prompt: string
+  const [selectedMoment, setSelectedMoment] = useState<{
+    moment: MomentWithPhotos
+    initialPhotoId: string
   } | null>(null)
 
   const {
@@ -54,27 +53,15 @@ export default function StudioPage() {
         <StaggerGrid
           className="w-full grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-5"
         >
-          {allMoments.map(moment =>
-            moment.photos.map(photo => (
-              <MagneticCard key={photo.id}>
-                <motion.div
-                  layoutId={photo.id}
-                  className="relative aspect-9/16 w-full overflow-hidden rounded bg-muted cursor-pointer"
-                  onClick={() => setSelectedPhoto({ photo, prompt: moment.prompt })}
-                >
-                  <Image
-                    className="object-cover"
-                    src={photo.url}
-                    alt={moment.prompt}
-                    fill
-                    sizes="(min-width: 1280px) 16vw, (min-width: 768px) 25vw, 50vw"
-                    loading="lazy"
-                    unoptimized
-                  />
-                </motion.div>
-              </MagneticCard>
-            ))
-          )}
+          {allMoments.map(moment => (
+            <MomentCard
+              key={moment.id}
+              moment={moment}
+              onPhotoClick={(photo, moment) =>
+                setSelectedMoment({ moment, initialPhotoId: photo.id })
+              }
+            />
+          ))}
           {hasNextPage && (
             <div
               className="relative flex aspect-9/16 w-full items-center justify-center rounded bg-muted p-4"
@@ -91,11 +78,11 @@ export default function StudioPage() {
         </StaggerGrid>
       </LayoutGroup>
 
-      {selectedPhoto && (
+      {selectedMoment && (
         <MomentView
-          photo={selectedPhoto.photo}
-          prompt={selectedPhoto.prompt}
-          onClose={() => setSelectedPhoto(null)}
+          moment={selectedMoment.moment}
+          initialPhotoId={selectedMoment.initialPhotoId}
+          onClose={() => setSelectedMoment(null)}
         />
       )}
 
