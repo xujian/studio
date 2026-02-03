@@ -57,7 +57,6 @@ export async function POST(request: NextRequest) {
 
     // 4. Call Engine to generate image
     const { imageData, mimeType } = await engine.generate({
-      userId,
       prompt,
       mixins
     })
