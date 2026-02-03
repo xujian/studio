@@ -40,6 +40,10 @@ export type Photo = {
   id: string
   moment_id: string
   url: string
+  storage_path: string
+  mixins: {
+    face?: string
+  } | null
   created_at: string
 }
 
