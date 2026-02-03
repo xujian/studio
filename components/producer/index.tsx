@@ -108,7 +108,7 @@ export function Producer ({
         <div className="flex-1 rounded">
           <Textarea
             placeholder="Describe the portrait you want to create..."
-            className="min-h-12 max-h-24 resize-none border-none bg-transparent! focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="min-h-17 max-h-24 resize-none border-none bg-transparent! focus-visible:ring-0 focus-visible:ring-offset-0"
             style={{
               marginLeft: '48px',
             }}
@@ -166,7 +166,7 @@ export function Producer ({
       </div>
 
       {/* Face Picker */}
-      <div className="absolute h-12 bottom-26 left-3">
+      <div className="absolute h-12 top-3 left-3">
         <FacePicker
           faces={filterAssets('face')}
           onSelect={handleFaceSelect}
