@@ -427,3 +427,15 @@ USING (
   bucket_id = 'photos' AND
   auth.uid()::text = (storage.foldername(name))[1]
 );
+
+-- Allow public read access to photos from published posts
+CREATE POLICY IF NOT EXISTS "Public can read photos from posts"
+ON storage.objects FOR SELECT
+USING (
+  bucket_id = 'photos' AND
+  EXISTS (
+    SELECT 1 FROM photos p
+    JOIN posts ON posts.moment_id = p.moment_id
+    WHERE p.storage_path = name
+  )
+);
