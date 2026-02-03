@@ -62,9 +62,9 @@ export const engine = {
     const imageBuffer = await imageResponse.arrayBuffer()
     const imageBase64 = Buffer.from(imageBuffer).toString('base64')
 
-    // 4. Call Gemini API with face + prompt
+    // 4. Call Gemini API with face + prompt (using image generation model)
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' })
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-image' })
 
     const result = await model.generateContent([
       {
