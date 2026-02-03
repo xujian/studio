@@ -4,6 +4,9 @@ import { engine } from '@/lib/engine'
 import { engineRequestSchema } from '@/lib/validations'
 import type { MomentWithPhotos } from '@/lib/types'
 
+// Configure route timeout for image generation (60 seconds)
+export const maxDuration = 60
+
 export async function POST(request: NextRequest) {
   try {
     // 1. Parse and validate request body
