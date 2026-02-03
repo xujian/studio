@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
 
     if (!validation.success) {
       return NextResponse.json(
-        { error: 'Invalid request', details: validation.error.errors },
+        { error: 'Invalid request', details: validation.error.message },
         { status: 400 }
       )
     }
@@ -39,14 +39,12 @@ export async function POST(request: NextRequest) {
         .select('user_id')
         .eq('id', momentId)
         .single()
-
       if (momentError) {
         return NextResponse.json(
           { error: 'Moment not found' },
           { status: 404 }
         )
       }
-
       if (moment.user_id !== userId) {
         return NextResponse.json(
           { error: 'Unauthorized' },
