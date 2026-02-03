@@ -2,60 +2,76 @@
 
 import * as React from 'react'
 import { useState } from 'react'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
 import {
   Button,
   Textarea,
   Toggle,
 } from '@/components/ui'
 import { cn } from '@/lib/utils'
-import { promptSchema, type PromptInput } from '@/lib/validations'
-import { Mixins, MixinsProps } from './mixins'
+import { Mixins } from './mixins'
 import {
   Loader2,
   ArrowUp,
   Plus,
   GripHorizontal,
+  X
 } from 'lucide-react'
-import { Asset, AssetType, AssetValue } from '@/lib/types'
 import { FacePicker } from '../face-picker'
 import { useAssets } from '@/hooks/use-assets'
+import { useEngine } from '@/hooks/use-engine'
+import type { AssetType, MomentWithPhotos } from '@/lib/types'
 
 interface ProducerProps {
-  onSubmit: (data: PromptInput) => void
-  isLoading: boolean
-  defaultValue?: string
   className?: string
+  onGenerationComplete?: (moment: MomentWithPhotos) => void
 }
 
 export function Producer ({
-  onSubmit,
-  isLoading,
-  defaultValue,
-  className
+  className,
+  onGenerationComplete
 }: ProducerProps) {
+  // State
+  const [selectedFaceId, setSelectedFaceId] = useState<string | null>(null)
+  const [currentMomentId, setCurrentMomentId] = useState<string | null>(null)
+  const [prompt, setPrompt] = useState('')
+  const [mode, setMode] = useState<'generate' | 'retry'>('generate')
   const [expanded, setExpanded] = useState(false)
+
+  // Data
   const { data: assets = [] } = useAssets()
+  const { mutate, isPending, error } = useEngine()
+
+  // Handlers
+  const handleGenerate = () => {
+    if (!prompt.trim()) return
+
+    mutate({
+      prompt,
+      mixins: selectedFaceId ? { face: selectedFaceId } : undefined,
+      moment: currentMomentId || undefined
+    }, {
+      onSuccess: (moment) => {
+        setCurrentMomentId(moment.id)
+        setMode('retry')
+        onGenerationComplete?.(moment)
+      }
+    })
+  }
+
+  const handleNew = () => {
+    setCurrentMomentId(null)
+    setMode('generate')
+    setPrompt('')
+    setSelectedFaceId(null)
+  }
+
+  const handleFaceSelect = (faceId: string) => {
+    setSelectedFaceId(faceId)
+  }
 
   const toggleExpanded = () => {
     setExpanded(!expanded)
   }
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors }
-  } = useForm<PromptInput>({
-    resolver: zodResolver(promptSchema),
-    defaultValues: {
-      prompt: defaultValue || ''
-    }
-  })
-
-  const [mixins] = useState<AssetValue>({
-    hair: 'Short Curly Hair',
-  })
 
   const filterAssets = (type?: AssetType) => {
     if (!type) return assets
@@ -74,58 +90,84 @@ export function Producer ({
         className={cn('-mb-7 flex px-8 opacity-0 transition-all duration-300', {
           'mb-0 opacity-100': expanded
         })}>
-        <Mixins value={mixins} />
+        <Mixins value={{}} />
       </div>
       <div className="-m-px flex flex-col rounded-4xl border border-white/50 bg-black/20 p-4 overflow-hidden">
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
-          <div className="flex-1 rounded">
-            <Textarea
-              {...register('prompt')}
-              placeholder="Describe the portrait you want to create..."
-              className="min-h-25 resize-none border-none bg-transparent! focus-visible:ring-0 focus-visible:ring-offset-0"
-              style={{
-                marginLeft: '48px',
-              }}
-              disabled={isLoading}
-            />
+        <div className="flex-1 rounded">
+          <Textarea
+            placeholder="Describe the portrait you want to create..."
+            className="min-h-25 resize-none border-none bg-transparent! focus-visible:ring-0 focus-visible:ring-offset-0"
+            style={{
+              marginLeft: '48px',
+            }}
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            disabled={isPending}
+          />
+        </div>
+        <div className="flex justify-between">
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="icon-button"
+              disabled={isPending}>
+              <Plus />
+            </Button>
+            <Toggle
+              pressed={expanded}
+              type="button"
+              variant="outline"
+              className="button"
+              onClick={toggleExpanded}>
+              <GripHorizontal />
+            </Toggle>
           </div>
-          <div className="flex justify-between">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
+            {/* New/Clear button (only visible in retry mode) */}
+            {mode === 'retry' && (
               <Button
                 type="button"
                 variant="outline"
                 className="icon-button"
-                disabled={isLoading}>
-                <Plus />
+                onClick={handleNew}
+                disabled={isPending}>
+                <X />
               </Button>
-              <Toggle
-                pressed={expanded}
-                type="button"
-                variant="outline"
-                className="button"
-                onClick={toggleExpanded}>
-                <GripHorizontal />
-              </Toggle>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                type="submit"
-                variant="outline"
-                className="icon-button"
-                disabled={isLoading}>
-                {isLoading ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <ArrowUp />
-                )}
-              </Button>
-            </div>
+            )}
+
+            {/* Generate/Retry button */}
+            <Button
+              type="button"
+              variant="outline"
+              className="icon-button"
+              onClick={handleGenerate}
+              disabled={isPending || !prompt.trim()}>
+              {isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <ArrowUp />
+              )}
+            </Button>
           </div>
-        </form>
+        </div>
       </div>
+
+      {/* Face Picker */}
       <div className="absolute h-12 bottom-26 left-3">
-        <FacePicker faces={filterAssets('face')} />
+        <FacePicker
+          faces={filterAssets('face')}
+          onSelect={handleFaceSelect}
+          selected={selectedFaceId}
+        />
       </div>
+
+      {/* Error display */}
+      {error && (
+        <div className="absolute top-0 left-0 right-0 p-2 bg-destructive text-destructive-foreground text-sm rounded-t-4xl">
+          {error.message}
+        </div>
+      )}
     </div>
   )
 }

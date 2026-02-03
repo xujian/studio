@@ -4,27 +4,17 @@ import Image from 'next/image'
 import { useState } from 'react'
 import { Producer } from '@/components/producer'
 import { Button } from '@/components/ui/button'
-import type { PromptInput } from '@/lib/validations'
-import { useGenerateMutation } from '@/hooks/use-generations'
 import { useMoments } from '@/hooks/use-moments'
 import { MomentView, StaggerGrid, MagneticCard, MomentSkeleton } from '@/components/motion-exports'
-import type { Photo } from '@/lib/types'
+import type { Photo, MomentWithPhotos } from '@/lib/types'
 import { motion, LayoutGroup } from 'motion/react'
 
 export default function StudioPage() {
-  const [currentImage, setCurrentImage] = useState<{
-    url: string
-    prompt: string
-  } | null>(null)
-  const [currentPrompt, setCurrentPrompt] = useState('')
-
-  // Add this new state
   const [selectedPhoto, setSelectedPhoto] = useState<{
     photo: Photo
     prompt: string
   } | null>(null)
 
-  const generateMutation = useGenerateMutation()
   const {
     data,
     isLoading,
@@ -34,23 +24,9 @@ export default function StudioPage() {
     isFetchingNextPage
   } = useMoments()
 
-  const handleSubmit = async (data: PromptInput) => {
-    setCurrentPrompt(data.prompt)
-    try {
-      const result = await generateMutation.mutateAsync(data.prompt)
-      setCurrentImage({
-        url: result.url,
-        prompt: result.prompt
-      })
-    } catch {
-      // Error handled by mutation
-    }
-  }
-
-  const handleRegenerate = () => {
-    if (currentPrompt) {
-      handleSubmit({ prompt: currentPrompt })
-    }
+  const handleGenerationComplete = (moment: MomentWithPhotos) => {
+    // Optional: Could add UI feedback here (toast, animation, etc.)
+    console.log('Generation complete:', moment)
   }
 
   // Flatten all pages into single array
@@ -124,9 +100,7 @@ export default function StudioPage() {
       )}
 
       <Producer
-        onSubmit={handleSubmit}
-        isLoading={generateMutation.isPending}
-        defaultValue={currentPrompt}
+        onGenerationComplete={handleGenerationComplete}
       />
     </section>
   )
