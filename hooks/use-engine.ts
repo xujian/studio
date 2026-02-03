@@ -7,17 +7,18 @@ interface EngineParams {
   prompt: string
   mixins?: { face?: string }
   moment?: string | null
+  promptEdited?: boolean
 }
 
 export const useEngine = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ prompt, mixins, moment }: EngineParams) => {
+    mutationFn: async ({ prompt, mixins, moment, promptEdited }: EngineParams) => {
       const response = await fetch('/api/engine', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, mixins, moment }),
+        body: JSON.stringify({ prompt, mixins, moment, promptEdited }),
       })
 
       if (!response.ok) {

@@ -5,7 +5,8 @@ export const engineRequestSchema = z.object({
   mixins: z.object({
     face: z.string().uuid('Invalid face ID').optional()
   }).optional(),
-  moment: z.string().uuid('Invalid moment ID').optional()
+  moment: z.string().uuid('Invalid moment ID').optional(),
+  promptEdited: z.boolean().optional()
 })
 
 export type EngineRequest = z.infer<typeof engineRequestSchema>

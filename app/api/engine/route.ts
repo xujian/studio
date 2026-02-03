@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { prompt, mixins, moment: momentId } = validation.data
+    const { prompt, mixins, moment: momentId, promptEdited } = validation.data
 
     // 2. Authenticate user
     const supabase = await createClient()
@@ -32,13 +32,16 @@ export async function POST(request: NextRequest) {
 
     const userId = session.user.id
 
-    // 3. If moment provided, verify ownership
+    // 3. If moment provided, verify ownership and fetch baseline prompt/mixins
+    let momentBaseline: { prompt: string; mixins: Record<string, string> | null } | null = null
+
     if (momentId) {
       const { data: moment, error: momentError } = await supabase
         .from('moments')
-        .select('user_id')
+        .select('user_id, prompt, mixins')
         .eq('id', momentId)
         .single()
+
       if (momentError) {
         return NextResponse.json(
           { error: 'Moment not found' },
@@ -51,18 +54,24 @@ export async function POST(request: NextRequest) {
           { status: 403 }
         )
       }
+
+      momentBaseline = {
+        prompt: moment.prompt,
+        mixins: moment.mixins as Record<string, string> | null
+      }
     }
 
     // 4. Create or get moment ID first (before upload)
     let finalMomentId = momentId
 
     if (!momentId) {
-      // Create new moment
+      // Create new moment with baseline prompt and mixins
       const { data: newMoment, error: momentError } = await supabase
         .from('moments')
         .insert({
           user_id: userId,
           prompt: prompt,
+          mixins: mixins || null,
           status: 'completed'
         })
         .select()
@@ -108,7 +117,34 @@ export async function POST(request: NextRequest) {
       throw new Error('Failed to get public URL')
     }
 
-    // 9. Insert photo record
+    // 9. Calculate photo prompt and mixins deltas
+    let photoPrompt: string | null = null
+    let photoMixins: Record<string, string> | null = null
+
+    if (momentBaseline) {
+      // Retry mode: only save deltas
+      // Prompt: use promptEdited flag from client
+      if (promptEdited) {
+        photoPrompt = prompt
+      }
+
+      // Mixins: compare key-by-key, save only differences
+      if (mixins) {
+        const diff: Record<string, string> = {}
+        for (const [key, value] of Object.entries(mixins)) {
+          if (value !== undefined && value !== momentBaseline.mixins?.[key]) {
+            diff[key] = value
+          }
+        }
+        // Only save if there are differences
+        if (Object.keys(diff).length > 0) {
+          photoMixins = diff
+        }
+      }
+    }
+    // New moment: prompt and mixins stay null (use moment's baseline)
+
+    // 10. Insert photo record
     const { error: photoError } = await supabase
       .from('photos')
       .insert({
@@ -116,14 +152,15 @@ export async function POST(request: NextRequest) {
         moment_id: finalMomentId,
         url: urlData.publicUrl,
         storage_path: storagePath,
-        mixins: mixins || null
+        prompt: photoPrompt,
+        mixins: photoMixins
       })
 
     if (photoError) {
       throw new Error(`Failed to insert photo: ${photoError.message}`)
     }
 
-    // 10. Fetch complete moment with photos
+    // 11. Fetch complete moment with photos
     const { data: completeMoment, error: fetchError } = await supabase
       .from('moments')
       .select(`
@@ -137,7 +174,7 @@ export async function POST(request: NextRequest) {
       throw new Error(`Failed to fetch moment: ${fetchError.message}`)
     }
 
-    // 11. Return moment with photos
+    // 12. Return moment with photos
     return NextResponse.json(completeMoment as MomentWithPhotos)
 
   } catch (error) {

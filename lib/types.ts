@@ -30,6 +30,10 @@ export type Moment = {
   id: string
   user_id: string
   prompt: string
+  mixins: {
+    face?: string
+    [key: string]: string | undefined
+  } | null
   final_prompt: string | null
   seed: number | null
   status: 'pending' | 'processing' | 'completed' | 'failed'
@@ -42,12 +46,18 @@ export type Photo = {
   url: string
   storage_path: string | null
   /**
-   * Asset IDs applied to this specific photo variation.
-   * Allows different mixins per photo within the same moment.
+   * Only set if different from moment's prompt.
+   * Display logic: photo.prompt || moment.prompt
+   */
+  prompt: string | null
+  /**
+   * Only contains keys that differ from moment's mixins.
+   * Display logic: { ...moment.mixins, ...photo.mixins }
    * Example: { face: "uuid-of-face-asset" }
    */
   mixins: {
     face?: string
+    [key: string]: string | undefined
   } | null
   created_at: string
 }

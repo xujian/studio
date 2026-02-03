@@ -16,6 +16,7 @@ CREATE TABLE moments (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid REFERENCES profiles(id) ON DELETE CASCADE,
   prompt text NOT NULL,
+  mixins jsonb, -- baseline mixins for this moment
   final_prompt text,
   seed bigint,
   status text DEFAULT 'pending', -- pending, processing, completed, failed
@@ -53,7 +54,8 @@ CREATE TABLE photos (
   moment_id uuid REFERENCES moments(id) ON DELETE CASCADE,
   url text NOT NULL,
   storage_path text,
-  mixins jsonb,
+  prompt text, -- only if different from moment's prompt
+  mixins jsonb, -- only keys that differ from moment's mixins
   created_at timestamptz DEFAULT now()
 );
 
@@ -103,6 +105,7 @@ CREATE TABLE transactions (
 CREATE INDEX idx_moments_user_id ON moments(user_id);
 CREATE INDEX idx_moments_created_at ON moments(created_at DESC);
 CREATE INDEX idx_moments_status ON moments(status);
+CREATE INDEX IF NOT EXISTS idx_moments_mixins ON moments USING GIN (mixins);
 
 CREATE INDEX idx_assets_user_id ON assets(user_id);
 CREATE INDEX idx_assets_type ON assets(type);

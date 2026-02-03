@@ -34,6 +34,7 @@ export function Producer ({
   const [selectedFaceId, setSelectedFaceId] = useState<string>('')
   const [currentMomentId, setCurrentMomentId] = useState<string>('')
   const [prompt, setPrompt] = useState('')
+  const [promptEdited, setPromptEdited] = useState(false)
   const [mode, setMode] = useState<'generate' | 'retry'>('generate')
   const [expanded, setExpanded] = useState(false)
 
@@ -48,11 +49,13 @@ export function Producer ({
     mutate({
       prompt,
       mixins: selectedFaceId ? { face: selectedFaceId } : undefined,
-      moment: currentMomentId || undefined
+      moment: currentMomentId || undefined,
+      promptEdited: mode === 'retry' ? promptEdited : undefined
     }, {
       onSuccess: (moment) => {
         setCurrentMomentId(moment.id)
         setMode('retry')
+        setPromptEdited(false) // Reset after successful generation
         onGenerationComplete?.(moment)
       }
     })
@@ -63,6 +66,15 @@ export function Producer ({
     setMode('generate')
     setPrompt('')
     setSelectedFaceId('')
+    setPromptEdited(false)
+  }
+
+  const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setPrompt(e.target.value)
+    // Only track edits in retry mode
+    if (mode === 'retry') {
+      setPromptEdited(true)
+    }
   }
 
   const handleFaceSelect = (faceId: string) => {
@@ -101,7 +113,7 @@ export function Producer ({
               marginLeft: '48px',
             }}
             value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
+            onChange={handlePromptChange}
             disabled={isPending}
           />
         </div>
