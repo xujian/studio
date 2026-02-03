@@ -413,7 +413,8 @@ $$;
 -- =============================================
 
 -- Allow users to upload photos to their own folders
-CREATE POLICY IF NOT EXISTS "Users can upload own photos"
+DROP POLICY IF EXISTS "Users can upload own photos" ON storage.objects;
+CREATE POLICY "Users can upload own photos"
 ON storage.objects FOR INSERT
 WITH CHECK (
   bucket_id = 'photos' AND
@@ -421,7 +422,8 @@ WITH CHECK (
 );
 
 -- Allow users to read their own photos
-CREATE POLICY IF NOT EXISTS "Users can read own photos"
+DROP POLICY IF EXISTS "Users can read own photos" ON storage.objects;
+CREATE POLICY "Users can read own photos"
 ON storage.objects FOR SELECT
 USING (
   bucket_id = 'photos' AND
@@ -429,7 +431,8 @@ USING (
 );
 
 -- Allow public read access to photos from published posts
-CREATE POLICY IF NOT EXISTS "Public can read photos from posts"
+DROP POLICY IF EXISTS "Public can read photos from posts" ON storage.objects;
+CREATE POLICY "Public can read photos from posts"
 ON storage.objects FOR SELECT
 USING (
   bucket_id = 'photos' AND
