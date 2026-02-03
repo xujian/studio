@@ -31,8 +31,8 @@ export function Producer ({
   onGenerationComplete
 }: ProducerProps) {
   // State
-  const [selectedFaceId, setSelectedFaceId] = useState<string | null>(null)
-  const [currentMomentId, setCurrentMomentId] = useState<string | null>(null)
+  const [selectedFaceId, setSelectedFaceId] = useState<string>('')
+  const [currentMomentId, setCurrentMomentId] = useState<string>('')
   const [prompt, setPrompt] = useState('')
   const [mode, setMode] = useState<'generate' | 'retry'>('generate')
   const [expanded, setExpanded] = useState(false)
@@ -59,10 +59,10 @@ export function Producer ({
   }
 
   const handleNew = () => {
-    setCurrentMomentId(null)
+    setCurrentMomentId('')
     setMode('generate')
     setPrompt('')
-    setSelectedFaceId(null)
+    setSelectedFaceId('')
   }
 
   const handleFaceSelect = (faceId: string) => {
@@ -96,7 +96,7 @@ export function Producer ({
         <div className="flex-1 rounded">
           <Textarea
             placeholder="Describe the portrait you want to create..."
-            className="min-h-25 resize-none border-none bg-transparent! focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="min-h-12 max-h-24 resize-none border-none bg-transparent! focus-visible:ring-0 focus-visible:ring-offset-0"
             style={{
               marginLeft: '48px',
             }}
