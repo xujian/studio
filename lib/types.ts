@@ -40,7 +40,12 @@ export type Photo = {
   id: string
   moment_id: string
   url: string
-  storage_path: string
+  storage_path: string | null
+  /**
+   * Asset IDs applied to this specific photo variation.
+   * Allows different mixins per photo within the same moment.
+   * Example: { face: "uuid-of-face-asset" }
+   */
   mixins: {
     face?: string
   } | null
