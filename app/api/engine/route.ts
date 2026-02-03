@@ -53,40 +53,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 4. Call Engine to generate image
-    const { imageData, mimeType } = await engine.generate({
-      prompt,
-      mixins
-    })
-
-    // 5. Convert base64 to buffer for upload
-    const imageBuffer = Buffer.from(imageData, 'base64')
-    const photoId = crypto.randomUUID()
-    const extension = mimeType === 'image/jpeg' ? 'jpg' : 'png'
-    const storagePath = `${userId}/${momentId || 'temp'}/${photoId}.${extension}`
-
-    // 6. Upload to Supabase Storage
-    const { error: uploadError } = await supabase.storage
-      .from('photos')
-      .upload(storagePath, imageBuffer, {
-        contentType: mimeType,
-        upsert: false
-      })
-
-    if (uploadError) {
-      throw new Error(`Storage upload failed: ${uploadError.message}`)
-    }
-
-    // 7. Get public URL
-    const { data: urlData } = supabase.storage
-      .from('photos')
-      .getPublicUrl(storagePath)
-
-    if (!urlData) {
-      throw new Error('Failed to get public URL')
-    }
-
-    // 8. Create or update moment + insert photo
+    // 4. Create or get moment ID first (before upload)
     let finalMomentId = momentId
 
     if (!momentId) {
@@ -106,17 +73,39 @@ export async function POST(request: NextRequest) {
       }
 
       finalMomentId = newMoment.id
+    }
 
-      // Update storage path with actual moment ID
-      const correctPath = `${userId}/${finalMomentId}/${photoId}.${extension}`
-      const { error: moveError } = await supabase.storage
-        .from('photos')
-        .move(storagePath, correctPath)
+    // 5. Call Engine to generate image
+    const { imageData, mimeType } = await engine.generate({
+      prompt,
+      mixins
+    })
 
-      if (moveError) {
-        console.error('Failed to move file to correct path:', moveError)
-        // Continue anyway, photo still works with temp path
-      }
+    // 6. Convert base64 to buffer for upload
+    const imageBuffer = Buffer.from(imageData, 'base64')
+    const photoId = crypto.randomUUID()
+    const extension = mimeType === 'image/jpeg' ? 'jpg' : 'png'
+    const storagePath = `${userId}/${finalMomentId}/${photoId}.${extension}`
+
+    // 7. Upload to Supabase Storage (directly to final path)
+    const { error: uploadError } = await supabase.storage
+      .from('photos')
+      .upload(storagePath, imageBuffer, {
+        contentType: mimeType,
+        upsert: false
+      })
+
+    if (uploadError) {
+      throw new Error(`Storage upload failed: ${uploadError.message}`)
+    }
+
+    // 8. Get public URL
+    const { data: urlData } = supabase.storage
+      .from('photos')
+      .getPublicUrl(storagePath)
+
+    if (!urlData) {
+      throw new Error('Failed to get public URL')
     }
 
     // 9. Insert photo record
