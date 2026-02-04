@@ -42,53 +42,58 @@ export function MomentCard({ moment, onPhotoClick }: MomentCardProps) {
   if (!hasMultiplePhotos) {
     const photo = moment.photos[0]
     return (
-      <motion.div
-        layoutId={photo.id}
-        className="relative aspect-9/16 w-full cursor-pointer overflow-hidden rounded bg-muted"
-        onClick={() => onPhotoClick(photo, moment)}
-        whileHover={{ scale: 1.05 }}
-        transition={{ duration: 0.2 }}
-      >
-        <Image
-          className="object-cover"
-          src={photo.url}
-          alt={moment.prompt}
-          fill
-          sizes="(min-width: 1280px) 16vw, (min-width: 768px) 25vw, 50vw"
-          loading="lazy"
-          unoptimized
-        />
-      </motion.div>
+      <div className="relative aspect-9/16 w-full cursor-pointer overflow-hidden rounded bg-muted">
+        <motion.div
+          layoutId={photo.id}
+          className="relative h-full w-full"
+          onClick={() => onPhotoClick(photo, moment)}
+          whileHover={{ scale: 1.1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Image
+            className="object-cover"
+            src={photo.url}
+            alt={moment.prompt}
+            fill
+            sizes="(min-width: 1280px) 16vw, (min-width: 768px) 25vw, 50vw"
+            loading="lazy"
+            unoptimized
+          />
+        </motion.div>
+      </div>
     )
   }
 
   // Multiple photos - carousel
   return (
-    <motion.div
+    <div
       className="relative overflow-hidden rounded"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      whileHover={{ scale: 1.05 }}
-      transition={{ duration: 0.2 }}
     >
       <Carousel setApi={setApi} opts={{ loop: false }}>
         <CarouselContent>
           {moment.photos.map(photo => (
             <CarouselItem key={photo.id}>
-              <motion.div
-                layoutId={photo.id}
-                className="relative aspect-9/16 w-full cursor-pointer overflow-hidden rounded bg-muted"
-                onClick={() => onPhotoClick(photo, moment)}>
-                <Image
-                  className="object-cover"
-                  src={photo.url}
-                  alt={moment.prompt}
-                  fill
-                  sizes="(min-width: 1280px) 16vw, (min-width: 768px) 25vw, 50vw"
-                  loading="lazy"
-                  unoptimized
-                />
-              </motion.div>
+              <div className="relative aspect-9/16 w-full cursor-pointer overflow-hidden rounded bg-muted">
+                <motion.div
+                  layoutId={photo.id}
+                  className="relative h-full w-full"
+                  onClick={() => onPhotoClick(photo, moment)}
+                  whileHover={{ scale: 1.1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Image
+                    className="object-cover"
+                    src={photo.url}
+                    alt={moment.prompt}
+                    fill
+                    sizes="(min-width: 1280px) 16vw, (min-width: 768px) 25vw, 50vw"
+                    loading="lazy"
+                    unoptimized
+                  />
+                </motion.div>
+              </div>
             </CarouselItem>
           ))}
         </CarouselContent>
@@ -115,6 +120,6 @@ export function MomentCard({ moment, onPhotoClick }: MomentCardProps) {
           />
         ))}
       </div>
-    </motion.div>
+    </div>
   )
 }
