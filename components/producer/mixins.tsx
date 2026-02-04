@@ -1,134 +1,137 @@
-import {
-  Button,
-  ButtonGroup,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuGroup,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-  Toggle,
-} from '@/components/ui'
-import { cn } from '@/lib/utils'
-import {
-  MoreHorizontalIcon,
-  MailCheckIcon,
-  ArchiveIcon,
-  ClockIcon,
-  CalendarPlusIcon,
-  ListFilterIcon,
-  TagIcon,
-  Trash2Icon
-} from 'lucide-react'
+import * as React from 'react'
+import { Button, ButtonGroup, Toggle } from '@/components/ui'
 import { assetTypes } from '@/lib/constants'
 import type { AssetType, AssetValue } from '@/lib/types'
-import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover'
+import { cn } from '@/lib/utils'
+import { useAssets } from '@/hooks/use-assets'
+import { Popover, PopoverTrigger, PopoverContent } from '../ui'
+import { MoreHorizontalIcon, XIcon } from 'lucide-react'
 
 export type MixinsProps = {
   value?: AssetValue
+  onChange?: (value: AssetValue) => void
 }
 
-export function Mixins ({ value }: MixinsProps) {
+export function Mixins({ value = {}, onChange }: MixinsProps) {
+  const { data: assets = [], isLoading } = useAssets()
+  const [openPopover, setOpenPopover] = React.useState<AssetType | null>(null)
+
+  // Group assets by type
+  const assetsByType = React.useMemo(() => {
+    const grouped: Record<string, typeof assets> = {}
+    assets.forEach(asset => {
+      if (!grouped[asset.type]) {
+        grouped[asset.type] = []
+      }
+      grouped[asset.type].push(asset)
+    })
+    return grouped
+  }, [assets])
+
+  const handleTogglePopover = (type: AssetType) => {
+    setOpenPopover(prev => (prev === type ? null : type))
+  }
+
+  const handleClosePopover = () => {
+    setOpenPopover(null)
+  }
+
+  const handleSelect = (type: AssetType, assetId: string) => {
+    const newValue = { ...value }
+    if (newValue[type] === assetId) {
+      // Deselect if clicking the same asset
+      delete newValue[type]
+    } else {
+      // Select new asset
+      newValue[type] = assetId
+    }
+    onChange?.(newValue)
+    setOpenPopover(null)
+  }
+
+  const handleClear = (type: AssetType, e: React.MouseEvent) => {
+    e.stopPropagation()
+    const newValue = { ...value }
+    delete newValue[type]
+    onChange?.(newValue)
+  }
+
   return (
     <ButtonGroup className="-mt-px h-7 rounded-none bg-white/20">
-      {assetTypes.filter(t => t.type !== 'face').map((mixin) => (
-        <Popover key={mixin.type}>
-          <PopoverTrigger asChild>
-            <Button
-              key={mixin.name}
-              type="button"
-              variant="outline"
-              className={cn('h-7 rounded-none text-xs px-2 tube',
-                value?.hasOwnProperty(mixin.type) ? 'on' : '',
-              )}>
-              {mixin.name}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent
-            align="start"
-            side="top"
-            sideOffset={0}
-            className="w-40 p-2 draw-up overflow-hidden border-border rounded-top glass">
-            <div className="flex gap-1 flex-col justify-start items-start min-h-40">
-              <Toggle variant="outline" size="sm" className="mixin">black-long-straight</Toggle>
-              <Toggle variant="outline" size="sm" className="mixin">wavy</Toggle>
-            </div>
-          </PopoverContent>
-        </Popover>
-      ))}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+      {assetTypes
+        .filter(t => t.type !== 'face')
+        .map(assetType => {
+          const typeAssets = assetsByType[assetType.type] || []
+          const isSelected = value.hasOwnProperty(assetType.type)
+          const selectedAsset = isSelected
+            ? assets.find(a => a.id === value[assetType.type])
+            : null
+          return (
+            <Popover
+              key={assetType.type}
+              modal={false}>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className={cn(
+                    'tube group h-7 rounded-none px-2 text-xs',
+                    isSelected ? 'on' : ''
+                  )}>
+                  {selectedAsset?.name || assetType.name}
+                  {isSelected && (
+                    <XIcon
+                      className="ml-1 h-3 w-3 opacity-0 transition-opacity group-hover:opacity-100"
+                      onClick={e => handleClear(assetType.type, e)}
+                    />
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                align="start"
+                side="top"
+                sideOffset={0}
+                className="draw-up rounded-top glass w-48 overflow-hidden border-border p-2">
+                <div className="flex max-h-60 flex-col items-start justify-start gap-1 overflow-y-auto">
+                  {isLoading ? (
+                    <div className="p-2 text-xs text-muted-foreground">
+                      Loading...
+                    </div>
+                  ) : typeAssets.length === 0 ? (
+                    <div className="p-2 text-xs text-muted-foreground">
+                      No {assetType.name.toLowerCase()} assets yet
+                    </div>
+                  ) : (
+                    typeAssets.map(asset => (
+                      <Toggle
+                        key={asset.id}
+                        variant="outline"
+                        size="sm"
+                        className="mixin w-full justify-start"
+                        pressed={value[assetType.type] === asset.id}
+                        onPressedChange={() =>
+                          handleSelect(assetType.type, asset.id)
+                        }>
+                        <span className="truncate">{asset.name}</span>
+                      </Toggle>
+                    ))
+                  )}
+                  
+                </div>
+              </PopoverContent>
+            </Popover>
+          )
+        })}
+      <Popover>
+        <PopoverTrigger asChild>
           <Button
+            type="button"
             variant="outline"
-            className="h-7 rounded-none text-xs"
-            aria-label="More Options">
+            className="tube group h-7 rounded-none px-2 text-xs">
             <MoreHorizontalIcon />
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="start"
-          side="top"
-          sideOffset={12}
-          className={cn(
-            'w-48',
-            'draw-up',
-            'glass'
-          )}>
-          <DropdownMenuGroup>
-            <DropdownMenuItem>
-              <MailCheckIcon />
-              Mark as Read
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <ArchiveIcon />
-              Archive
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-          <DropdownMenuGroup>
-            <DropdownMenuItem>
-              <ClockIcon />
-              Snooze
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <CalendarPlusIcon />
-              Add to Calendar
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <ListFilterIcon />
-              Add to List
-            </DropdownMenuItem>
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>
-                <TagIcon />
-                Label As...
-              </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent>
-                <DropdownMenuRadioGroup>
-                  <DropdownMenuRadioItem value="personal">
-                    Personal
-                  </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="work">
-                    Work
-                  </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="other">
-                    Other
-                  </DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
-          </DropdownMenuGroup>
-          <DropdownMenuGroup>
-            <DropdownMenuItem variant="destructive">
-              <Trash2Icon />
-              Trash
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
+        </PopoverTrigger>
+      </Popover>
     </ButtonGroup>
   )
 }

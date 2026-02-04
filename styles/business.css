@@ -72,7 +72,7 @@
   }
 }
 
-@keyframes draw-down {
+@keyframes draw-up-back {
   from {
     max-height: 500px;
   }
@@ -90,7 +90,7 @@
 }
 
 .draw-up[data-state="closed"] {
-  animation: draw-up-back 200ms ease-in forwards;
+  animation: draw-up-back 600ms ease-in forwards;
 }
 
 .face {
