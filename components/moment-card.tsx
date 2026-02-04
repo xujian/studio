@@ -29,10 +29,8 @@ export function MomentCard({ moment, onPhotoClick }: MomentCardProps) {
 
   React.useEffect(() => {
     if (!api) return
-
     setCount(api.scrollSnapList().length)
     setCurrent(api.selectedScrollSnap())
-
     api.on('select', () => {
       setCurrent(api.selectedScrollSnap())
     })
@@ -69,8 +67,7 @@ export function MomentCard({ moment, onPhotoClick }: MomentCardProps) {
     <div
       className="relative overflow-hidden rounded"
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+      onMouseLeave={() => setIsHovered(false)}>
       <Carousel setApi={setApi} opts={{ loop: false }}>
         <CarouselContent>
           {moment.photos.map(photo => (
@@ -81,8 +78,7 @@ export function MomentCard({ moment, onPhotoClick }: MomentCardProps) {
                   className="relative h-full w-full"
                   onClick={() => onPhotoClick(photo, moment)}
                   whileHover={{ scale: 1.1 }}
-                  transition={{ duration: 0.3 }}
-                >
+                  transition={{ duration: 0.3 }}>
                   <Image
                     className="object-cover"
                     src={photo.url}
@@ -103,11 +99,10 @@ export function MomentCard({ moment, onPhotoClick }: MomentCardProps) {
             isHovered ? 'opacity-100' : 'opacity-0'
           )}
           onClick={(e) => { e.preventDefault(); e.stopPropagation()}}>
-          <CarouselPrevious className="left-2" />
-          <CarouselNext className="right-2" />
+          <CarouselPrevious className="left-2 bg-black!" />
+          <CarouselNext className="right-2 bg-black!" />
         </div>
       </Carousel>
-
       {/* Dots indicator */}
       <div className="absolute right-0 bottom-2 left-0 z-10 flex justify-center gap-1.5">
         {Array.from({ length: count }).map((_, index) => (

@@ -29,7 +29,9 @@ export default function StudioPage() {
   }
 
   // Flatten all pages into single array
-  const allMoments = data?.pages.flatMap(page => page.moments) || []
+  const allMoments = data?.pages.flatMap(page => page.moments)
+    .filter(m => m.photos.length > 0) || []
+  console.log('empty moments', data?.pages.flatMap(page => page.moments).filter(m => m.photos.length == 0))
 
   return (
     <section className="flex w-full flex-col items-start justify-center px-16 pb-52">

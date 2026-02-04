@@ -21,12 +21,11 @@ To write long prompt is hard. This app let users to pick predefined settings of 
 ---
 
 ## Key data models
-1. **Moment**: A generation session containing the original prompt, mixins used, and resulting photos. Can be shared to community.
+1. **Moment**: A generation session containing the original prompt, mixins (JSONB mapping asset types to asset IDs), and resulting photos. Can be shared to community.
 2. **Asset**: Reusable resources stored in user's library or marketplace. Can be faces, reference photos, attires, scenes, etc. (image-based or text-based).
-3. **Mixin**: Input used in a specific generation. Either references a saved asset, or contains ad-hoc uploads/text.
-4. **Photo**: Output image from a generation.
-5. **Post**: Moment shared to community, can be liked by users.
-6. **User/Profile**: User account with credits and settings.
+3. **Photo**: Output image from a generation. Can override moment's mixins with photo-specific asset selections.
+4. **Post**: Moment shared to community, can be liked by users.
+5. **User/Profile**: User account with credits and settings.
 
 
 ## Key UI components

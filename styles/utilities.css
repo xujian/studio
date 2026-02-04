@@ -94,3 +94,6 @@ br::selection {
 .tooltip {
   @apply text-xs bg-black text-white rounded-full p-2;
 }
+.carousel [data-slot="carousel-content"] {
+  height: 100%;
+}

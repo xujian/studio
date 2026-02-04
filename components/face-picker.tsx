@@ -68,7 +68,7 @@ export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
                   variant="outline"
                   onClick={() => onSelect?.(face.id)}
                   className={cn(
-                    'rounded w-16 h-16 p-0 text-xs transition glow cursor-pointer',
+                    'face rounded w-16 h-16 p-0 text-xs transition glow cursor-pointer',
                     selected === face.id ? 'on' : ''
                   )}
                   title={face.name}>
@@ -76,7 +76,6 @@ export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
                     <img
                       src={face.url}
                       alt={face.name}
-                      className="w-full h-full object-cover rounded"
                     />
                   ) : (
                     face.name

@@ -166,7 +166,10 @@ export function Producer ({
       </div>
 
       {/* Face Picker */}
-      <div className="absolute h-12 top-3 left-3">
+      <div className={cn(
+          'absolute h-12 left-3 transition-all duration-500',
+          expanded ? 'top-10' : 'top-3'
+        )}>
         <FacePicker
           faces={filterAssets('face')}
           onSelect={handleFaceSelect}

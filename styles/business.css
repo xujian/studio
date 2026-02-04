@@ -92,3 +92,11 @@
 .draw-up[data-state="closed"] {
   animation: draw-up-back 200ms ease-in forwards;
 }
+
+.face {
+  @apply rounded-2xl max-w-20 max-h-20 overflow-hidden border;
+}
+
+.face img {
+  @apply w-full h-full aspect-square object-cover object-top;
+}

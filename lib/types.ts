@@ -26,15 +26,14 @@ export type Profile = {
   created_at: string
 }
 
+
+
 export type Moment = {
   id: string
   user_id: string
   prompt: string
-  mixins: {
-    face?: string
-    [key: string]: string | undefined
-  } | null
-  final_prompt: string | null
+  mixins?: Mixins
+  final_prompt?: string
   seed: number | null
   status: 'pending' | 'processing' | 'completed' | 'failed'
   created_at: string
@@ -55,10 +54,7 @@ export type Photo = {
    * Display logic: { ...moment.mixins, ...photo.mixins }
    * Example: { face: "uuid-of-face-asset" }
    */
-  mixins: {
-    face?: string
-    [key: string]: string | undefined
-  } | null
+  mixins: Mixins
   created_at: string
 }
 
@@ -82,17 +78,14 @@ export type Asset = {
   created_at: string
 }
 
-/**
- * Asset applied to a moment or ad-hoc custom asset
- */
-export type Mixin = {
-  id: string
-  moment_id: string
-  asset_id: string | null // references asset if from library
-  type: AssetType // when asset_id is null, defines type of custom asset
-  content: string | null // snapshot of asset content at time of application
-  url: string | null // snapshot of asset url at time of application
-  created_at: string
+export type Assets = {
+  [k in AssetType]?: Asset
+}
+
+export type AssetMap = Map<string, Asset>
+
+export type Mixins = {
+  [k in AssetType]?: string
 }
 
 /**

@@ -37,16 +37,6 @@ CREATE TABLE assets (
   created_at timestamptz DEFAULT now()
 );
 
--- Mixins table (inputs used in a specific generation)
-CREATE TABLE mixins (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  moment_id uuid REFERENCES moments(id) ON DELETE CASCADE,
-  asset_id uuid REFERENCES assets(id) ON DELETE SET NULL, -- nullable: references asset if from library
-  type text NOT NULL, -- face, reference, attire, scene, etc.
-  url text, -- if ad-hoc upload (not from assets)
-  content text, -- if text input or prompt fragment
-  created_at timestamptz DEFAULT now()
-);
 
 -- Photos table (output images from generations)
 CREATE TABLE photos (
@@ -110,9 +100,6 @@ CREATE INDEX IF NOT EXISTS idx_moments_mixins ON moments USING GIN (mixins);
 CREATE INDEX idx_assets_user_id ON assets(user_id);
 CREATE INDEX idx_assets_type ON assets(type);
 CREATE INDEX idx_assets_is_public ON assets(is_public) WHERE is_public = true;
-
-CREATE INDEX idx_mixins_moment_id ON mixins(moment_id);
-CREATE INDEX idx_mixins_asset_id ON mixins(asset_id);
 
 CREATE INDEX idx_photos_moment_id ON photos(moment_id);
 CREATE INDEX IF NOT EXISTS idx_photos_mixins ON photos USING GIN (mixins);
@@ -189,29 +176,6 @@ CREATE POLICY "Users can update own assets"
 CREATE POLICY "Users can delete own assets"
   ON assets FOR DELETE
   USING (auth.uid() = user_id);
-
--- Mixins
-ALTER TABLE mixins ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Users can view mixins of own moments"
-  ON mixins FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM moments
-      WHERE moments.id = mixins.moment_id
-      AND moments.user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Users can insert mixins to own moments"
-  ON mixins FOR INSERT
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM moments
-      WHERE moments.id = mixins.moment_id
-      AND moments.user_id = auth.uid()
-    )
-  );
 
 -- Photos
 ALTER TABLE photos ENABLE ROW LEVEL SECURITY;
