@@ -40,15 +40,11 @@ export function MomentView({ moment, initialPhotoId, onClose }: MomentViewProps)
     ...moment.mixins,
     ...currentPhoto?.mixins
   }
-
-  console.log('merged', moment, merged)
-
   // Fetch mixins and assets for current photo
   const { data: assetsMap } = useMixins(merged)
-  console.log('assetsMap', assetsMap)
-
   const nonFaceMixins = Object.entries(merged)
     .filter(([key]) => key !== 'face')
+  const emptyAssets = Array(4 - (nonFaceMixins.length % 4)).fill(null)
 
   // Set up carousel API
   React.useEffect(() => {
@@ -59,7 +55,6 @@ export function MomentView({ moment, initialPhotoId, onClose }: MomentViewProps)
       setCurrent(api.selectedScrollSnap())
     })
   }, [api])
-
   // Scroll to initial photo
   React.useEffect(() => {
     if (api && initialIndex >= 0) {
@@ -165,8 +160,7 @@ export function MomentView({ moment, initialPhotoId, onClose }: MomentViewProps)
                   if (info.offset.y > 150) {
                     onClose()
                   }
-                }}
-              >
+                }}>
                 <Image
                   src={moment.photos[0].url}
                   alt={moment.prompt}
@@ -190,14 +184,14 @@ export function MomentView({ moment, initialPhotoId, onClose }: MomentViewProps)
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="mixins grid grid-cols-2 @sm:grid-cols-3 @lg:grid-cols-4 border bg-neutral rounded-2xl gap-px overflow-hidden">
+              { nonFaceMixins.length > 0 && (
+              <div className="mixins grid grid-cols-2 @sm:grid-cols-3 @lg:grid-cols-4 border bg-white/10 rounded-2xl gap-px overflow-hidden">
                 {nonFaceMixins.map(([type, assetId]) => {
                   const assetType = assetTypes.find(t => t.type === type)
                   const displayName = assetType?.name || type
                   const asset = assetId && assetsMap ? assetsMap.get(assetId) : null
-
                   return (
-                    <div key={type} className="mixin relative h-20 bg-black/75 flex items-center overflow-hidden">
+                    <div key={type} className="mixin-item relative h-20 bg-black/75 flex items-center justify-center overflow-hidden">
                       <Badge className="absolute bg-white/50 top-1 left-1 z-10">{displayName}</Badge>
                       {asset?.url
                         ? (
@@ -208,16 +202,20 @@ export function MomentView({ moment, initialPhotoId, onClose }: MomentViewProps)
                           />
                         )
                         : (
-                          <div className="flex items-center justify-center w-full h-full bg-muted text-sm text-muted-foreground">
+                          <Badge className="bg-black/50 text-white">
                             {asset?.name || displayName}
-                          </div>
+                          </Badge>
                         )
                       }
                     </div>
                   )
                 })
-                }
+              }
+              {emptyAssets.map((_, index) => (
+                <div key={`empty-${index}`} className="mixin-item h-20 bg-black/75" />
+              ))}
               </div>
+              )}
               <div className="bg-linear-to-t from-black/80 to-black/40 rounded p-4 border">
                 <motion.div
                   className="max-h-24 overflow-clip"
