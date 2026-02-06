@@ -1,3 +1,5 @@
+import { Asset, Assets, AssetType } from "./types"
+
 export const assetTypes = [
   { name: 'Face', type: 'face' },
   { name: 'Makeup', type: 'makeup' },
@@ -7,3 +9,35 @@ export const assetTypes = [
   { name: 'Lighting', type: 'lighting' },
   { name: 'Camera', type: 'camera' },
 ] as const
+
+export const defaultAssets: Assets = {
+  face: {
+    type: 'face',
+    url: 'https://rhxlulctluazrpqzooya.supabase.co/storage/v1/object/public/assets/face/ju.jpg',
+  },
+  makeup: {
+    type: 'makeup',
+    content: ''
+  },
+  hair: {
+    type: 'hair',
+    content: ''
+  },
+  attire: {
+    type: 'attire',
+    content: ''
+  },
+  scene: {
+    type: 'scene',
+    content: ''
+  },
+  lighting: {
+    type: 'lighting',
+    content: ''
+  },
+  camera: {
+    type: 'camera',
+    content: ''
+  },
+}
+

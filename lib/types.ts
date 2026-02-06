@@ -26,17 +26,14 @@ export type Profile = {
   created_at: string
 }
 
-
-
 export type Moment = {
   id: string
   user_id: string
   prompt: string
   mixins?: Mixins
   final_prompt?: string
-  seed: number | null
-  status: 'pending' | 'processing' | 'completed' | 'failed'
-  created_at: string
+  status?: 'pending' | 'processing' | 'completed' | 'failed'
+  created_at?: string
 }
 
 export type Photo = {
@@ -54,7 +51,7 @@ export type Photo = {
    * Display logic: { ...moment.mixins, ...photo.mixins }
    * Example: { face: "uuid-of-face-asset" }
    */
-  mixins: Mixins
+  mixins: Mixins | null
   created_at: string
 }
 
@@ -66,16 +63,16 @@ export type MomentWithPhotos = Moment & {
  * Reueable resource to build prompts
  */
 export type Asset = {
-  id: string
-  user_id: string | null // NULL = official Kanojo Studio asset
-  name: string
-  description: string | null
+  id?: string
+  user_id?: string | null // NULL = official Kanojo Studio asset
+  name?: string
+  description?: string | null
   type: AssetType // face, reference, attire, scene, etc.
-  url: string | null // if image-based asset
-  content: string | null // if text-based asset
-  is_public: boolean
-  price: number | null // credits cost (NULL = personal asset, not for sale)
-  created_at: string
+  url?: string | null // if image-based asset
+  content?: string | null // if text-based asset
+  is_public?: boolean
+  price?: number | null // credits cost (NULL = personal asset, not for sale)
+  created_at?: string
 }
 
 export type Assets = {
@@ -142,3 +139,5 @@ export type PostWithLikes = Post & {
 export type AssetWithPurchaseInfo = Asset & {
   is_purchased: boolean
 }
+
+export type JsonPrompt = Partial<Record<AssetType, string | Record<string, string>>>

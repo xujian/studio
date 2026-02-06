@@ -1,6 +1,6 @@
 # API Documentation
 
-## POST /api/generate
+## POST /api/photo
 
 Generate an AI portrait image from a text prompt.
 

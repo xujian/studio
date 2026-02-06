@@ -62,11 +62,11 @@ Open [http://localhost:3000](http://localhost:3000)
 ## Project Structure
 
 ```
-/app                  # Next.js app router
+/app                 # Next.js app router
   /studio            # Generation interface
   /store             # Generation history
   /login             # Authentication
-  /api/generate      # Image generation endpoint
+  /api/photo         # Image generation endpoint
 /components          # React components
 /hooks               # Custom hooks
 /lib                 # Utilities and configs

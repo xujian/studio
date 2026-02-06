@@ -1,31 +1,33 @@
 'use client'
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import type { MomentWithPhotos } from '@/lib/types'
+import type { Mixins, AssetType, MomentWithPhotos } from '@/lib/types'
 
 interface EngineParams {
+  momentId?: string | null
   prompt: string
-  mixins?: { face?: string }
-  moment?: string | null
-  promptEdited?: boolean
+  reference?: string,
+  mixins?: Mixins
 }
 
 export const useEngine = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ prompt, mixins, moment, promptEdited }: EngineParams) => {
-      const response = await fetch('/api/engine', {
+    mutationFn: async ({
+      prompt,
+      mixins = {},
+      momentId = '',
+      reference = '' }: EngineParams) => {
+      const response = await fetch('/api/photo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, mixins, moment, promptEdited }),
+        body: JSON.stringify({ prompt, mixins, reference, momentId }),
       })
-
       if (!response.ok) {
         const error = await response.json()
         throw new Error(error.error || 'Failed to generate')
       }
-
       return response.json() as Promise<MomentWithPhotos>
     },
     onSuccess: () => {

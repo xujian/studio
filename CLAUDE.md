@@ -51,26 +51,33 @@ All clients use the **publishable key** (format: `sb_publishable_xxx`) which res
 
 ### Image Generation Flow
 
-1. User submits prompt → `/api/generate` POST endpoint
-2. Validate with Zod (`promptSchema` in `lib/validations.ts`)
-3. Call `generateImage()` from `lib/gemini.ts` (uses Gemini 2.0 Flash)
-4. Insert generation record with `status: 'completed'` or `'failed'`
-5. Upload base64 image to Supabase Storage bucket `generations`
-6. Update generation record with public URL
-7. Return generation object to client
+1. User submits request → `/api/photo` POST endpoint with prompt, mixins, and optional reference image URL
+2. Validate with Zod (`engineRequestSchema` in `lib/validations.ts`)
+3. **Analyze inputs** (if provided):
+   - Reference image URL → `ImageAnalyzer.analyze()` extracts structured details (attire, pose, scene, lighting, camera)
+   - Text prompt → `PromptAnalyzer.analyze()` converts natural language to structured JSON
+   - Both → Merge analyses (prompt overrides reference)
+4. Create or load moment record (baseline prompt + mixins)
+5. Load asset data from database based on mixins (face, makeup, etc.)
+6. Call `engine.generate()` from `lib/engine.ts` (uses Gemini 2.0 Flash with image generation)
+7. Upload generated base64 image to Supabase Storage bucket `photos` as `{userId}/{momentId}/{photoId}.{ext}`
+8. Insert photo record with deltas (only store differences from moment baseline)
+9. Return complete moment with all photos
 
-**Note:** The Gemini integration (`lib/gemini.ts`) contains placeholder logic for image extraction - verify API response format when implementing.
+**Key Services:**
+- **ImageAnalyzer** (`lib/image-analyzer.ts`) - Analyzes reference images using Gemini Vision, extracts detailed structured data, caches results for 30 minutes
+- **PromptAnalyzer** (`lib/prompt-analyzer.ts`) - Converts natural language prompts to structured JSON format matching ImageAnalyzer output, enables prompt merging
+- **Engine** (`lib/engine.ts`) - Generates images via Gemini 2.0 Flash, processes assets and analysis data into generation prompts
 
 ### Data Fetching Pattern
 
 **Philosophy:** Keep database logic on the server, not in client code.
 
 **TanStack Query Hooks:** All client-side data fetching uses custom hooks in `/hooks`:
-- `useGenerations()` - Fetch user's generation history
-- `useGenerateMutation()` - Create new generation, auto-invalidates query cache
-- `useDeleteGeneration()` - Delete generation
+- `useEngine()` - Image generation mutation (creates moments/photos), auto-invalidates query cache
+- `useMoments()` - Fetch user's moment history with photos
+- `useAssets()` - Fetch user's own assets + purchased assets (via RPC)
 - `useUser()` - Fetch current user profile
-- `useAssets()` - Fetch user's own assets + purchased assets
 
 **When to Use Postgres Functions:**
 
@@ -148,16 +155,32 @@ $$;
 
 ### Database Schema
 
-Two main tables with RLS policies:
+Core tables with RLS policies:
 
 1. **`profiles`** - User profiles (auto-created via trigger on signup)
-   - Fields: `id`, `name`, `avatar`, `created_at`
+   - Fields: `id`, `name`, `avatar`, `credits`, `created_at`
    - RLS: Users can only view/update own profile
 
-2. **`generations`** - Image generations
-   - Fields: `id`, `user`, `prompt`, `url`, `status`, `error`, `created_at`
-   - RLS: Users can only view/insert/delete own generations
-   - Indexes on `user` and `created_at DESC`
+2. **`moments`** - Generation sessions (baseline prompt + mixins)
+   - Fields: `id`, `user_id`, `prompt`, `mixins` (JSONB), `final_prompt`, `status`, `created_at`
+   - RLS: Users can only view/insert/delete own moments
+   - A moment represents a creation session with baseline settings
+
+3. **`photos`** - Generated images (delta storage)
+   - Fields: `id`, `moment_id`, `url`, `storage_path`, `prompt` (delta), `mixins` (delta), `created_at`
+   - RLS: Users can only view/insert/delete photos for their moments
+   - Only stores **differences** from moment baseline (efficient storage)
+   - Display logic: `photo.prompt || moment.prompt` and `{ ...moment.mixins, ...photo.mixins }`
+
+4. **`assets`** - Reusable prompt components (faces, styles, scenes, etc.)
+   - Fields: `id`, `user_id`, `name`, `type`, `url`, `content`, `is_public`, `price`, `created_at`
+   - Types: face, makeup, hair, attire, scene, lighting, camera
+   - Supports both image-based (URL) and text-based (content) assets
+   - Marketplace functionality with credits system
+
+5. **`purchases`** - Asset marketplace transactions
+   - Tracks which assets users have purchased
+   - Used by `get_user_assets()` RPC to return owned + purchased assets
 
 ### Component Architecture
 
@@ -170,9 +193,30 @@ Two main tables with RLS policies:
 
 ### TypeScript Types
 
-All database types are defined in `lib/types.ts`:
-- `Generation` - Matches generations table schema
-- `Profile` - Matches profiles table schema
+All database and domain types are defined in `lib/types.ts`:
+- `Profile` - User profile schema
+- `Moment` - Generation session schema
+- `Photo` - Generated image schema
+- `MomentWithPhotos` - Moment with related photos array
+- `Asset` - Reusable prompt component schema
+- `AssetType` - Union type for asset categories
+- `Mixins` - Map of asset type to asset ID
+- `JsonPrompt` - Structured prompt format (output from ImageAnalyzer/PromptAnalyzer)
+  - Contains: subject, attire, pose, scene, makeup, lighting, camera sections
+  - Used for merging reference image analysis with text prompt analysis
+
+**JsonPrompt Structure:**
+```typescript
+{
+  subject: { bodyType, skinTone, expression, bodyLanguage },
+  attire: { top, bottom, footwear?, accessories?, overall },
+  pose: { position, limbs, angle, energy },
+  scene: { setting, background, foreground, atmosphere },
+  makeup: { face, eyes, lips, overall },
+  lighting: { direction, quality, shadows, highlights, mood },
+  camera: { lens, aperture, angle, framing, focus, style }
+}
+```
 
 Always use these types instead of inline definitions.
 
@@ -180,21 +224,29 @@ Always use these types instead of inline definitions.
 
 ```
 /app
-  /api/generate     # Image generation endpoint
+  /api/photo        # Image generation endpoint (POST)
   /auth/callback    # OAuth callback handler
   /studio           # Generation interface (protected)
   /gallery          # Generation history (protected)
   /login            # Auth page
 /components         # React components (mix of server/client)
+  /producer         # Main generation UI component
+  /face-picker      # Face asset selector
 /hooks              # TanStack Query hooks (all client-side)
+  use-engine.ts     # Generation mutation hook
+  use-assets.ts     # Asset fetching hook
 /lib
   /supabase         # Three client implementations
-  gemini.ts         # Gemini API wrapper
+  engine.ts         # Image generation engine (Gemini 2.0 Flash)
+  image-analyzer.ts # Reference image analyzer service (cached)
+  prompt-analyzer.ts # Text prompt structuring service (cached)
+  prompts.ts        # Prompt constants and templates
   types.ts          # TypeScript type definitions
   validations.ts    # Zod schemas
+  constants.ts      # Asset types and configuration
   utils.ts          # Utility functions
 /supabase
-  schema.sql        # Database schema, RLS policies, triggers
+  schema.sql        # Database schema, RLS policies, triggers, functions
 ```
 
 ## Environment Variables
@@ -214,13 +266,21 @@ NEXT_PUBLIC_APP_URL=                    # For OAuth redirects
 
 1. Run `supabase/schema.sql` in SQL Editor
 2. Enable Google OAuth in Authentication → Providers
-3. Create public storage bucket named `generations`
-4. Add storage policy allowing users to upload to their own folders
+3. Create public storage bucket named `photos`
+4. Add storage policy allowing users to upload to their own folders: `{userId}/{momentId}/*.{jpg|png}`
 
 ## Key Patterns
 
-- **Validation:** All user input validated with Zod schemas before processing
-- **Error Handling:** Failed generations logged to database with `status: 'failed'` and `error` message
-- **Storage:** Images stored as `{userId}/{generationId}.png` in Supabase Storage
+- **Validation:** All user input validated with Zod schemas before processing (`engineRequestSchema`)
+- **Error Handling:** Failed generations return error responses, graceful degradation for analyzer failures
+- **Storage:** Images stored as `{userId}/{momentId}/{photoId}.{jpg|png}` in Supabase Storage bucket `photos`
+- **Delta Storage:** Photos only store differences from moment baseline (prompt/mixins deltas)
+  - Saves storage and makes variation tracking explicit
+  - Display: merge moment baseline with photo deltas
+- **AI Services with Caching:**
+  - `ImageAnalyzer` - 30-minute in-memory cache for reference image analysis
+  - `PromptAnalyzer` - 30-minute in-memory cache for prompt structuring
+  - Both return `JsonPrompt` structure for easy merging
+- **Analysis Merging:** When both reference + prompt provided, prompt analysis overrides reference (deep merge)
 - **State Management:** TanStack Query for server state, React Hook Form for form state
 - **Styling:** Tailwind CSS + Shadcn UI components

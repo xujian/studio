@@ -2,83 +2,88 @@
 
 import * as React from 'react'
 import { useState } from 'react'
-import {
-  Button,
-  Textarea,
-  Toggle,
-} from '@/components/ui'
+import { Button, Textarea, Toggle } from '@/components/ui'
+import type { AssetType, MomentWithPhotos } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { Mixins } from './mixins'
-import {
-  Loader2,
-  ArrowUp,
-  Plus,
-  GripHorizontal,
-  X
-} from 'lucide-react'
-import { FacePicker } from '../face-picker'
 import { useAssets } from '@/hooks/use-assets'
 import { useEngine } from '@/hooks/use-engine'
-import type { AssetType, MomentWithPhotos } from '@/lib/types'
+import { FacePicker } from '../face-picker'
+import { Mixins } from './mixins'
+import type { Mixins as MixinsType } from '@/lib/types'
+import { Loader2, ArrowUp, Plus, GripHorizontal, X } from 'lucide-react'
+import { preinitModule } from 'react-dom'
 
 interface ProducerProps {
   className?: string
   onGenerationComplete?: (moment: MomentWithPhotos) => void
 }
 
-export function Producer ({
-  className,
-  onGenerationComplete
-}: ProducerProps) {
-  // State
-  const [selectedFaceId, setSelectedFaceId] = useState<string>('')
-  const [currentMomentId, setCurrentMomentId] = useState<string>('')
+export function Producer({ className, onGenerationComplete }: ProducerProps) {
+  const [momentId, setMomentId] = useState<string>('')
   const [prompt, setPrompt] = useState('')
-  const [promptEdited, setPromptEdited] = useState(false)
-  const [mode, setMode] = useState<'generate' | 'retry'>('generate')
+  const [mixins, setMixins] = useState<MixinsType>({})
+  /**
+   * indicates prompt is modified after the first generation
+   */
+  const [dirty, setDirty] = useState(false)
+  /**
+   * User can regenerate photos by the same settings
+   * till create new
+   */
+  const [mode, setMode] = useState<'create' | 'retry'>('create')
+  /**
+   * the UI mode
+   */
   const [expanded, setExpanded] = useState(false)
 
   // Data
   const { data: assets = [] } = useAssets()
-  const { mutate, isPending, error } = useEngine()
+  const { mutate: commit, isPending, error } = useEngine()
 
   // Handlers
   const handleGenerate = () => {
     if (!prompt.trim()) return
-
-    mutate({
-      prompt,
-      mixins: selectedFaceId ? { face: selectedFaceId } : undefined,
-      moment: currentMomentId || undefined,
-      promptEdited: mode === 'retry' ? promptEdited : undefined
-    }, {
-      onSuccess: (moment) => {
-        setCurrentMomentId(moment.id)
-        setMode('retry')
-        setPromptEdited(false) // Reset after successful generation
-        onGenerationComplete?.(moment)
+    commit(
+      {
+        prompt: dirty
+          ? ''
+          : prompt,
+        mixins,
+        reference: 'https://rhxlulctluazrpqzooya.supabase.co/storage/v1/object/public/uploads/cd99d106-419b-4ebf-aa09-29e5f6d688d1/b2ee669ac725e671.jpg',
+        momentId,
+      },
+      {
+        onSuccess: moment => {
+          setMomentId(moment.id)
+          setMode('retry')
+          setDirty(false) // Reset after successful generation
+          onGenerationComplete?.(moment)
+        }
       }
-    })
+    )
   }
 
   const handleNew = () => {
-    setCurrentMomentId('')
-    setMode('generate')
+    setMomentId('')
+    setMode('create')
     setPrompt('')
-    setSelectedFaceId('')
-    setPromptEdited(false)
+    setMixins({})
+    setDirty(false)
   }
 
   const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(e.target.value)
     // Only track edits in retry mode
     if (mode === 'retry') {
-      setPromptEdited(true)
+      setDirty(true)
     }
   }
 
   const handleFaceSelect = (faceId: string) => {
-    setSelectedFaceId(faceId)
+    setMixins({
+      ...mixins,
+      face: faceId
+    })
   }
 
   const toggleExpanded = () => {
@@ -104,13 +109,13 @@ export function Producer ({
         })}>
         <Mixins value={{}} />
       </div>
-      <div className="-m-px flex flex-col rounded-4xl border border-white/50 bg-black/20 p-4 overflow-hidden">
+      <div className="-m-px flex flex-col overflow-hidden rounded-4xl border border-white/50 bg-black/20 p-4">
         <div className="flex-1 rounded">
           <Textarea
             placeholder="Describe the portrait you want to create..."
-            className="min-h-17 max-h-24 resize-none border-none bg-transparent! focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="max-h-24 min-h-17 resize-none border-none bg-transparent! focus-visible:ring-0 focus-visible:ring-offset-0"
             style={{
-              marginLeft: '48px',
+              marginLeft: '48px'
             }}
             value={prompt}
             onChange={handlePromptChange}
@@ -166,20 +171,21 @@ export function Producer ({
       </div>
 
       {/* Face Picker */}
-      <div className={cn(
-          'absolute h-12 left-3 transition-all duration-500',
+      <div
+        className={cn(
+          'absolute left-3 h-12 transition-all duration-500',
           expanded ? 'top-10' : 'top-3'
         )}>
         <FacePicker
           faces={filterAssets('face')}
           onSelect={handleFaceSelect}
-          selected={selectedFaceId}
+          selected={mixins.face}
         />
       </div>
 
       {/* Error display */}
       {error && (
-        <div className="absolute top-0 left-0 right-0 p-2 bg-destructive text-destructive-foreground text-sm rounded-t-4xl">
+        <div className="absolute top-0 right-0 left-0 rounded-t-4xl bg-destructive p-2 text-sm text-destructive-foreground">
           {error.message}
         </div>
       )}
