@@ -20,7 +20,6 @@ export const useMoments = () => {
         data: { session }
       } = await supabase.auth.getSession()
       if (!session) return { moments: [], hasMore: false }
-
       // Single query with Supabase relations
       const { data, error } = await supabase
         .from('moments')
@@ -32,12 +31,9 @@ export const useMoments = () => {
         )
         .order('created_at', { ascending: false })
         .range(pageParam, pageParam + PAGE_SIZE - 1)
-
       if (error) throw error
-
       const moments = (data || []) as MomentWithPhotos[]
       const hasMore = moments.length === PAGE_SIZE
-
       return { moments, hasMore }
     },
     getNextPageParam: (lastPage, allPages) => {
@@ -51,12 +47,26 @@ export const useMoments = () => {
 export const useDeleteMoment = () => {
   const queryClient = useQueryClient()
   const supabase = createClient()
-
   return useMutation({
     mutationFn: async (id: string) => {
-      // Photos will be deleted automatically via CASCADE
+      // Fetch photo storage paths before deleting
+      const { data: photos } = await supabase
+        .from('photos')
+        .select('storage_path')
+        .eq('moment_id', id)
+      const paths = (photos || [])
+        .map(p => p.storage_path)
+        .filter(Boolean) as string[]
+      if (paths.length > 0) {
+        const { data, error: storageError } = await supabase.storage
+          .from('photos')
+          .remove(paths)
+        if (storageError) {
+          console.error('Storage delete failed:', storageError)
+        } 
+      }
+      // Delete moment (photos cascade-deleted from DB)
       const { error } = await supabase.from('moments').delete().eq('id', id)
-
       if (error) throw error
     },
     onSuccess: () => {

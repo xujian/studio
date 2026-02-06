@@ -1,12 +1,17 @@
 'use client'
 
 import { useState } from 'react'
+import { LayoutGroup } from 'motion/react'
+import {
+  MomentView,
+  MomentCard,
+  StaggerGrid,
+  MomentSkeleton
+} from '@/components/motion-exports'
 import { Producer } from '@/components/producer'
 import { Button } from '@/components/ui'
-import { useMoments } from '@/hooks/use-moments'
-import { MomentView, MomentCard, StaggerGrid, MomentSkeleton } from '@/components/motion-exports'
 import type { MomentWithPhotos } from '@/lib/types'
-import { LayoutGroup } from 'motion/react'
+import { useMoments } from '@/hooks/use-moments'
 
 export default function StudioPage() {
   const [selectedMoment, setSelectedMoment] = useState<{
@@ -29,9 +34,14 @@ export default function StudioPage() {
   }
 
   // Flatten all pages into single array
-  const allMoments = data?.pages.flatMap(page => page.moments)
-    .filter(m => m.photos.length > 0) || []
-  console.log('empty moments', data?.pages.flatMap(page => page.moments).filter(m => m.photos.length == 0))
+  const allMoments =
+    data?.pages
+      .flatMap(page => page.moments)
+      .filter(m => m.photos.length > 0) || []
+  console.log(
+    'empty moments',
+    data?.pages.flatMap(page => page.moments).filter(m => m.photos.length == 0)
+  )
 
   return (
     <section className="flex w-full flex-col items-start justify-center px-16 pb-52">
@@ -52,9 +62,7 @@ export default function StudioPage() {
         <div className="text-muted-foreground">No moments yet</div>
       )}
       <LayoutGroup>
-        <StaggerGrid
-          className="w-full grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-5"
-        >
+        <StaggerGrid className="w-full grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-5">
           {allMoments.map(moment => (
             <MomentCard
               key={moment.id}
@@ -79,7 +87,6 @@ export default function StudioPage() {
           )}
         </StaggerGrid>
       </LayoutGroup>
-
       {selectedMoment && (
         <MomentView
           moment={selectedMoment.moment}
@@ -87,10 +94,7 @@ export default function StudioPage() {
           onClose={() => setSelectedMoment(null)}
         />
       )}
-
-      <Producer
-        onGenerationComplete={handleGenerationComplete}
-      />
+      <Producer onGenerationComplete={handleGenerationComplete} />
     </section>
   )
 }

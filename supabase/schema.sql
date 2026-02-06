@@ -397,6 +397,15 @@ USING (
   auth.uid()::text = (storage.foldername(name))[1]
 );
 
+-- Allow users to delete their own photos
+DROP POLICY IF EXISTS "Users can delete own photos" ON storage.objects;
+CREATE POLICY "Users can delete own photos"
+ON storage.objects FOR DELETE
+USING (
+  bucket_id = 'photos' AND
+  auth.uid()::text = (storage.foldername(name))[1]
+);
+
 -- Allow public read access to photos from published posts
 DROP POLICY IF EXISTS "Public can read photos from posts" ON storage.objects;
 CREATE POLICY "Public can read photos from posts"
