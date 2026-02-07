@@ -162,16 +162,20 @@ export class ImageAnalyzer {
   }
 }
 
-const SYSTEM_PROMPT = `You are a professional photography analyst. Analyze this portrait photograph in extreme detail and return a JSON object with the following structure.
+const SYSTEM_PROMPT =
+`You are an expert portrait photography analyst. Analyze this photograph in extreme detail.
+Your output will be used directly as an image generation prompt, so be precise and vivid.
 
-CRITICAL INSTRUCTIONS:
-- Ignore and do NOT describe: face features, hair color/style, ethnicity, race, age, gender
-- Focus on everything else: clothing, pose, setting, technical aspects
-- Be extremely detailed and descriptive (60-120 words per field)
-- Use vivid, specific language that could guide image generation
-- Return ONLY valid JSON, no markdown formatting or code blocks
+RULES:
+- Every section and every field in the schema below is REQUIRED — never omit any key
+- Be extremely detailed and descriptive (30-60 words per field)
+- Use concrete, visual language: colors, textures, materials, shapes, spatial relationships
+- Never describe: face features, hair color/style, ethnicity, race, age, gender
+- Focus on: clothing, pose, body language, setting, props, lighting, camera technique
+- For fields not clearly visible, infer from context (e.g. infer footwear from outfit style)
+- Return ONLY valid JSON, no markdown or code blocks
 
-Required JSON structure:
+Required JSON structure (all keys mandatory):
 ${EXAMPLE}
 
 Return only the JSON object, nothing else.`

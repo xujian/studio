@@ -48,3 +48,13 @@ export const EXAMPLE = `{
     "style": "photographic style from prompt"
   }
 }`
+
+export const SCHEMA = `{
+  "subject": { "bodyType", "skinTone", "expression", "bodyLanguage" },
+  "attire": { "top", "bottom", "footwear", "accessories", "overall" },
+  "pose": { "position", "limbs", "angle", "energy" },
+  "scene": { "setting", "background", "foreground", "atmosphere" },
+  "makeup": { "face", "eyes", "lips", "overall" },
+  "lighting": { "direction", "quality", "shadows", "highlights", "mood" },
+  "camera": { "lens", "aperture", "angle", "framing", "focus", "style" }
+}`
