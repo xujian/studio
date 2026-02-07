@@ -37,16 +37,20 @@ export class ImageAnalyzer {
     // Call Gemini Vision API
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
     const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash-exp',
+      model: 'gemini-3-pro-preview',
       contents: [
         {
-          role: 'user',
-          parts: [{ inlineData: imageData }, { text: ANALYSIS_PROMPT }]
+          parts: [
+            { 
+              inlineData: imageData
+            }
+          ]
         }
       ],
       config: {
+        systemInstruction: SYSTEM_PROMPT,
         responseModalities: ['TEXT'],
-        temperature: 0.3,
+        temperature: 1,
         responseMimeType: 'application/json'
       }
     })
@@ -74,6 +78,7 @@ export class ImageAnalyzer {
     jsonText = jsonText.replace(/^```json\s*/i, '')
     jsonText = jsonText.replace(/^```\s*/i, '')
     jsonText = jsonText.replace(/\s*```$/i, '')
+    console.log('image analyzed:-----------------', jsonText)
     // Extract JSON object
     const jsonMatch = jsonText.match(/\{[\s\S]*\}/)
     if (!jsonMatch) {
@@ -157,7 +162,7 @@ export class ImageAnalyzer {
   }
 }
 
-const ANALYSIS_PROMPT = `You are a professional photography analyst. Analyze this portrait photograph in extreme detail and return a JSON object with the following structure.
+const SYSTEM_PROMPT = `You are a professional photography analyst. Analyze this portrait photograph in extreme detail and return a JSON object with the following structure.
 
 CRITICAL INSTRUCTIONS:
 - Ignore and do NOT describe: face features, hair color/style, ethnicity, race, age, gender

@@ -6,7 +6,13 @@ import type { Mixins, AssetType, MomentWithPhotos } from '@/lib/types'
 interface EngineParams {
   momentId?: string | null
   prompt: string
+  /**
+   * Reference image to generate prompt
+   */
   reference?: string,
+  /**
+   * mixins to revise the final prompt
+   */
   mixins?: Mixins
 }
 

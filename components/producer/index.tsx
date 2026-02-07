@@ -1,18 +1,17 @@
 'use client'
 
-import Image from 'next/image'
 import * as React from 'react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Button, Textarea, Toggle } from '@/components/ui'
 import type { AssetType, MomentWithPhotos } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { useAssets } from '@/hooks/use-assets'
 import { useEngine } from '@/hooks/use-engine'
+import { createClient } from '@/lib/supabase/client'
 import { FacePicker } from '../face-picker'
 import { Mixins } from './mixins'
 import type { Mixins as MixinsType } from '@/lib/types'
 import { Loader2, ArrowUp, Plus, GripHorizontal, X } from 'lucide-react'
-import { preinitModule } from 'react-dom'
 
 interface ProducerProps {
   className?: string
@@ -23,15 +22,25 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
   const [momentId, setMomentId] = useState<string>(''),
     [prompt, setPrompt] = useState(''),
     [mixins, setMixins] = useState<MixinsType>({}),
-    [reference, setReference] = useState<string>('')
-
+    [reference, setReference] = useState<string>('eec8bc6582d49f5b.jpg'),
+    [uploading, setUploading] = useState(false),
+    [userId, setUserId] = useState('')
 
   React.useEffect(() => {
-    window.setTimeout(() => {
-      setReference('https://rhxlulctluazrpqzooya.supabase.co/storage/v1/object/public/uploads/cd99d106-419b-4ebf-aa09-29e5f6d688d1/b2ee669ac725e671.jpg')
-    }, 10000)
+    const supabase = createClient()
+    supabase.auth.getSession().then(({data}) => {
+      if (!data) {
+        throw new Error('Not authenticated')
+      } else {
+        if (data.session) {
+          setUserId(data.session.user.id)
+        }
+      }
+    })
   })
-  
+
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   /**
    * indicates prompt is modified after the first generation
    */
@@ -78,7 +87,47 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
     setMode('create')
     setPrompt('')
     setMixins({})
+    setReference('')
     setDirty(false)
+  }
+
+  /**
+   * 
+   */
+  const couldNotSubmit = React.useMemo<boolean>(() => {
+    return reference === '' && prompt === ''
+  }, [reference, prompt])
+
+  const handleReferenceUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    try {
+      const supabase = createClient()
+      const ext = file.name.split('.').pop() || 'jpg'
+      const bytes = new Uint8Array(8)
+      crypto.getRandomValues(bytes)
+      const hex = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join(''),
+        filename = `${hex}.${ext}`,
+        path = `${userId}/${filename}`
+      const { error } = await supabase.storage
+        .from('uploads')
+        .upload(path, file, { contentType: file.type, upsert: false })
+      if (error) throw error
+      const { data: urlData } = supabase.storage
+        .from('uploads')
+        .getPublicUrl(path)
+      setReference(filename)
+    } catch (err) {
+      console.error('Reference upload failed:', err)
+    } finally {
+      setUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
+  const handleReferenceClear = () => {
+    setReference('')
   }
 
   const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -121,24 +170,41 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
       </div>
       <div className="-m-px flex flex-col overflow-hidden rounded-4xl border border-white/50 bg-black/20 p-4 gap">
         <div className="flex items-start gap">
-          <div className="h-full w-12"></div>
+          <div className="w-12 h-12"></div>
           {/** the reference image */}
-          <div className={cn('reference transtion-all duration-500 rounded overflow-hidden',
-              reference ? 'block h-20 w-20 border' : 'h-8 w-8',
-              expanded ? 'top-10' : 'top-3'
+          <div className={cn('reference relative transtion-all duration-500 rounded overflow-hidden',
+              reference ? 'h-20 w-20 border' : 'h-8 w-8'
             )}>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleReferenceUpload}
+            />
             { reference
-              ? (<img className="object-cover h-full w-full"
-                  alt="reference"
-                  src={reference}
-                  width={100}
-                  height={100} />)
+              ? (<>
+                  <img className="object-cover h-full w-full"
+                    alt="reference"
+                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${userId}/${reference}`}
+                    width={100}
+                    height={100} />
+                  <button
+                    type="button"
+                    className="absolute top-0 right-0 rounded-bl bg-black/60 p-0.5 text-white hover:bg-black/80"
+                    onClick={handleReferenceClear}>
+                    <X className="h-3 w-3" />
+                  </button>
+                </>)
               : (<Button
                   type="button"
                   variant="outline"
                   className="icon-button"
-                  disabled={isPending}>
-                  <Plus />
+                  disabled={isPending || uploading}
+                  onClick={() => fileInputRef.current?.click()}>
+                  {uploading
+                    ? <Loader2 className="h-4 w-4 animate-spin" />
+                    : <Plus />}
                 </Button>)
             }
           </div>
@@ -182,7 +248,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
               variant="outline"
               className="icon-button"
               onClick={handleGenerate}
-              disabled={isPending || !prompt.trim()}>
+              disabled={isPending || couldNotSubmit}>
               {isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (

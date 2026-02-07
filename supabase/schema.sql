@@ -418,3 +418,33 @@ USING (
     WHERE p.storage_path = name
   )
 );
+
+-- =============================================
+-- Uploads Storage Policies
+-- =============================================
+
+-- Allow users to upload reference images to their own folder
+DROP POLICY IF EXISTS "Users can upload own references" ON storage.objects;
+CREATE POLICY "Users can upload own references"
+ON storage.objects FOR INSERT
+WITH CHECK (
+  bucket_id = 'uploads' AND
+  auth.uid()::text = (storage.foldername(name))[1]
+);
+
+-- Allow public read access to uploads (needed for reference URL passed to engine)
+DROP POLICY IF EXISTS "Public can read uploads" ON storage.objects;
+CREATE POLICY "Public can read uploads"
+ON storage.objects FOR SELECT
+USING (
+  bucket_id = 'uploads'
+);
+
+-- Allow users to delete their own uploads
+DROP POLICY IF EXISTS "Users can delete own uploads" ON storage.objects;
+CREATE POLICY "Users can delete own uploads"
+ON storage.objects FOR DELETE
+USING (
+  bucket_id = 'uploads' AND
+  auth.uid()::text = (storage.foldername(name))[1]
+);

@@ -28,6 +28,11 @@ export const engine = {
     assets,
     reference
   }: GenerateParams): Promise<GenerateResult> => {
+    const supabase = await createClient()
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) throw new Error('Not authenticated')
+    const userId = session.user.id
+
     // fetch and process assets one by one
     const { parts = [], sections = [] } = await buildAssets(assets)
     const ai = new GoogleGenAI({
@@ -41,10 +46,11 @@ export const engine = {
     })
     let json: JsonPrompt = {}
     if (reference) {
-      const imageAnalyzer = new ImageAnalyzer()
+      const imageAnalyzer = new ImageAnalyzer(),
+        image = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${userId}/${reference}`
       // Only reference image provided
       try {
-        const result = await imageAnalyzer.analyze(reference)
+        const result = await imageAnalyzer.analyze(image)
         json = {
           ...json,
           ...result
