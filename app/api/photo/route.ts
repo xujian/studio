@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
      */
     generateParams: GenerateParams = {
       prompt: input.prompt,
+      reference: input.reference,
       assets: {}
     },
     /**
@@ -63,6 +64,7 @@ export async function POST(request: NextRequest) {
       .insert({
         user_id: userId,
         prompt: input.prompt,
+        reference: input.reference,
         mixins: mixins || null,
         status: 'completed'
       })
@@ -77,7 +79,7 @@ export async function POST(request: NextRequest) {
     // load moment data to compare
     const { data: moment, error: momentError } = await supabase
       .from('moments')
-      .select('user_id, prompt, mixins')
+      .select('user_id, prompt, reference, mixins')
       .eq('id', momentId)
       .single()
       .overrideTypes<Moment>()
@@ -91,6 +93,7 @@ export async function POST(request: NextRequest) {
     // user did not modify the prompt
     // just use the moment prompt
     generateParams.prompt = input.prompt || moment.prompt
+    generateParams.prompt = moment.reference
     photoData.prompt = input.prompt || moment.prompt
     if (mixins) {
       const diff: Record<string, string> = {}
