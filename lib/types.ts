@@ -39,8 +39,6 @@ export type Moment = {
 export type Photo = {
   id: string
   moment_id: string
-  url: string
-  storage_path: string | null
   /**
    * Only set if different from moment's prompt.
    * Display logic: photo.prompt || moment.prompt

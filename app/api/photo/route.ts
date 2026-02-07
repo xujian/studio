@@ -125,39 +125,28 @@ export async function POST(request: NextRequest) {
   // 6. Convert base64 to buffer for upload
   const imageBuffer = Buffer.from(image, 'base64')
   const photoId = crypto.randomUUID()
-  const extension = mime === 'image/jpeg' ? 'jpg' : 'png'
-  const storagePath = `${userId}/${momentId}/${photoId}.${extension}`
-  // 7. Upload to Supabase Storage (directly to final path)
+  const storagePath = `${userId}/${momentId}/${photoId}.jpg`
+  // 7. Upload to Supabase Storage
   const { error: uploadError } = await supabase.storage
     .from('photos')
     .upload(storagePath, imageBuffer, {
-      contentType: mime,
+      contentType: 'image/jpeg',
       upsert: false
     })
   if (uploadError) {
     throw new Error(`Storage upload failed: ${uploadError.message}`)
   }
-  // 8. Get public URL
-  const { data: urlData } = supabase.storage
-    .from('photos')
-    .getPublicUrl(storagePath)
-  if (!urlData) {
-    throw new Error('Failed to get public URL')
-  }
-  // 9. Calculate photo prompt and mixins deltas
-  // 10. Insert photo record
+  // 8. Insert photo record (url derived from userId/momentId/photoId)
   const { error: photoError } = await supabase.from('photos').insert({
     id: photoId,
     moment_id: momentId,
-    url: urlData.publicUrl,
-    storage_path: storagePath,
     prompt: photoData.prompt,
     mixins: photoData.mixins
   })
   if (photoError) {
     throw new Error(`Failed to insert photo: ${photoError.message}`)
   }
-  // 11. Fetch complete moment with photos
+  // 9. Fetch complete moment with photos
   const { data: completeMoment, error: fetchError } = await supabase
     .from('moments')
     .select(`
@@ -169,7 +158,6 @@ export async function POST(request: NextRequest) {
   if (fetchError) {
     throw new Error(`Failed to fetch moment: ${fetchError.message}`)
   }
-  // 12. Return moment with photos
   return NextResponse.json(completeMoment as MomentWithPhotos)
 }
 

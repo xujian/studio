@@ -49,21 +49,22 @@ export const useDeleteMoment = () => {
   const supabase = createClient()
   return useMutation({
     mutationFn: async (id: string) => {
-      // Fetch photo storage paths before deleting
-      const { data: photos } = await supabase
-        .from('photos')
-        .select('storage_path')
-        .eq('moment_id', id)
-      const paths = (photos || [])
-        .map(p => p.storage_path)
-        .filter(Boolean) as string[]
-      if (paths.length > 0) {
-        const { data, error: storageError } = await supabase.storage
+      // Fetch moment + photo IDs to derive storage paths
+      const { data: moment } = await supabase
+        .from('moments')
+        .select('user_id, photos(id)')
+        .eq('id', id)
+        .single()
+      if (moment?.photos?.length) {
+        const paths = moment.photos.map(
+          (p: { id: string }) => `${moment.user_id}/${id}/${p.id}.jpg`
+        )
+        const { error: storageError } = await supabase.storage
           .from('photos')
           .remove(paths)
         if (storageError) {
           console.error('Storage delete failed:', storageError)
-        } 
+        }
       }
       // Delete moment (photos cascade-deleted from DB)
       const { error } = await supabase.from('moments').delete().eq('id', id)

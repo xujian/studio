@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/popover'
 import { assetTypes } from '@/lib/constants'
 import type { AssetType, MomentWithPhotos } from '@/lib/types'
-import { cn } from '@/lib/utils'
+import { cn, photoUrl } from '@/lib/utils'
 import { useMixins } from '@/hooks/use-mixins'
 import { useDeleteMoment } from '@/hooks/use-moments'
 import { Loader2, Trash, X } from 'lucide-react'
@@ -123,7 +123,7 @@ export function MomentView({
                           }
                         }}>
                         <Image
-                          src={photo.url}
+                          src={photoUrl(moment.user_id, moment.id, photo.id)}
                           alt={moment.prompt}
                           fill
                           className="h-full w-full object-cover"
@@ -168,7 +168,7 @@ export function MomentView({
                   }
                 }}>
                 <Image
-                  src={moment.photos[0].url}
+                  src={photoUrl(moment.user_id, moment.id, moment.photos[0].id)}
                   alt={moment.prompt}
                   fill
                   className="h-full w-full object-cover"

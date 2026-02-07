@@ -42,8 +42,6 @@ CREATE TABLE assets (
 CREATE TABLE photos (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   moment_id uuid REFERENCES moments(id) ON DELETE CASCADE,
-  url text NOT NULL,
-  storage_path text,
   prompt text, -- only if different from moment's prompt
   mixins jsonb, -- only keys that differ from moment's mixins
   created_at timestamptz DEFAULT now()
@@ -414,8 +412,9 @@ USING (
   bucket_id = 'photos' AND
   EXISTS (
     SELECT 1 FROM photos p
+    JOIN moments m ON m.id = p.moment_id
     JOIN posts ON posts.moment_id = p.moment_id
-    WHERE p.storage_path = name
+    WHERE name = m.user_id || '/' || m.id || '/' || p.id || '.jpg'
   )
 );
 

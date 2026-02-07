@@ -12,7 +12,7 @@ import {
   type CarouselApi
 } from '@/components/ui'
 import type { Photo, MomentWithPhotos } from '@/lib/types'
-import { cn } from '@/lib/utils'
+import { cn, photoUrl } from '@/lib/utils'
 
 interface MomentCardProps {
   moment: MomentWithPhotos
@@ -50,7 +50,7 @@ export function MomentCard({ moment, onPhotoClick }: MomentCardProps) {
         >
           <Image
             className="object-cover"
-            src={photo.url}
+            src={photoUrl(moment.user_id, moment.id, photo.id)}
             alt={moment.prompt}
             fill
             sizes="(min-width: 1280px) 16vw, (min-width: 768px) 25vw, 50vw"
@@ -81,7 +81,7 @@ export function MomentCard({ moment, onPhotoClick }: MomentCardProps) {
                   transition={{ duration: 0.3 }}>
                   <Image
                     className="object-cover"
-                    src={photo.url}
+                    src={photoUrl(moment.user_id, moment.id, photo.id)}
                     alt={moment.prompt}
                     fill
                     sizes="(min-width: 1280px) 16vw, (min-width: 768px) 25vw, 50vw"
