@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import * as React from 'react'
 import { useState } from 'react'
 import { Button, Textarea, Toggle } from '@/components/ui'
@@ -19,9 +20,18 @@ interface ProducerProps {
 }
 
 export function Producer({ className, onGenerationComplete }: ProducerProps) {
-  const [momentId, setMomentId] = useState<string>('')
-  const [prompt, setPrompt] = useState('')
-  const [mixins, setMixins] = useState<MixinsType>({})
+  const [momentId, setMomentId] = useState<string>(''),
+    [prompt, setPrompt] = useState(''),
+    [mixins, setMixins] = useState<MixinsType>({}),
+    [reference, setReference] = useState<string>('')
+
+
+  React.useEffect(() => {
+    window.setTimeout(() => {
+      setReference('https://rhxlulctluazrpqzooya.supabase.co/storage/v1/object/public/uploads/cd99d106-419b-4ebf-aa09-29e5f6d688d1/b2ee669ac725e671.jpg')
+    }, 10000)
+  })
+  
   /**
    * indicates prompt is modified after the first generation
    */
@@ -49,7 +59,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
           ? ''
           : prompt,
         mixins,
-        reference: 'https://rhxlulctluazrpqzooya.supabase.co/storage/v1/object/public/uploads/cd99d106-419b-4ebf-aa09-29e5f6d688d1/b2ee669ac725e671.jpg',
+        reference,
         momentId,
       },
       {
@@ -109,28 +119,41 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
         })}>
         <Mixins value={{}} />
       </div>
-      <div className="-m-px flex flex-col overflow-hidden rounded-4xl border border-white/50 bg-black/20 p-4">
-        <div className="flex-1 rounded">
-          <Textarea
-            placeholder="Describe the portrait you want to create..."
-            className="max-h-24 min-h-17 resize-none border-none bg-transparent! focus-visible:ring-0 focus-visible:ring-offset-0"
-            style={{
-              marginLeft: '48px'
-            }}
-            value={prompt}
-            onChange={handlePromptChange}
-            disabled={isPending}
-          />
+      <div className="-m-px flex flex-col overflow-hidden rounded-4xl border border-white/50 bg-black/20 p-4 gap">
+        <div className="flex items-start gap">
+          <div className="h-full w-12"></div>
+          {/** the reference image */}
+          <div className={cn('reference transtion-all duration-500 rounded overflow-hidden',
+              reference ? 'block h-20 w-20 border' : 'h-8 w-8',
+              expanded ? 'top-10' : 'top-3'
+            )}>
+            { reference
+              ? (<img className="object-cover h-full w-full"
+                  alt="reference"
+                  src={reference}
+                  width={100}
+                  height={100} />)
+              : (<Button
+                  type="button"
+                  variant="outline"
+                  className="icon-button"
+                  disabled={isPending}>
+                  <Plus />
+                </Button>)
+            }
+          </div>
+          <div className={cn('flex-1')}>
+            <Textarea
+              placeholder="Describe the portrait you want to create..."
+              className="max-h-24 min-h-12 resize-none border-none rounded-none bg-transparent! focus-visible:ring-0 focus-visible:ring-offset-0 p-0"
+              value={prompt}
+              onChange={handlePromptChange}
+              disabled={isPending}
+            />
+          </div>
         </div>
         <div className="flex justify-between">
           <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              className="icon-button"
-              disabled={isPending}>
-              <Plus />
-            </Button>
             <Toggle
               pressed={expanded}
               type="button"
@@ -169,12 +192,11 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
           </div>
         </div>
       </div>
-
       {/* Face Picker */}
       <div
         className={cn(
-          'absolute left-3 h-12 transition-all duration-500',
-          expanded ? 'top-10' : 'top-3'
+          'absolute left-4 transition-all duration-500',
+          expanded ? 'top-10' : 'top-4'
         )}>
         <FacePicker
           faces={filterAssets('face')}
@@ -182,7 +204,6 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
           selected={mixins.face}
         />
       </div>
-
       {/* Error display */}
       {error && (
         <div className="absolute top-0 right-0 left-0 rounded-t-4xl bg-destructive p-2 text-sm text-destructive-foreground">
