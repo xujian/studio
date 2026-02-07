@@ -3,14 +3,14 @@
 import * as React from 'react'
 import { useRef, useState } from 'react'
 import { Button, Textarea, Toggle } from '@/components/ui'
+import { createClient } from '@/lib/supabase/client'
 import type { AssetType, MomentWithPhotos } from '@/lib/types'
+import type { Mixins as MixinsType } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { useAssets } from '@/hooks/use-assets'
 import { useEngine } from '@/hooks/use-engine'
-import { createClient } from '@/lib/supabase/client'
 import { FacePicker } from '../face-picker'
 import { Mixins } from './mixins'
-import type { Mixins as MixinsType } from '@/lib/types'
 import { Loader2, ArrowUp, Plus, GripHorizontal, X } from 'lucide-react'
 
 interface ProducerProps {
@@ -22,13 +22,13 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
   const [momentId, setMomentId] = useState<string>(''),
     [prompt, setPrompt] = useState(''),
     [mixins, setMixins] = useState<MixinsType>({}),
-    [reference, setReference] = useState<string>('eec8bc6582d49f5b.jpg'),
+    [reference, setReference] = useState<string>(''),
     [uploading, setUploading] = useState(false),
     [userId, setUserId] = useState('')
 
   React.useEffect(() => {
     const supabase = createClient()
-    supabase.auth.getSession().then(({data}) => {
+    supabase.auth.getSession().then(({ data }) => {
       if (!data) {
         throw new Error('Not authenticated')
       } else {
@@ -61,15 +61,13 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
 
   // Handlers
   const handleGenerate = () => {
-    if (!prompt.trim()) return
+    if (couldNotSubmit) return
     commit(
       {
-        prompt: dirty
-          ? ''
-          : prompt,
+        prompt: dirty ? '' : prompt,
         mixins,
         reference,
-        momentId,
+        momentId
       },
       {
         onSuccess: moment => {
@@ -92,13 +90,15 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
   }
 
   /**
-   * 
+   *
    */
   const couldNotSubmit = React.useMemo<boolean>(() => {
     return reference === '' && prompt === ''
   }, [reference, prompt])
 
-  const handleReferenceUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleReferenceUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = e.target.files?.[0]
     if (!file) return
     setUploading(true)
@@ -168,12 +168,16 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
         })}>
         <Mixins value={{}} />
       </div>
-      <div className="-m-px flex flex-col overflow-hidden rounded-4xl border border-white/50 bg-black/20 p-4 gap">
-        <div className="flex items-start gap">
-          <div className="w-12 h-12"></div>
+      <div className="gap -m-px flex flex-col overflow-hidden rounded-4xl border border-white/50 bg-black/20 p-4">
+        <div className="gap flex items-start">
+          <div className="h-12 w-12"></div>
           {/** the reference image */}
-          <div className={cn('reference relative transtion-all duration-500 rounded overflow-hidden',
-              reference ? 'h-20 w-20 border' : 'h-8 w-8'
+          <div
+            className={cn(
+              'reference transtion-all relative overflow-hidden rounded duration-500',
+              reference
+                ? 'h-20 w-20 border'
+                : 'h-8 w-8'
             )}>
             <input
               ref={fileInputRef}
@@ -182,36 +186,41 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
               className="hidden"
               onChange={handleReferenceUpload}
             />
-            { reference
-              ? (<>
-                  <img className="object-cover h-full w-full"
-                    alt="reference"
-                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${userId}/${reference}`}
-                    width={100}
-                    height={100} />
-                  <button
+            {reference
+              ? (
+                  <>
+                    <img
+                      className="h-full w-full object-cover"
+                      alt="reference"
+                      src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${userId}/${reference}`}
+                      width={100}
+                      height={100}
+                    />
+                    <button
+                      type="button"
+                      className="absolute top-0 right-0 rounded-bl bg-black/60 p-0.5 text-white hover:bg-black/80"
+                      onClick={handleReferenceClear}>
+                      <X className="h-3 w-3" />
+                    </button>
+                  </>
+                )
+              : (
+                  <Button
                     type="button"
-                    className="absolute top-0 right-0 rounded-bl bg-black/60 p-0.5 text-white hover:bg-black/80"
-                    onClick={handleReferenceClear}>
-                    <X className="h-3 w-3" />
-                  </button>
-                </>)
-              : (<Button
-                  type="button"
-                  variant="outline"
-                  className="icon-button"
-                  disabled={isPending || uploading}
-                  onClick={() => fileInputRef.current?.click()}>
-                  {uploading
-                    ? <Loader2 className="h-4 w-4 animate-spin" />
-                    : <Plus />}
-                </Button>)
-            }
+                    variant="outline"
+                    className="icon-button"
+                    disabled={isPending || uploading}
+                    onClick={() => fileInputRef.current?.click()}>
+                    {uploading
+                      ? (<Loader2 className="h-4 w-4 animate-spin" />)
+                      : (<Plus />)}
+                  </Button>
+                )}
           </div>
           <div className={cn('flex-1')}>
             <Textarea
               placeholder="Describe the portrait you want to create..."
-              className="max-h-24 min-h-12 resize-none border-none rounded-none bg-transparent! focus-visible:ring-0 focus-visible:ring-offset-0 p-0"
+              className="max-h-24 min-h-12 resize-none rounded-none border-none bg-transparent! p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
               value={prompt}
               onChange={handlePromptChange}
               disabled={isPending}

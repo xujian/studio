@@ -93,8 +93,8 @@ export async function POST(request: NextRequest) {
     // user did not modify the prompt
     // just use the moment prompt
     generateParams.prompt = input.prompt || moment.prompt
-    generateParams.prompt = moment.reference
-    photoData.prompt = input.prompt || moment.prompt
+    generateParams.reference = moment.reference
+    photoData.prompt = input.prompt
     if (mixins) {
       const diff: Record<string, string> = {}
       for (const [key, value] of Object.entries(mixins)) {
