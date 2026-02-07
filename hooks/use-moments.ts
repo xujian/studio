@@ -44,6 +44,39 @@ export const useMoments = () => {
   })
 }
 
+export const useDeletePhoto = () => {
+  const queryClient = useQueryClient()
+  const supabase = createClient()
+  return useMutation({
+    mutationFn: async ({
+      userId,
+      momentId,
+      photoId
+    }: {
+      userId: string
+      momentId: string
+      photoId: string
+    }) => {
+      const path = `${userId}/${momentId}/${photoId}.jpg`
+      console.log('delete photo--------', path)
+      const { error: storageError } = await supabase.storage
+        .from('photos')
+        .remove([path])
+      if (storageError) {
+        console.error('Storage delete failed:', storageError)
+      }
+      const { error } = await supabase
+        .from('photos')
+        .delete()
+        .eq('id', photoId)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['moments'] })
+    }
+  })
+}
+
 export const useDeleteMoment = () => {
   const queryClient = useQueryClient()
   const supabase = createClient()

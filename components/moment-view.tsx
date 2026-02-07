@@ -5,25 +5,23 @@ import * as React from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import {
   Badge,
+  Button,
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-  type CarouselApi
-} from '@/components/ui'
-import { Button } from '@/components/ui/button'
-import {
   Popover,
   PopoverContent,
-  PopoverTrigger
-} from '@/components/ui/popover'
+  PopoverTrigger,
+  type CarouselApi
+} from '@/components/ui'
 import { assetTypes } from '@/lib/constants'
 import type { AssetType, MomentWithPhotos } from '@/lib/types'
 import { cn, photoUrl } from '@/lib/utils'
 import { useMixins } from '@/hooks/use-mixins'
-import { useDeleteMoment } from '@/hooks/use-moments'
-import { Loader2, Trash, X } from 'lucide-react'
+import { useDeleteMoment, useDeletePhoto } from '@/hooks/use-moments'
+import { ImageMinus, Loader2, Trash, X } from 'lucide-react'
 
 interface MomentViewProps {
   moment: MomentWithPhotos
@@ -41,6 +39,7 @@ export function MomentView({
   const [current, setCurrent] = React.useState(0)
   const [count, setCount] = React.useState(0)
   const deleteMoment = useDeleteMoment()
+  const deletePhoto = useDeletePhoto()
 
   // Find initial photo index
   const initialIndex = moment.photos.findIndex(p => p.id === initialPhotoId)
@@ -179,7 +178,7 @@ export function MomentView({
             )}
           </div>
           <div className="attributes flex-1">
-            <div className="@container flex flex-col gap-4 pt-16 pr-4 pb-4 h-full">
+            <div className="@container flex h-full flex-col gap-4 pt-16 pr-4 pb-4">
               <div className="face relative">
                 <Badge className="absolute top-1 left-1 bg-white/50">
                   Face
@@ -240,7 +239,43 @@ export function MomentView({
                 </motion.div>
               </div>
               <div className="flex-1"></div>
-              <div className="flex flex-0 items-center">
+              <div className="flex flex-0 items-center gap-2">
+                {hasMultiplePhotos && currentPhoto && (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        size="icon"
+                        className="icon-button cursor-pointer"
+                        variant="outline"
+                        disabled={deletePhoto.isPending}>
+                        {deletePhoto.isPending ? (
+                          <Loader2 className="animate-spin" />
+                        ) : (
+                          <ImageMinus />
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="z-101 flex w-auto min-w-80 items-center justify-between rounded-4xl bg-black p-3"
+                      side="top"
+                      align="start">
+                      <p className="text-sm">Delete this photo?</p>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        disabled={deletePhoto.isPending}
+                        onClick={() =>
+                          deletePhoto.mutate({
+                            userId: moment.user_id,
+                            momentId: moment.id,
+                            photoId: currentPhoto.id
+                          })
+                        }>
+                        {deletePhoto.isPending ? 'Deleting...' : 'Confirm'}
+                      </Button>
+                    </PopoverContent>
+                  </Popover>
+                )}
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -248,17 +283,25 @@ export function MomentView({
                       className="icon-button delete-button cursor-pointer"
                       variant="destructive"
                       disabled={deleteMoment.isPending}>
-                      {deleteMoment.isPending ? <Loader2 className="animate-spin" /> : <Trash />}
+                      {deleteMoment.isPending
+                        ? (<Loader2 className="animate-spin" />)
+                        : (<Trash />)}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto min-w-100 flex items-center justify-between p-3 z-101 rounded-4xl bg-black"
-                    side="top" align="start">
-                    <p className="mb text-sm">Delete this moment and all the photos?</p>
+                  <PopoverContent
+                    className="z-101 flex w-auto min-w-100 items-center justify-between rounded-4xl bg-black p-3"
+                    side="top"
+                    align="start">
+                    <p className="mb text-sm">
+                      Delete this moment and all the photos?
+                    </p>
                     <Button
                       size="sm"
                       variant="destructive"
                       disabled={deleteMoment.isPending}
-                      onClick={() => deleteMoment.mutate(moment.id, { onSuccess: onClose })}>
+                      onClick={() =>
+                        deleteMoment.mutate(moment.id, { onSuccess: onClose })
+                      }>
                       {deleteMoment.isPending ? 'Deleting...' : 'Confirm'}
                     </Button>
                   </PopoverContent>

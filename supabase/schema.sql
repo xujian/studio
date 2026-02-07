@@ -207,6 +207,16 @@ CREATE POLICY "Users can insert photos to own moments"
     )
   );
 
+CREATE POLICY "Users can delete photos of own moments"
+  ON photos FOR DELETE
+  USING (
+    EXISTS (
+      SELECT 1 FROM moments
+      WHERE moments.id = photos.moment_id
+      AND moments.user_id = auth.uid()
+    )
+  );
+
 -- Posts
 ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
 
