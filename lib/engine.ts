@@ -1,5 +1,6 @@
 import { GoogleGenAI } from '@google/genai'
 import type { Part } from '@google/genai'
+import merge from 'lodash-es/merge'
 import * as prompts from '@/lib/prompts'
 import { createClient } from '@/lib/supabase/server'
 import { ImageAnalyzer } from './image-analyzer'
@@ -51,10 +52,7 @@ export const engine = {
       // Only reference image provided
       try {
         const result = await imageAnalyzer.analyze(image)
-        json = {
-          ...json,
-          ...result
-        }
+        merge(json, result)
       } catch (error) {
         console.error('[Engine] Reference analysis failed:', error)
       }
@@ -63,10 +61,7 @@ export const engine = {
       const promptAnalyzer = new PromptAnalyzer()
       try {
         const result = await promptAnalyzer.analyze(prompt)
-        json = {
-          ...json,
-          ...result
-        }
+        merge(json, result)
       } catch (error) {
         console.error('[Engine] Prompt analysis failed:', error)
       }
