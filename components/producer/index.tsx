@@ -57,7 +57,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
 
   // Data
   const { data: assets = [] } = useAssets()
-  const { mutate: commit, isPending, error } = useEngine()
+  const { mutate: commit, isPending, error, reset: clearError } = useEngine()
 
   // Handlers
   const handleGenerate = () => {
@@ -154,9 +154,6 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
     return assets.filter(asset => asset.type === type)
   }
 
-  const clearError = () => {
-    // clear the error state
-  }
 
   return (
     <div
