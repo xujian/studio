@@ -30,6 +30,7 @@ export type Moment = {
   id: string
   user_id: string
   prompt: string
+  reference?: string,
   mixins?: Mixins
   final_prompt?: string
   status?: 'pending' | 'processing' | 'completed' | 'failed'

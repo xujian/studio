@@ -20,5 +20,5 @@ export const uploadUrl = (userId: string, filename: string) =>
   [
     `${process.env.NEXT_PUBLIC_SUPABASE_URL}`,
     '/storage/v1/object/public/uploads/',
-    `${userId}/${filename}.jpg`
+    `${userId}/${filename}`
   ].join('')

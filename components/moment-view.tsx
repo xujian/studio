@@ -18,10 +18,10 @@ import {
 } from '@/components/ui'
 import { assetTypes } from '@/lib/constants'
 import type { AssetType, MomentWithPhotos } from '@/lib/types'
-import { cn, photoUrl } from '@/lib/utils'
+import { cn, photoUrl, uploadUrl } from '@/lib/utils'
 import { useMixins } from '@/hooks/use-mixins'
 import { useDeleteMoment, useDeletePhoto } from '@/hooks/use-moments'
-import { ImageMinus, Loader2, Trash, X } from 'lucide-react'
+import { GalleryHorizontal, Image as ImageIcon, Loader2, Trash, X } from 'lucide-react'
 
 interface MomentViewProps {
   moment: MomentWithPhotos
@@ -133,11 +133,9 @@ export function MomentView({
                     </CarouselItem>
                   ))}
                 </CarouselContent>
-
                 {/* Navigation arrows - always visible */}
                 <CarouselPrevious className="left-4" />
                 <CarouselNext className="right-4" />
-
                 {/* Dots indicator */}
                 <div className="absolute right-0 bottom-20 left-0 z-20 flex justify-center gap-2">
                   {Array.from({ length: count }).map((_, index) => (
@@ -179,19 +177,31 @@ export function MomentView({
           </div>
           <div className="attributes flex-1">
             <div className="@container flex h-full flex-col gap-4 pt-16 pr-4 pb-4">
-              <div className="face relative">
-                <Badge className="absolute top-1 left-1 bg-white/50">
-                  Face
-                </Badge>
-                <img
-                  alt="face"
-                  src={
-                    merged?.face
-                      ? assetsMap?.get(merged.face)?.url || '/face.png'
-                      : '/face.png'
-                  }
-                  className="h-full w-full object-cover"
-                />
+              <div className="flex items-start justify-start gap">
+                <div className="face relative">
+                  <Badge className="absolute top-1 left-1 bg-black/80 text-foreground">
+                    Face
+                  </Badge>
+                  <img
+                    alt="face"
+                    src={
+                      merged?.face
+                        ? assetsMap?.get(merged.face)?.url || '/face.png'
+                        : '/face.png'
+                    }
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                {moment.reference && (<div className="reference relative rounded overflow-hidden">
+                  <Badge className="absolute top-1 left-1 bg-black/80 text-foreground">
+                    Reference image
+                  </Badge>
+                  <img
+                    alt="reference"
+                    src={uploadUrl(moment.user_id, moment.reference)}
+                    className="max-h-50 max-w-50 object-cover"
+                  />
+                </div>)}
               </div>
               {nonFaceMixins.length > 0 && (
                 <div className="mixins grid grid-cols-2 gap-px overflow-hidden rounded-2xl border bg-white/10 @sm:grid-cols-3 @lg:grid-cols-4">
@@ -229,13 +239,16 @@ export function MomentView({
                   ))}
                 </div>
               )}
-              <div className="rounded border bg-linear-to-t from-black/80 to-black/40 p-4">
+              <div className="relative rounded border bg-linear-to-t from-black/80 to-black/40 p-4">
+                <Badge className="absolute -top-2 left-1 bg-black/80 text-foreground">
+                  Prompt
+                </Badge>
                 <motion.div
                   className="max-h-24 overflow-clip"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}>
-                  <p className="text-sm text-white">{moment.prompt}</p>
+                  <p className="text-xs text-white">{moment.prompt || '(EMPTY)'}</p>
                 </motion.div>
               </div>
               <div className="flex-1"></div>
@@ -244,14 +257,15 @@ export function MomentView({
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
-                        size="icon"
-                        className="icon-button cursor-pointer"
-                        variant="outline"
+                        size="sm"
+                        className="cursor-pointer"
+                        variant="destructive"
                         disabled={deletePhoto.isPending}>
                         {deletePhoto.isPending ? (
                           <Loader2 className="animate-spin" />
-                        ) : (
-                          <ImageMinus />
+                        ) : (<>
+                            <Trash /><ImageIcon />
+                          </>
                         )}
                       </Button>
                     </PopoverTrigger>
@@ -279,13 +293,13 @@ export function MomentView({
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
-                      size="icon"
-                      className="icon-button delete-button cursor-pointer"
+                      size="sm"
+                      className="delete-button cursor-pointer"
                       variant="destructive"
                       disabled={deleteMoment.isPending}>
                       {deleteMoment.isPending
                         ? (<Loader2 className="animate-spin" />)
-                        : (<Trash />)}
+                        : (<><Trash /><GalleryHorizontal /></>)}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent
