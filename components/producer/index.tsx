@@ -154,12 +154,16 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
     return assets.filter(asset => asset.type === type)
   }
 
+  const clearError = () => {
+    // clear the error state
+  }
+
   return (
     <div
       className={cn(
         'producer fixed bottom-4 left-1/2 z-50 w-full max-w-2xl -translate-x-1/2',
         'glass animate-float-up rounded-4xl bg-accent/80',
-        'transition-all duration-300',
+        'transition-all duration-300 overflow-hidden',
         className
       )}>
       <div
@@ -280,11 +284,17 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
         />
       </div>
       {/* Error display */}
-      {error && (
-        <div className="absolute top-0 right-0 left-0 rounded-t-4xl bg-destructive p-2 text-sm text-destructive-foreground">
-          {error.message}
-        </div>
-      )}
+      <div className={cn([
+          'absolute glass flex items-center justify-between bottom-0 right-0 left-0 rounded-full',
+          'bg-destructive/80! text-xs h-14 p-2 pl-4',
+          'text-destructive-foreground',
+          error ? 'translate-y-0' : 'translate-y-full',
+        ].join(' '))}>
+        {error && error.message}
+        <Button className="icon-button" onClick={clearError}>
+          <X />
+        </Button>
+      </div>
     </div>
   )
 }
