@@ -1,5 +1,5 @@
 import { GoogleGenAI } from '@google/genai'
-import { SCHEMA } from './prompts'
+import * as prompts from './prompts'
 import { JsonPrompt } from './types'
 
 interface CachedAnalysis {
@@ -8,7 +8,7 @@ interface CachedAnalysis {
   expiresAt: number
 }
 
-export class PromptAnalyzer {
+export class TextAnalyzer {
   private cache: Map<string, CachedAnalysis>
   private cacheTTL: number
 
@@ -47,11 +47,11 @@ export class PromptAnalyzer {
         responseModalities: ['TEXT'],
         temperature: 1,
         responseMimeType: 'application/json',
-        systemInstruction: SYSTEM_PROMPT
+        systemInstruction: prompts.TEXT_ANALYZER_SYSTEM_PROMPT
       }
     })
     const textResponse = response.candidates?.[0]?.content?.parts?.[0]?.text
-    console.log('prompt-analyzer---------------------------------result', textResponse)
+    console.log('-----------TEXT-ANALYZER---------------------------------RESULT', textResponse)
     if (!textResponse) {
       throw new Error('No response from Gemini')
     }
@@ -120,10 +120,10 @@ export class PromptAnalyzer {
   clearCache(prompt?: string): void {
     if (prompt) {
       this.cache.delete(prompt)
-      console.log(`[PromptAnalyzer] Cleared cache for prompt`)
+      console.log(`[TextAnalyzer] Cleared cache for prompt`)
     } else {
       this.cache.clear()
-      console.log(`[PromptAnalyzer] Cleared entire cache`)
+      console.log(`[TextAnalyzer] Cleared entire cache`)
     }
   }
 
@@ -135,26 +135,6 @@ export class PromptAnalyzer {
   }
 }
 
-const SYSTEM_PROMPT =
-`You are a professional portrait photography prompt analyzer.
-Extract ONLY what the user explicitly mentions into structured JSON.
 
-CRITICAL RULES:
-- ONLY include sections and fields that the user directly mentions or clearly implies
-- Do NOT invent, assume, or fill in defaults for anything not in the prompt
-- If the user says "sitting on a bench in a park", output only pose and scene — nothing about attire, makeup, lighting, or camera
-- Be specific and vivid for what IS mentioned
-- Never describe: face features, hair color/style, ethnicity, race, age, gender
-- Return ONLY valid JSON, no markdown
-
-Available sections and fields (include only what applies):
-${SCHEMA}
-
-Examples:
-- "casual outdoor portrait" → { "scene": { "setting": "outdoors" }, "attire": { "overall": "casual" } }
-- "sitting on a bench" → { "pose": { "position": "sitting on a bench" } }
-- "red dress, golden hour" → { "attire": { "overall": "red dress" }, "lighting": { "quality": "golden hour" } }
-
-Return only the JSON object, nothing else.`
 
 // Singleton export

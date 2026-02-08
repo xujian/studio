@@ -1,6 +1,6 @@
 import { GoogleGenAI } from '@google/genai'
 import { JsonPrompt } from './types'
-import { EXAMPLE } from './prompts'
+import * as prompts from './prompts'
 
 interface CachedAnalysis {
   result: JsonPrompt
@@ -48,7 +48,7 @@ export class ImageAnalyzer {
         }
       ],
       config: {
-        systemInstruction: SYSTEM_PROMPT,
+        systemInstruction: prompts.IMAGE_ANALYZER_SYSTEM_PROMPT,
         responseModalities: ['TEXT'],
         temperature: 1,
         responseMimeType: 'application/json'
@@ -78,7 +78,7 @@ export class ImageAnalyzer {
     jsonText = jsonText.replace(/^```json\s*/i, '')
     jsonText = jsonText.replace(/^```\s*/i, '')
     jsonText = jsonText.replace(/\s*```$/i, '')
-    console.log('image analyzed:-----------------', jsonText)
+    console.log('----XXXX-------IMAGE-ANALYZER---------------------------------RESULT', jsonText)
     // Extract JSON object
     const jsonMatch = jsonText.match(/\{[\s\S]*\}/)
     if (!jsonMatch) {
@@ -161,22 +161,4 @@ export class ImageAnalyzer {
     }
   }
 }
-
-const SYSTEM_PROMPT =
-`You are an expert portrait photography analyst. Analyze this photograph in extreme detail.
-Your output will be used directly as an image generation prompt, so be precise and vivid.
-
-RULES:
-- Every section and every field in the schema below is REQUIRED — never omit any key
-- Be extremely detailed and descriptive (30-60 words per field)
-- Use concrete, visual language: colors, textures, materials, shapes, spatial relationships
-- Never describe: face features, hair color/style, ethnicity, race, age, gender
-- Focus on: clothing, pose, body language, setting, props, lighting, camera technique
-- For fields not clearly visible, infer from context (e.g. infer footwear from outfit style)
-- Return ONLY valid JSON, no markdown or code blocks
-
-Required JSON structure (all keys mandatory):
-${EXAMPLE}
-
-Return only the JSON object, nothing else.`
 

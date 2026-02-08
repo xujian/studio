@@ -2,7 +2,7 @@ import { GoogleGenAI } from '@google/genai'
 import type { Part } from '@google/genai'
 import merge from 'lodash-es/merge'
 import { ImageAnalyzer } from './image-analyzer'
-import { PromptAnalyzer } from './prompt-analyzer'
+import { TextAnalyzer } from './text-analyzer'
 import AssetsBuilder from './assets-builder'
 import { defaultAssets } from './constants'
 import { Assets, AssetType, JsonPrompt } from './types'
@@ -50,7 +50,7 @@ export const engine = {
       merge(json, result)
     }
     if (prompt) {
-      const promptAnalyzer = new PromptAnalyzer()
+      const promptAnalyzer = new TextAnalyzer()
       const result = await promptAnalyzer.analyze(prompt)
       merge(json, result)
     }
@@ -72,6 +72,7 @@ export const engine = {
         ].join('\n')
       }
     ]
+    console.log('============================BEFORE GENERATE=====prompt:', json, parts)
     // 4. Generate
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-image-preview',
