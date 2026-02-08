@@ -11,7 +11,7 @@ import { useAssets } from '@/hooks/use-assets'
 import { useEngine } from '@/hooks/use-engine'
 import { FacePicker } from '../face-picker'
 import { Mixins } from './mixins'
-import { Loader2, ArrowUp, Plus, GripHorizontal, X } from 'lucide-react'
+import { Loader2, ArrowUp, Plus, GripHorizontal, X, Square } from 'lucide-react'
 
 interface ProducerProps {
   className?: string
@@ -288,8 +288,10 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
           error ? 'translate-y-0' : 'translate-y-full',
         ].join(' '))}>
         {error && error.message}
-        <Button className="icon-button" onClick={clearError}>
-          <X />
+      </div>
+      <div className={cn('pulse', isPending ? 'on' : 'off')}>
+        <Button className="absolute top-4 right-4 icon-button" onClick={clearError}>
+          <Square />
         </Button>
       </div>
     </div>

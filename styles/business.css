@@ -1,3 +1,8 @@
+:root {
+  --pulse-color: 100 90% 50%;
+  --pulse-glow: 50 90% 60%;
+}
+
 .page-body {
   @apply px-4 max-w-[1280px] min-h-[calc(100vh-8rem)] mx-auto w-full flex flex-col;
 }
@@ -99,4 +104,48 @@
 
 .face img {
   @apply w-full h-full aspect-square object-cover object-top;
+}
+
+.pulse {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 55;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(20px);
+  background: 
+    radial-gradient(ellipse 80% 50% at 50% 50%, hsl(var(--pulse-color) / 0.3), transparent),
+    radial-gradient(ellipse 60% 40% at 30% 30%, hsl(var(--pulse-glow) / 0.2), transparent),
+    radial-gradient(ellipse 70% 45% at 70% 70%, hsl(var(--pulse-color) / 0.25), transparent);
+  animation: wave-flow 4s ease-in-out infinite;
+  transition: transform;
+  transition-duration: 600;
+}
+
+.pulse.on {
+  transform: translate3d(0, 0, 0);
+}
+
+.pulse.off {
+  transform: translate3d(0, 100%, 0);
+}
+
+@keyframes wave-flow {
+  0%, 100% {
+    background-position: 0% 0%, 0% 0%, 100% 100%;
+    opacity: 0.6;
+  }
+  25% {
+    background-position: 50% 25%, 25% 50%, 75% 50%;
+    opacity: 1;
+  }
+  50% {
+    background-position: 100% 50%, 50% 100%, 50% 0%;
+    opacity: 0.8;
+  }
+  75% {
+    background-position: 50% 75%, 75% 50%, 25% 50%;
+    opacity: 1;
+  }
 }
