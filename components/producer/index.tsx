@@ -11,7 +11,7 @@ import { useAssets } from '@/hooks/use-assets'
 import { useEngine } from '@/hooks/use-engine'
 import { FacePicker } from '../face-picker'
 import { Mixins } from './mixins'
-import { Loader2, ArrowUp, Plus, GripHorizontal, X, Square } from 'lucide-react'
+import { Loader2, ArrowUp, Plus, GripHorizontal, X, Square, RotateCcw } from 'lucide-react'
 
 interface ProducerProps {
   className?: string
@@ -24,7 +24,20 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
     [mixins, setMixins] = useState<MixinsType>({}),
     [reference, setReference] = useState<string>(''),
     [uploading, setUploading] = useState(false),
-    [userId, setUserId] = useState('')
+    [userId, setUserId] = useState(''),
+    /**
+     * indicates prompt is modified after the first generation
+     */
+    [dirty, setDirty] = useState(false),
+    /**
+     * User can regenerate photos by the same settings
+     * till create new
+     */
+    [mode, setMode] = useState<'create' | 'retry'>('create'),
+    /**
+     * the UI mode
+     */
+    [expanded, setExpanded] = useState(false)
 
   React.useEffect(() => {
     const supabase = createClient()
@@ -41,20 +54,6 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  /**
-   * indicates prompt is modified after the first generation
-   */
-  const [dirty, setDirty] = useState(false)
-  /**
-   * User can regenerate photos by the same settings
-   * till create new
-   */
-  const [mode, setMode] = useState<'create' | 'retry'>('create')
-  /**
-   * the UI mode
-   */
-  const [expanded, setExpanded] = useState(false)
-
   // Data
   const { data: assets = [] } = useAssets()
   const { mutate: commit, isPending, error, reset: clearError } = useEngine()
@@ -64,7 +63,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
     if (couldNotSubmit) return
     commit(
       {
-        prompt: dirty ? '' : prompt,
+        prompt: dirty ? prompt : '',
         mixins,
         reference,
         momentId
@@ -259,11 +258,14 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
               className="icon-button"
               onClick={handleGenerate}
               disabled={isPending || couldNotSubmit}>
-              {isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <ArrowUp />
-              )}
+              {isPending
+                ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  )
+                : mode === 'create'
+                  ? (<ArrowUp />)
+                  : (<RotateCcw />)
+              }
             </Button>
           </div>
         </div>

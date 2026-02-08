@@ -40,6 +40,7 @@ export const engine = {
     assets,
     reference
   }: GenerateParams): Promise<GenerateResult> => {
+    console.log('----------------ENGINE---------', prompt, reference, assets)
     const json: JsonPrompt = {},
       ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
     // 1. Analyze inputs into structured json
