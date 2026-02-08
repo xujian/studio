@@ -1,4 +1,11 @@
 export const FACE = 'facial features are 100% identical to'
+export const MAKEUP = ''
+export const ATTIRE = ''
+export const POSE = ''
+export const SCENE = ''
+export const LIGHTING = ''
+export const CAMERA = ''
+
 
 export const EXAMPLE = `{
   "subject": {
@@ -6,6 +13,12 @@ export const EXAMPLE = `{
     "skinTone": "skin tone if mentioned, otherwise general description",
     "expression": "facial expression and emotional quality from prompt",
     "bodyLanguage": "overall posture and physical presence from prompt"
+  },
+  "makeup": {
+    "face": "foundation, blush, contour from prompt or natural defaults",
+    "eyes": "eye makeup from prompt or subtle defaults",
+    "lips": "lip makeup from prompt or natural defaults",
+    "overall": "makeup aesthetic from prompt style"
   },
   "attire": {
     "top": "upper garment details from prompt or inferred from style",
@@ -26,12 +39,6 @@ export const EXAMPLE = `{
     "foreground": "foreground elements from prompt",
     "atmosphere": "mood and atmosphere from prompt"
   },
-  "makeup": {
-    "face": "foundation, blush, contour from prompt or natural defaults",
-    "eyes": "eye makeup from prompt or subtle defaults",
-    "lips": "lip makeup from prompt or natural defaults",
-    "overall": "makeup aesthetic from prompt style"
-  },
   "lighting": {
     "direction": "lighting direction from prompt or professional default",
     "quality": "lighting quality from prompt mood",
@@ -51,10 +58,10 @@ export const EXAMPLE = `{
 
 export const SCHEMA = `{
   "subject": { "bodyType", "skinTone", "expression", "bodyLanguage" },
+  "makeup": { "face", "eyes", "lips", "overall" },
   "attire": { "top", "bottom", "footwear", "accessories", "overall" },
   "pose": { "position", "limbs", "angle", "energy" },
   "scene": { "setting", "background", "foreground", "atmosphere" },
-  "makeup": { "face", "eyes", "lips", "overall" },
   "lighting": { "direction", "quality", "shadows", "highlights", "mood" },
   "camera": { "lens", "aperture", "angle", "framing", "focus", "style" }
 }`

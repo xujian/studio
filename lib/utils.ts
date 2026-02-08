@@ -10,4 +10,15 @@ export const cn = (...inputs: ClassValue[]) => {
  * Storage path: {userId}/{momentId}/{photoId}.jpg in the `photos` bucket.
  */
 export const photoUrl = (userId: string, momentId: string, photoId: string) =>
-  `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/photos/${userId}/${momentId}/${photoId}.jpg`
+  [
+    `${process.env.NEXT_PUBLIC_SUPABASE_URL}`,
+    '/storage/v1/object/public/photos/',
+    `${userId}/${momentId}/${photoId}.jpg`
+  ].join('')
+
+export const uploadUrl = (userId: string, filename: string) =>
+  [
+    `${process.env.NEXT_PUBLIC_SUPABASE_URL}`,
+    '/storage/v1/object/public/uploads/',
+    `${userId}/${filename}.jpg`
+  ].join('')

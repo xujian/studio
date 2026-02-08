@@ -51,23 +51,32 @@ All clients use the **publishable key** (format: `sb_publishable_xxx`) which res
 
 ### Image Generation Flow
 
-1. User submits request → `/api/photo` POST endpoint with prompt, mixins, and optional reference image URL
-2. Validate with Zod (`engineRequestSchema` in `lib/validations.ts`)
-3. **Analyze inputs** (if provided):
-   - Reference image URL → `ImageAnalyzer.analyze()` extracts structured details (attire, pose, scene, lighting, camera)
-   - Text prompt → `PromptAnalyzer.analyze()` converts natural language to structured JSON
-   - Both → Merge analyses (prompt overrides reference)
-4. Create or load moment record (baseline prompt + mixins)
-5. Load asset data from database based on mixins (face, makeup, etc.)
-6. Call `engine.generate()` from `lib/engine.ts` (uses Gemini 2.0 Flash with image generation)
-7. Upload generated base64 image to Supabase Storage bucket `photos` as `{userId}/{momentId}/{photoId}.{ext}`
-8. Insert photo record with deltas (only store differences from moment baseline)
-9. Return complete moment with all photos
+**API Route** (`/api/photo` POST):
+1. Validate request with Zod (`engineRequestSchema`)
+2. Authenticate user via Supabase session
+3. Create or load moment record (baseline prompt + mixins)
+4. Load asset data from database based on mixins
+5. Call `engine.generate({ userId, prompt, assets, reference })`
+6. Upload base64 image to Supabase Storage (`{userId}/{momentId}/{photoId}.{ext}`)
+7. Insert photo record with deltas (only differences from moment baseline)
+8. Return complete moment with all photos
+
+**Engine** (`lib/engine.ts`) — pure generation function, no auth:
+1. **Analyze inputs** → structured JSON baseline
+   - Reference image → `ImageAnalyzer` (full scene description)
+   - Text prompt → `PromptAnalyzer` (only explicit mentions)
+   - Deep merge: prompt overrides reference
+2. **Build assets** → face image parts + text sections
+   - Face defaults to system face (`defaultAssets.face`) when not provided
+   - `AssetsBuilder` produces image parts (face) and text sections (other assets)
+   - Asset sections override corresponding JSON keys
+3. **Assemble prompt** → face image parts + single combined JSON
+4. **Generate** → Gemini API (9:16 portrait, 2K resolution)
 
 **Key Services:**
 - **ImageAnalyzer** (`lib/image-analyzer.ts`) - Analyzes reference images using Gemini Vision, extracts detailed structured data, caches results for 30 minutes
 - **PromptAnalyzer** (`lib/prompt-analyzer.ts`) - Converts natural language prompts to structured JSON format matching ImageAnalyzer output, enables prompt merging
-- **Engine** (`lib/engine.ts`) - Generates images via Gemini 2.0 Flash, processes assets and analysis data into generation prompts
+- **Engine** (`lib/engine.ts`) - Pure generation function: takes userId, prompt, assets, reference; returns base64 image. No auth or database access.
 
 ### Data Fetching Pattern
 
@@ -237,7 +246,7 @@ Always use these types instead of inline definitions.
   use-assets.ts     # Asset fetching hook
 /lib
   /supabase         # Three client implementations
-  engine.ts         # Image generation engine (Gemini 2.0 Flash)
+  engine.ts         # Image generation engine (pure function, no auth)
   image-analyzer.ts # Reference image analyzer service (cached)
   prompt-analyzer.ts # Text prompt structuring service (cached)
   prompts.ts        # Prompt constants and templates
@@ -272,7 +281,7 @@ NEXT_PUBLIC_APP_URL=                    # For OAuth redirects
 ## Key Patterns
 
 - **Validation:** All user input validated with Zod schemas before processing (`engineRequestSchema`)
-- **Error Handling:** Failed generations return error responses, graceful degradation for analyzer failures
+- **Error Handling:** Failed generations propagate errors to the API route; analyzer failures are not swallowed
 - **Storage:** Images stored as `{userId}/{momentId}/{photoId}.{jpg|png}` in Supabase Storage bucket `photos`
 - **Delta Storage:** Photos only store differences from moment baseline (prompt/mixins deltas)
   - Saves storage and makes variation tracking explicit

@@ -82,7 +82,48 @@ The Producer is the main creation interface where users combine inputs to genera
 3. **Detailed control**: Face + structured settings (formal attire + studio lighting + professional vibe)
 4. **Mixed approach**: Face + reference image + text refinements + selected settings
 
-The system combines all inputs into an optimized master prompt for generation.
+**Generation Engine Pipeline (`lib/engine.ts`):**
+
+```
+┌─────────────┐     ┌─────────────┐
+│  Reference   │     │    Text      │
+│    Image     │     │   Prompt     │
+└──────┬──────┘     └──────┬──────┘
+       │                    │
+       ▼                    ▼
+ ImageAnalyzer        PromptAnalyzer
+ (full scene)        (explicit only)
+       │                    │
+       └──────┬─────────────┘
+              │ deep merge (prompt overrides reference)
+              ▼
+        Structured JSON
+              │
+              │  ┌─────────────┐
+              │  │   Assets     │
+              │  │ (face, etc.) │
+              │  └──────┬──────┘
+              │         │
+              │    AssetsBuilder
+              │    ├─ face image parts (default face if none)
+              │    └─ text sections
+              │         │
+              └────┬────┘
+                   │ asset sections override json
+                   ▼
+           Combined JSON Prompt
+                   │
+                   ▼
+         Gemini API (image gen)
+                   │
+                   ▼
+          Base64 image result
+```
+
+1. **Analyze inputs** — Reference image → `ImageAnalyzer` (detailed scene baseline). Text prompt → `PromptAnalyzer` (only explicit mentions). Deep merged, prompt overrides reference.
+2. **Build assets** — Face defaults to system face when not provided. `AssetsBuilder` produces image parts (for face) and text sections (for other assets). Sections override corresponding json keys.
+3. **Assemble prompt** — Face image parts + single combined JSON prompt. No redundant data.
+4. **Generate** — Gemini API with portrait aspect ratio (9:16), 2K resolution.
 
 ### 2. Assets Management
 - **Faces**: Reference face images saved to library

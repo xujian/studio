@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
      * params to generate image
      */
     generateParams: GenerateParams = {
+      userId,
       prompt: input.prompt,
       reference: input.reference,
       assets: {}

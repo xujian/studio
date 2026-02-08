@@ -1,15 +1,15 @@
 import { GoogleGenAI } from '@google/genai'
 import type { Part } from '@google/genai'
 import merge from 'lodash-es/merge'
-import * as prompts from '@/lib/prompts'
-import { createClient } from '@/lib/supabase/server'
 import { ImageAnalyzer } from './image-analyzer'
 import { PromptAnalyzer } from './prompt-analyzer'
-import { Asset, Assets, AssetType, JsonPrompt } from './types'
-
-const FALLBACK_FACE_ID = process.env.FALLBACK_FACE_ID || ''
+import AssetsBuilder from './assets-builder'
+import { defaultAssets } from './constants'
+import { Assets, AssetType, JsonPrompt } from './types'
+import { uploadUrl } from './utils'
 
 export interface GenerateParams {
+  userId: string
   prompt: string
   assets?: Assets
   reference?: string
@@ -22,81 +22,76 @@ interface GenerateResult {
 
 export const engine = {
   /**
-   * Generate a photo using face + prompt via Gemini API
+   * Generate a portrait photo via Gemini API
+   *
+   * Flow (per PRD):
+   * 1. Analyze inputs → structured json baseline
+   *    - Reference image → ImageAnalyzer (full scene description)
+   *    - Text prompt → PromptAnalyzer (only explicit mentions, merges on top)
+   * 2. Build assets → face image + text sections
+   *    - Face defaults to system face when not provided
+   *    - Asset sections override analyzer json
+   * 3. Assemble prompt → face image parts + combined json
+   * 4. Generate via Gemini → extract base64 image
    */
   generate: async ({
+    userId,
     prompt,
     assets,
     reference
   }: GenerateParams): Promise<GenerateResult> => {
-    const supabase = await createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) throw new Error('Not authenticated')
-    const userId = session.user.id
-
-    // fetch and process assets one by one
-    const { parts = [], sections = [] } = await buildAssets(assets)
-    const ai = new GoogleGenAI({
-      apiKey: process.env.GEMINI_API_KEY!
-    })
-    const aspectRatio = '9:16',
-      resolution = '2K',
-      prompts: any = {}
-    sections.forEach(s => {
-      prompts[s.key] = s.content
-    })
-    let json: JsonPrompt = {}
+    const json: JsonPrompt = {},
+      ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
+    // 1. Analyze inputs into structured json
     if (reference) {
       const imageAnalyzer = new ImageAnalyzer(),
-        image = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${userId}/${reference}`
-      // Only reference image provided
-      try {
-        const result = await imageAnalyzer.analyze(image)
-        merge(json, result)
-      } catch (error) {
-        console.error('[Engine] Reference analysis failed:', error)
-      }
+        image = uploadUrl(userId, reference)
+      const result = await imageAnalyzer.analyze(image)
+      merge(json, result)
     }
     if (prompt) {
       const promptAnalyzer = new PromptAnalyzer()
-      try {
-        const result = await promptAnalyzer.analyze(prompt)
-        merge(json, result)
-      } catch (error) {
-        console.error('[Engine] Prompt analysis failed:', error)
-      }
+      const result = await promptAnalyzer.analyze(prompt)
+      merge(json, result)
     }
+    // 2. Build assets — ensure face is always present
+    if (!assets?.face) {
+      assets = { ...assets, face: defaultAssets.face }
+    }
+    const { parts = [], sections = [] } = await AssetsBuilder.build(assets)
+    sections.forEach(s => {
+      json[s.key as AssetType] = s.content
+    })
+    // 3. Assemble prompt — face image parts + combined json
     const contents = [
       ...parts,
       {
         text: [
-          `Generate a high-quality portrait photo\n`,
-          `JSON.stringify(sections)\n`,
-          `based on the following prompt:\n`,
+          'Generate a high-quality portrait photo with the following prompt:',
           JSON.stringify(json),
         ].join('\n')
       }
     ]
+    // 4. Generate
     const response = await ai.models.generateContent({
       model: 'gemini-3-pro-image-preview',
       contents,
       config: {
         responseModalities: ['TEXT', 'IMAGE'],
         imageConfig: {
-          aspectRatio: aspectRatio,
-          imageSize: resolution
+          aspectRatio: '9:16',
+          imageSize: '2K'
         }
       }
     })
-    const generatedImage = extractGeneratedImage(response)
-    return generatedImage
+    return extractGenerationResult(response)
   }
 }
 
 /**
  * Extract base64 image data from Gemini response
  */
-function extractGeneratedImage(response: any): GenerateResult {
+function extractGenerationResult (response: any): GenerateResult {
   const parts = response.candidates?.[0]?.content?.parts || []
   for (const part of parts) {
     if (part.inlineData) {
@@ -107,93 +102,4 @@ function extractGeneratedImage(response: any): GenerateResult {
     }
   }
   throw new Error('No image found in Gemini response')
-}
-
-/**
- * build prompt from mixins
- */
-async function buildAssets(assets?: Assets): Promise<{
-  parts: (string | Part)[]
-  sections: {
-    key: string
-    content: string
-  }[]
-}> {
-  const parts: (string | Part)[] = [],
-    sections: {
-      key: string
-      content: string
-    }[] = []
-  if (!assets) {
-    return { parts, sections }
-  }
-  // default mixin content
-  for (const [type, asset] of Object.entries(assets)) {
-    const method = assetMethods.get(type as AssetType)
-    if (method) {
-      const result = await method(asset)
-      sections.push({
-        key: type as string,
-        content: result.text
-      })
-      if (result.image) {
-        // asset is an image
-        parts.push(`reference ${type}:`)
-        parts.push(result.image!)
-      }
-    }
-  }
-  return { parts, sections }
-}
-
-async function buildFace(asset: Asset) {
-  const inlineData = await fetchImage(asset.url!)
-  return {
-    image: {
-      inlineData
-    },
-    text: `${prompts.FACE} the "reference face"`
-  }
-}
-
-async function buildMakeup(asset: Asset) {
-  if (asset.url) {
-    const inlineData = await fetchImage(asset.url)
-    return {
-      image: {
-        inlineData
-      },
-      text: `${prompts.FACE} the "reference makeup"`
-    }
-  } else {
-    return Promise.resolve({
-      text: asset.content!
-    })
-  }
-}
-
-const assetMethods = new Map<
-  AssetType,
-  (asset: Asset) => Promise<{
-    image?: Part
-    text: string
-  }>
->()
-assetMethods.set('face', buildFace)
-assetMethods.set('makeup', buildMakeup)
-
-async function fetchImage(url: string): Promise<{
-  mimeType: string
-  data: string
-}> {
-  const image = await fetch(url)
-  if (!image.ok) {
-    throw new Error(`Failed to fetch face image: ${image.statusText}`)
-  }
-  const buffer = await image.arrayBuffer()
-  const data = Buffer.from(buffer).toString('base64')
-  return {
-    mimeType: image.headers.get('content-type') || 'image/jpeg',
-    data
-  }
 }
