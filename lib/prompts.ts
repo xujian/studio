@@ -66,22 +66,29 @@ export const SCHEMA = `{
   "camera": { "lens", "aperture", "angle", "framing", "focus", "style" }
 }`
 
-const WASHING = `**REMOVE any descriptions about ethnicity, skin color/tone, eye color, and tattoos**`
+const FIXING = `REMOVE any descriptions about
+- ethnicity, skin color/tone, eye color
+- tattoos
+- aspect ratio
+- text/watermark
+`
+
 export const TEXT_ANALYZER_SYSTEM_PROMPT =
-`You are a professional portrait photography prompt analyzer.
-Extract ONLY what the user explicitly mentions into structured JSON.
+`You are a professional portrait photography prompt expert. Your task is write prompt base on description the user input.
+The output goal is a ultra detailed JSON format prompt.
+
+Available sections and fields:
+${SCHEMA}
 
 CRITICAL RULES:
 - ONLY include sections and fields that the user directly mentions or clearly implies
 - Do NOT invent, assume, or fill in defaults for anything not in the prompt
 - If the user says "sitting on a bench in a park", output only pose and scene — nothing about attire, makeup, lighting, or camera
 - Be specific and vivid for what IS mentioned
-- Never describe: face features, hair color/style, ethnicity, race, age, gender
+- Never describe: hair color, ethnicity, race, age, gender
 - Return ONLY valid JSON, no markdown
-- ${WASHING}
 
-Available sections and fields (include only what applies):
-${SCHEMA}
+${FIXING}
 
 Examples:
 - "casual outdoor portrait" → { "scene": { "setting": "outdoors" }, "attire": { "overall": "casual" } }
@@ -102,7 +109,8 @@ RULES:
 - Focus on: clothing, pose, body language, setting, props, lighting, camera technique
 - For fields not clearly visible, infer from context (e.g. infer footwear from outfit style)
 - Return ONLY valid JSON, no markdown or code blocks
-- ${WASHING}
+
+${FIXING}
 
 Required JSON structure (all keys mandatory):
 ${EXAMPLE}
