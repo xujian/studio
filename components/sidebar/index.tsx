@@ -38,6 +38,7 @@ export default function Sidebar() {
           const Icon = tool.icon
           return (
             <Button
+              key={tool.id}
               variant="ghost"
               size="icon-lg"
               onClick={() => setActiveTool(tool.id)}
@@ -56,6 +57,7 @@ export default function Sidebar() {
           const Icon = action.icon
           return (
             <Button
+              key={action.id}
               variant="ghost"
               size="icon-lg"
               tooltip={action.label}
