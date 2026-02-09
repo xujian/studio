@@ -15,6 +15,7 @@ export const engineRequestSchema = z.object({
       scene: z.string().uuid('Invalid moment ID').optional(),
       lighting: z.string().uuid('Invalid moment ID').optional(),
       camera: z.string().uuid('Invalid moment ID').optional(),
+      mood: z.string().uuid('Invalid moment ID').optional(),
     })
     .optional(),
   momentId: z.union([

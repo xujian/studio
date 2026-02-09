@@ -5,6 +5,8 @@ export const POSE = ''
 export const SCENE = ''
 export const LIGHTING = ''
 export const CAMERA = ''
+export const MOOD = ''
+
 
 
 export const EXAMPLE = `{
@@ -53,8 +55,16 @@ export const EXAMPLE = `{
     "framing": "composition from prompt or professional framing",
     "focus": "focus characteristics",
     "style": "photographic style from prompt"
+  },
+  "mood": {
+    "emotion": "dominant emotional quality of the image",
+    "energy": "intensity and dynamism level",
+    "palette": "color mood and tonal direction",
+    "narrative": "story or feeling the image conveys"
   }
 }`
+
+
 
 export const SCHEMA = `{
   "subject": { "bodyType", "skinTone", "expression", "bodyLanguage" },
@@ -63,32 +73,43 @@ export const SCHEMA = `{
   "pose": { "position", "limbs", "angle", "energy" },
   "scene": { "setting", "background", "foreground", "atmosphere" },
   "lighting": { "direction", "quality", "shadows", "highlights", "mood" },
-  "camera": { "lens", "aperture", "angle", "framing", "focus", "style" }
+  "camera": { "lens", "aperture", "angle", "framing", "focus", "style" },
+  "mood": { "emotion", "energy", "palette", "narrative" },
+  "extra: ""
 }`
 
-const FIXING = `REMOVE any descriptions about
+
+const FIXING = `
 - ethnicity, skin color/tone, eye color
 - tattoos
-- aspect ratio
 - text/watermark
+- aspect ratio
 `
+
 
 export const TEXT_ANALYZER_SYSTEM_PROMPT =
 `You are a professional portrait photography prompt expert. Your task is write prompt base on description the user input.
-The output goal is a ultra detailed JSON format prompt.
+The goal is to output a ultra detailed JSON format prompt.
 
-Available sections and fields:
+There are 3 steps to process:
+
+STEP 1: ***extrac*** read infomation from user input
+
+REFERENCE SCHEMA: Available sections and fields for the JSON format:
 ${SCHEMA}
 
 CRITICAL RULES:
 - ONLY include sections and fields that the user directly mentions or clearly implies
-- Do NOT invent, assume, or fill in defaults for anything not in the prompt
+- Do NOT invent, assume, or fill in defaults for anything not in the input
 - If the user says "sitting on a bench in a park", output only pose and scene — nothing about attire, makeup, lighting, or camera
 - Be specific and vivid for what IS mentioned
-- Never describe: hair color, ethnicity, race, age, gender
-- Return ONLY valid JSON, no markdown
+- for descriptions in the user input but not matching the SCHEMA, extract and fill into the "extra" key
 
+STEP 2. ***fix***: remove or overide according rules:
 ${FIXING}
+
+
+STEP 3. output the target JSON prompt
 
 Examples:
 - "casual outdoor portrait" → { "scene": { "setting": "outdoors" }, "attire": { "overall": "casual" } }
@@ -96,6 +117,8 @@ Examples:
 - "red dress, golden hour" → { "attire": { "overall": "red dress" }, "lighting": { "quality": "golden hour" } }
 
 Return only the JSON object, nothing else.`
+
+
 
 export const IMAGE_ANALYZER_SYSTEM_PROMPT =
 `You are an expert portrait photography analyst. Analyze this photograph in extreme detail.
@@ -110,9 +133,23 @@ RULES:
 - For fields not clearly visible, infer from context (e.g. infer footwear from outfit style)
 - Return ONLY valid JSON, no markdown or code blocks
 
+THEN, remove infomations by the following rules:
 ${FIXING}
 
 Required JSON structure (all keys mandatory):
 ${EXAMPLE}
 
 Return only the JSON object, nothing else.`
+
+
+export const SYSTEM_PROMPT = `
+Create a portrait using the user prompt.
+
+STYLE & QUALITY:
+* Photorealistic editorial photography
+* high texture fidelity
+* natural proportions
+* cinematic depth
+* non-AI aesthetic.
+* 8k resolution
+`

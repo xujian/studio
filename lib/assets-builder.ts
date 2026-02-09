@@ -110,6 +110,22 @@ async function buildLighting(asset: Asset) {
   }
 }
 
+async function buildMood(asset: Asset) {
+  if (asset.url) {
+    const inlineData = await fetchImage(asset.url)
+    return {
+      image: {
+        inlineData
+      },
+      text: `${prompts.MOOD} the "reference mood"`
+    }
+  } else {
+    return Promise.resolve({
+      text: asset.content!
+    })
+  }
+}
+
 async function buildCamera(asset: Asset) {
   if (asset.url) {
     const inlineData = await fetchImage(asset.url)
@@ -139,6 +155,7 @@ assetMethods.set('attire', buildAttire)
 assetMethods.set('scene', buildScene)
 assetMethods.set('lighting', buildLighting)
 assetMethods.set('camera', buildCamera)
+assetMethods.set('mood', buildMood)
 
 async function fetchImage(url: string): Promise<{
   mimeType: string

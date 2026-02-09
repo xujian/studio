@@ -8,6 +8,7 @@ export const assetTypes = [
   { name: 'Scene', type: 'scene' },
   { name: 'Lighting', type: 'lighting' },
   { name: 'Camera', type: 'camera' },
+  { name: 'Mood', type: 'mood' },
 ] as const
 
 export const defaultAssets: Assets = {
@@ -37,6 +38,10 @@ export const defaultAssets: Assets = {
   },
   camera: {
     type: 'camera',
+    content: ''
+  },
+  mood: {
+    type: 'mood',
     content: ''
   },
 }
