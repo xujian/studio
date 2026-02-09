@@ -62,6 +62,70 @@ async function buildMakeup(asset: Asset) {
   }
 }
 
+async function buildAttire(asset: Asset) {
+  if (asset.url) {
+    const inlineData = await fetchImage(asset.url)
+    return {
+      image: {
+        inlineData
+      },
+      text: `${prompts.ATTIRE} the "reference attire"`
+    }
+  } else {
+    return Promise.resolve({
+      text: asset.content!
+    })
+  }
+}
+
+async function buildScene(asset: Asset) {
+  if (asset.url) {
+    const inlineData = await fetchImage(asset.url)
+    return {
+      image: {
+        inlineData
+      },
+      text: `${prompts.SCENE} the "reference scene"`
+    }
+  } else {
+    return Promise.resolve({
+      text: asset.content!
+    })
+  }
+}
+
+async function buildLighting(asset: Asset) {
+  if (asset.url) {
+    const inlineData = await fetchImage(asset.url)
+    return {
+      image: {
+        inlineData
+      },
+      text: `${prompts.LIGHTING} the "reference lighting"`
+    }
+  } else {
+    return Promise.resolve({
+      text: asset.content!
+    })
+  }
+}
+
+async function buildCamera(asset: Asset) {
+  if (asset.url) {
+    const inlineData = await fetchImage(asset.url)
+    return {
+      image: {
+        inlineData
+      },
+      text: `${prompts.CAMERA} the "reference camera"`
+    }
+  } else {
+    return Promise.resolve({
+      text: asset.content!
+    })
+  }
+}
+
 const assetMethods = new Map<
   AssetType,
   (asset: Asset) => Promise<{
@@ -71,6 +135,10 @@ const assetMethods = new Map<
 >()
 assetMethods.set('face', buildFace)
 assetMethods.set('makeup', buildMakeup)
+assetMethods.set('attire', buildAttire)
+assetMethods.set('scene', buildScene)
+assetMethods.set('lighting', buildLighting)
+assetMethods.set('camera', buildCamera)
 
 async function fetchImage(url: string): Promise<{
   mimeType: string

@@ -171,7 +171,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
         className={cn('-mb-7 flex px-8 opacity-0 transition-all duration-300', {
           'mb-0 opacity-100': expanded
         })}>
-        <Mixins value={{}} />
+        <Mixins value={{}} onChange={setMixins} />
       </div>
       <div className="gap -m-px flex flex-col overflow-hidden rounded-4xl border border-white/50 bg-black/20 p-4">
         <div className="gap flex items-start">
@@ -201,12 +201,13 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
                       width={100}
                       height={100}
                     />
-                    <button
+                    <Button
                       type="button"
-                      className="absolute top-0 right-0 rounded-bl bg-black/60 p-0.5 text-white hover:bg-black/80"
+                      size="icon"
+                      className="absolute top-0 right-0 h-4 w-4 rounded-full bg-black/60 text-white hover:bg-black/80"
                       onClick={handleReferenceClear}>
                       <X className="h-3 w-3" />
-                    </button>
+                    </Button>
                   </>
                 )
               : (
@@ -236,7 +237,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
         <div className="flex justify-between">
           <div className="flex items-center gap-2">
             <Tooltip>
-              <TooltipTrigger>
+              <TooltipTrigger asChild>
                 <Toggle
                   pressed={expanded}
                   type="button"
@@ -264,7 +265,6 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
                 <X />
               </Button>
             )}
-
             {/* Generate/Retry button */}
             <Button
               type="button"

@@ -1,20 +1,21 @@
 import * as React from 'react'
 import { Button, ButtonGroup, Toggle } from '@/components/ui'
 import { assetTypes } from '@/lib/constants'
-import type { AssetType, AssetValue } from '@/lib/types'
+import type { AssetType, AssetValue, Mixins } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { useAssets } from '@/hooks/use-assets'
 import { Popover, PopoverTrigger, PopoverContent } from '../ui'
 import { MoreHorizontalIcon, XIcon } from 'lucide-react'
 
 export type MixinsProps = {
-  value?: AssetValue
-  onChange?: (value: AssetValue) => void
+  value?: Mixins
+  onChange?: (value: Mixins) => void
 }
 
 export function Mixins({ value = {}, onChange }: MixinsProps) {
   const { data: assets = [], isLoading } = useAssets()
-  const [openPopover, setOpenPopover] = React.useState<AssetType | null>(null)
+  const [openPopover, setOpenPopover] = React.useState<AssetType | null>(null),
+    [selected, setSelected] = React.useState<Mixins>(value) 
 
   // Group assets by type
   const assetsByType = React.useMemo(() => {
@@ -37,15 +38,18 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
   }
 
   const handleSelect = (type: AssetType, assetId: string) => {
-    const newValue = { ...value }
-    if (newValue[type] === assetId) {
+    const v = {
+      ...selected
+    }
+    if (v[type] === assetId) {
       // Deselect if clicking the same asset
-      delete newValue[type]
+      delete v[type]
     } else {
       // Select new asset
-      newValue[type] = assetId
+      v[type] = assetId
     }
-    onChange?.(newValue)
+    setSelected(v)
+    onChange?.(v)
     setOpenPopover(null)
   }
 
@@ -62,14 +66,12 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
         .filter(t => t.type !== 'face')
         .map(assetType => {
           const typeAssets = assetsByType[assetType.type] || []
-          const isSelected = value.hasOwnProperty(assetType.type)
+          const isSelected = selected.hasOwnProperty(assetType.type)
           const selectedAsset = isSelected
-            ? assets.find(a => a.id === value[assetType.type])
+            ? assets.find(a => a.id === selected[assetType.type])
             : null
           return (
-            <Popover
-              key={assetType.type}
-              modal={false}>
+            <Popover key={assetType.type} modal={false}>
               <PopoverTrigger asChild>
                 <Button
                   type="button"
@@ -78,13 +80,7 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
                     'tube group h-7 rounded-none px-2 text-xs',
                     isSelected ? 'on' : ''
                   )}>
-                  {selectedAsset?.name || assetType.name}
-                  {isSelected && (
-                    <XIcon
-                      className="ml-1 h-3 w-3 opacity-0 transition-opacity group-hover:opacity-100"
-                      onClick={e => handleClear(assetType.type, e)}
-                    />
-                  )}
+                  {assetType.name}
                 </Button>
               </PopoverTrigger>
               <PopoverContent
@@ -107,16 +103,15 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
                         key={asset.id}
                         variant="outline"
                         size="sm"
-                        className="mixin w-full justify-start"
-                        pressed={value[assetType.type] === asset.id}
+                        className="mixin w-full justify-start data-[state=on]:bg-accent"
+                        pressed={selected[assetType.type] === asset.id}
                         onPressedChange={() =>
-                          handleSelect(assetType.type, asset.id)
+                          handleSelect(assetType.type, asset.id!)
                         }>
                         <span className="truncate">{asset.name}</span>
                       </Toggle>
                     ))
                   )}
-                  
                 </div>
               </PopoverContent>
             </Popover>
