@@ -63,7 +63,11 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
     if (couldNotSubmit) return
     commit(
       {
-        prompt: dirty ? prompt : '',
+        prompt: mode === 'create'
+          ? prompt
+          : dirty
+            ? prompt
+            : '',
         mixins,
         reference,
         momentId
