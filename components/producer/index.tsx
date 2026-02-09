@@ -7,6 +7,7 @@ import { Button } from '@/components/button'
 import { createClient } from '@/lib/supabase/client'
 import type { AssetType, MomentWithPhotos } from '@/lib/types'
 import type { Mixins as MixinsType } from '@/lib/types'
+import { useBus } from '@/lib/bus'
 import { cn } from '@/lib/utils'
 import { useAssets } from '@/hooks/use-assets'
 import { useEngine } from '@/hooks/use-engine'
@@ -51,6 +52,18 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
         }
       }
     })
+  })
+
+  const $bus = useBus()
+
+  // Listen for settings loaded from MomentView
+  $bus.on('moment:resume', (payload) => {
+    setMomentId(payload.momentId)
+    setPrompt(payload.prompt)
+    setMixins(payload.mixins)
+    setReference(payload.reference || '')
+    setMode('retry')
+    setDirty(false)
   })
 
   const fileInputRef = useRef<HTMLInputElement>(null)

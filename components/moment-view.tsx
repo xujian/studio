@@ -5,7 +5,6 @@ import * as React from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import {
   Badge,
-  Button,
   Carousel,
   CarouselContent,
   CarouselItem,
@@ -16,12 +15,14 @@ import {
   PopoverTrigger,
   type CarouselApi
 } from '@/components/ui'
+import { Button } from '@/components/button'
 import { assetTypes } from '@/lib/constants'
 import type { AssetType, MomentWithPhotos } from '@/lib/types'
 import { cn, photoUrl, uploadUrl } from '@/lib/utils'
 import { useMixins } from '@/hooks/use-mixins'
 import { useDeleteMoment, useDeletePhoto } from '@/hooks/use-moments'
-import { GalleryHorizontal, Image as ImageIcon, Loader2, Trash, X } from 'lucide-react'
+import { useBus } from '@/lib/bus'
+import { GalleryHorizontal, Image as ImageIcon, Loader2, StepForward, Trash, X } from 'lucide-react'
 
 interface MomentViewProps {
   moment: MomentWithPhotos
@@ -38,6 +39,7 @@ export function MomentView({
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
   const [count, setCount] = React.useState(0)
+  const $bus = useBus()
   const deleteMoment = useDeleteMoment()
   const deletePhoto = useDeletePhoto()
 
@@ -81,6 +83,16 @@ export function MomentView({
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
+
+  const redo = () => {
+    $bus.emit('moment:resume', {
+      momentId: moment.id,
+      prompt: currentPhoto?.prompt || moment.prompt,
+      mixins: { ...moment.mixins, ...currentPhoto?.mixins },
+      reference: moment.reference || undefined,
+    })
+    onClose()
+  }
 
   return (
     <AnimatePresence>
@@ -250,6 +262,16 @@ export function MomentView({
                   transition={{ delay: 0.2 }}>
                   <p className="text-xs text-white">{moment.prompt || '(EMPTY)'}</p>
                 </motion.div>
+              </div>
+              <div className="flex flex-0 items-center gap-2">
+                <Button
+                  size="icon"
+                  tooltip="load setting and redo this photo"
+                  className="bg-background cursor-pointer"
+                  variant="ghost"
+                  onClick={redo}>
+                  <StepForward />
+                </Button>
               </div>
               <div className="flex-1"></div>
               <div className="flex flex-0 items-center gap-2">
