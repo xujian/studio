@@ -1,13 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import {
-  Button,
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger
-} from '@/components/ui'
+import { Button } from '@/components/button'
 import { cn } from '@/lib/utils'
 import {
   Layers,
@@ -38,62 +32,42 @@ export default function Sidebar() {
   ]
 
   return (
-    <TooltipProvider delayDuration={100}>
-      <div className="fixed top-1/2 left-8 z-40 -translate-y-1/2">
-        <div className="relative flex flex-col p-2 gap-2 glass rounded-full">
-          {tools.map(tool => {
-            const Icon = tool.icon
-            return (
-              <Tooltip key={tool.id}>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon-lg"
-                    onClick={() => setActiveTool(tool.id)}
-                    className={cn(
-                      'rounded-full transition-all duration-300 cursor-pointer',
-                      activeTool === tool.id
-                        ? 'bg-white text-black shadow-[0_4px_16px_rgba(255,255,255,0.15)]'
-                        : 'text-white/50 hover:bg-white/10 hover:text-white'
-                    )}>
-                    <Icon className="size-5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="right"
-                  sideOffset={8}
-                  className="tooltip">
-                  {tool.label}
-                </TooltipContent>
-              </Tooltip>
-            )
-          })}
-          {actions.map(action => {
-            const Icon = action.icon
-            return (
-              <Tooltip key={action.id}>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon-lg"
-                    className={cn(
-                      'rounded-full transition-all duration-300 cursor-pointer',
-                      'text-white/50 hover:bg-white/10 hover:text-white',
-                    )}>
-                    <Icon className="size-5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="right"
-                  sideOffset={8}
-                  className="tooltip">
-                  {action.label}
-                </TooltipContent>
-              </Tooltip>
-            )
-          })}
-        </div>
+    <div className="fixed top-1/2 left-8 z-40 -translate-y-1/2">
+      <div className="relative flex flex-col p-2 gap-2 glass rounded-full">
+        {tools.map(tool => {
+          const Icon = tool.icon
+          return (
+            <Button
+              variant="ghost"
+              size="icon-lg"
+              onClick={() => setActiveTool(tool.id)}
+              tooltip={tool.label}
+              className={cn(
+                'rounded-full transition-all duration-300 cursor-pointer',
+                activeTool === tool.id
+                  ? 'bg-white text-black shadow-[0_4px_16px_rgba(255,255,255,0.15)]'
+                  : 'text-white/50 hover:bg-white/10 hover:text-white'
+              )}>
+              <Icon className="size-5" />
+            </Button>
+          )
+        })}
+        {actions.map(action => {
+          const Icon = action.icon
+          return (
+            <Button
+              variant="ghost"
+              size="icon-lg"
+              tooltip={action.label}
+              className={cn(
+                'rounded-full transition-all duration-300 cursor-pointer',
+                'text-white/50 hover:bg-white/10 hover:text-white',
+              )}>
+              <Icon className="size-5" />
+            </Button>
+          )
+        })}
       </div>
-    </TooltipProvider>
+    </div>
   )
 }

@@ -2,7 +2,8 @@
 
 import * as React from 'react'
 import { useRef, useState } from 'react'
-import { Button, Textarea, Toggle } from '@/components/ui'
+import { Textarea, Toggle, Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui'
+import { Button } from '@/components/button'
 import { createClient } from '@/lib/supabase/client'
 import type { AssetType, MomentWithPhotos } from '@/lib/types'
 import type { Mixins as MixinsType } from '@/lib/types'
@@ -212,6 +213,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
                   <Button
                     type="button"
                     variant="outline"
+                    tooltip="Upload reference image"
                     className="icon-button"
                     disabled={isPending || uploading}
                     onClick={() => fileInputRef.current?.click()}>
@@ -233,14 +235,21 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
         </div>
         <div className="flex justify-between">
           <div className="flex items-center gap-2">
-            <Toggle
-              pressed={expanded}
-              type="button"
-              variant="outline"
-              className="button"
-              onClick={toggleExpanded}>
-              <GripHorizontal />
-            </Toggle>
+            <Tooltip>
+              <TooltipTrigger>
+                <Toggle
+                  pressed={expanded}
+                  type="button"
+                  variant="outline"
+                  className="button"
+                  onClick={toggleExpanded}>
+                  <GripHorizontal />
+                </Toggle>
+              </TooltipTrigger>
+              <TooltipContent align='center' side="top" sideOffset={10}>
+                mixins
+              </TooltipContent>
+            </Tooltip>
           </div>
           <div className="flex items-center gap-2">
             {/* New/Clear button (only visible in retry mode) */}
@@ -248,6 +257,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
               <Button
                 type="button"
                 variant="outline"
+                tooltip="retry"
                 className="icon-button"
                 onClick={handleNew}
                 disabled={isPending}>
@@ -260,6 +270,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
               type="button"
               variant="outline"
               className="icon-button"
+              tooltip="generate"
               onClick={handleGenerate}
               disabled={isPending || couldNotSubmit}>
               {isPending
@@ -294,9 +305,12 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
           error ? 'translate-y-0' : 'translate-y-full',
         ].join(' '))}>
         {error && error.message}
+        <Button className="absolute top-3 right-3 icon-button" onClick={clearError}>
+          <X />
+        </Button>
       </div>
       <div className={cn('pulse', isPending ? 'on' : 'off')}>
-        <Button className="absolute top-4 right-4 icon-button" onClick={clearError}>
+        <Button className="absolute top-4 right-4 icon-button" tooltip="stop">
           <Square />
         </Button>
       </div>
