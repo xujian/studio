@@ -30,6 +30,7 @@ export const useMoments = () => {
         `
         )
         .order('created_at', { ascending: false })
+        .order('created_at', { referencedTable: 'photos', ascending: false })
         .range(pageParam, pageParam + PAGE_SIZE - 1)
       if (error) throw error
       const moments = (data || []) as MomentWithPhotos[]
