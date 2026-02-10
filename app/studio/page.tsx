@@ -2,12 +2,10 @@
 
 import { useState } from 'react'
 import { LayoutGroup } from 'motion/react'
-import {
-  MomentView,
-  MomentCard,
-  StaggerGrid,
-  MomentSkeleton
-} from '@/components/motion-exports'
+import { MomentView } from '@/components/moment-view'
+import { MomentCard } from '@/components/moment-card'
+import { StaggerGrid } from '@/components/stagger-grid'
+import { MomentSkeleton } from '@/components/moment-skeleton'
 import { Producer } from '@/components/producer'
 import { Button } from '@/components/ui'
 import type { MomentWithPhotos } from '@/lib/types'
