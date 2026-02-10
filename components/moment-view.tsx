@@ -17,12 +17,12 @@ import {
 } from '@/components/ui'
 import { Button } from '@/components/button'
 import { assetTypes } from '@/lib/constants'
-import type { AssetType, MomentWithPhotos } from '@/lib/types'
+import type { MomentWithPhotos } from '@/lib/types'
 import { cn, photoUrl, uploadUrl } from '@/lib/utils'
 import { useMixins } from '@/hooks/use-mixins'
 import { useDeleteMoment, useDeletePhoto } from '@/hooks/use-moments'
 import { useBus } from '@/lib/bus'
-import { Clock, GalleryHorizontal, Image as ImageIcon, Loader2, StepForward, Trash, X } from 'lucide-react'
+import { GalleryHorizontal, Image as ImageIcon, Loader2, StepForward, Trash, X } from 'lucide-react'
 import { MomentInfo } from './moment-info'
 
 interface MomentViewProps {
@@ -263,7 +263,7 @@ export function MomentView({
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}>
-                  <p className="text-xs text-white">{moment.prompt || '(EMPTY)'}</p>
+                  <p className="text-xs text-white">{currentPhoto.prompt || moment.prompt || '(EMPTY)'}</p>
                 </motion.div>
               </div>
               <div className="flex flex-0 items-center gap-2">
