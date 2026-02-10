@@ -102,7 +102,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
     setMode('create')
     setPrompt('')
     setMixins({})
-    setReference('')
+    // setReference('')
     setDirty(false)
   }
 
