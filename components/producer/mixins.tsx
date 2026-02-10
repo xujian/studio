@@ -29,6 +29,10 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
     return grouped
   }, [assets])
 
+  React.useEffect(() => {
+    setSelected(value)
+  }, [value])
+
   const handleTogglePopover = (type: AssetType) => {
     setOpenPopover(prev => (prev === type ? null : type))
   }
@@ -39,7 +43,7 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
 
   const handleSelect = (type: AssetType, assetId: string) => {
     const v = {
-      ...selected
+      ...selected,
     }
     if (v[type] === assetId) {
       // Deselect if clicking the same asset

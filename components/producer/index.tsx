@@ -102,8 +102,10 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
     setMomentId('')
     setMode('create')
     setPrompt('')
-    setMixins({})
-    // setReference('')
+    setMixins({
+      face: mixins.face
+    })
+    setReference('')
     setDirty(false)
   }
 
@@ -164,7 +166,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
         className={cn('-mb-7 flex px-8 opacity-0 transition-all duration-300', {
           'mb-0 opacity-100': expanded
         })}>
-        <Mixins value={{}} onChange={setMixins} />
+        <Mixins value={mixins} onChange={setMixins} />
       </div>
       <div className="gap -m-px flex flex-col overflow-hidden rounded-4xl border border-white/50 bg-black/20 p-4">
         <div className="gap flex items-start">
