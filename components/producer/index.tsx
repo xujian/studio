@@ -11,6 +11,7 @@ import { useBus } from '@/lib/bus'
 import { cn } from '@/lib/utils'
 import { useAssets } from '@/hooks/use-assets'
 import { useEngine } from '@/hooks/use-engine'
+import { useUpload } from '@/hooks/use-upload'
 import { FacePicker } from '../face-picker'
 import { Mixins } from './mixins'
 import { Loader2, ArrowUp, Plus, GripHorizontal, X, Square, RotateCcw } from 'lucide-react'
@@ -25,7 +26,6 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
     [prompt, setPrompt] = useState(''),
     [mixins, setMixins] = useState<MixinsType>({}),
     [reference, setReference] = useState<string>(''),
-    [uploading, setUploading] = useState(false),
     [userId, setUserId] = useState(''),
     /**
      * indicates prompt is modified after the first generation
@@ -71,6 +71,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
   // Data
   const { data: assets = [] } = useAssets()
   const { mutate: commit, isPending, error, reset: clearError } = useEngine()
+  const { upload, uploading } = useUpload()
 
   // Handlers
   const handleGenerate = () => {
@@ -113,34 +114,15 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
     return reference === '' && prompt === ''
   }, [reference, prompt])
 
-  const handleReferenceUpload = async (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleReferenceUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    setUploading(true)
-    try {
-      const supabase = createClient()
-      const ext = file.name.split('.').pop() || 'jpg'
-      const bytes = new Uint8Array(8)
-      crypto.getRandomValues(bytes)
-      const hex = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join(''),
-        filename = `${hex}.${ext}`,
-        path = `${userId}/${filename}`
-      const { error } = await supabase.storage
-        .from('uploads')
-        .upload(path, file, { contentType: file.type, upsert: false })
-      if (error) throw error
-      const { data: urlData } = supabase.storage
-        .from('uploads')
-        .getPublicUrl(path)
-      setReference(filename)
-    } catch (err) {
-      console.error('Reference upload failed:', err)
-    } finally {
-      setUploading(false)
-      if (fileInputRef.current) fileInputRef.current.value = ''
-    }
+    upload(file, {
+      onSuccess: ({ filename }) => setReference(filename),
+      onSettled: () => {
+        if (fileInputRef.current) fileInputRef.current.value = ''
+      },
+    })
   }
 
   const handleReferenceClear = () => {
