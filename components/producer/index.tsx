@@ -108,11 +108,9 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
   }
 
   /**
-   *
+   * Disable submit if both reference and prompt are empty.
    */
-  const couldNotSubmit = React.useMemo<boolean>(() => {
-    return reference === '' && prompt === ''
-  }, [reference, prompt])
+  const couldNotSubmit = reference === '' && prompt === ''
 
   const handleReferenceUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
