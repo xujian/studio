@@ -16,33 +16,33 @@ export const defaultAssets: Assets = {
     type: 'face',
     url: 'https://rhxlulctluazrpqzooya.supabase.co/storage/v1/object/public/assets/face/ju.jpg',
   },
-  makeup: {
-    type: 'makeup',
-    content: ''
-  },
-  hair: {
-    type: 'hair',
-    content: ''
-  },
+  // makeup: {
+  //   type: 'makeup',
+  //   content: ''
+  // },
+  // hair: {
+  //   type: 'hair',
+  //   content: ''
+  // },
   attire: {
     type: 'attire',
-    content: ''
+    content: 'casual shorts and a simple top'
   },
-  scene: {
-    type: 'scene',
-    content: ''
-  },
-  lighting: {
-    type: 'lighting',
-    content: ''
-  },
-  camera: {
-    type: 'camera',
-    content: ''
-  },
-  mood: {
-    type: 'mood',
-    content: ''
-  },
+  // scene: {
+  //   type: 'scene',
+  //   content: ''
+  // },
+  // lighting: {
+  //   type: 'lighting',
+  //   content: ''
+  // },
+  // camera: {
+  //   type: 'camera',
+  //   content: ''
+  // },
+  // mood: {
+  //   type: 'mood',
+  //   content: ''
+  // },
 }
 

@@ -1,12 +1,15 @@
-export const FACE = 'facial features are 100% identical to'
-export const MAKEUP = ''
-export const ATTIRE = ''
-export const POSE = ''
-export const SCENE = ''
-export const LIGHTING = ''
-export const CAMERA = ''
-export const MOOD = ''
 
+
+export const DEFAULTS = {
+  FACE: 'https://rhxlulctluazrpqzooya.supabase.co/storage/v1/object/public/assets/face/ju.jpg',
+  MAKEUP: '',
+  ATTIRE: '',
+  POSE: '',
+  SCENE: '',
+  LIGHTING: '',
+  CAMERA: '',
+  MOOD: ''
+}
 
 
 export const EXAMPLE = `{

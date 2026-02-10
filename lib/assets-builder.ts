@@ -1,6 +1,5 @@
 import { Part } from "@google/genai"
 import { Asset, Assets, AssetType } from "./types"
-import * as prompts from '@/lib/prompts'
 
 const AssetsBuilder = {
 
@@ -42,7 +41,7 @@ async function buildFace(asset: Asset) {
     image: {
       inlineData
     },
-    text: `${prompts.FACE} the "reference face"`
+    text: `facial features are 100% identical to the "reference face"`
   }
 }
 
@@ -53,7 +52,7 @@ async function buildMakeup(asset: Asset) {
       image: {
         inlineData
       },
-      text: `${prompts.MAKEUP} the "reference makeup"`
+      text: `use "reference makeup"`
     }
   } else {
     return Promise.resolve({
@@ -69,7 +68,7 @@ async function buildAttire(asset: Asset) {
       image: {
         inlineData
       },
-      text: `${prompts.ATTIRE} the "reference attire"`
+      text: `use the "reference attire"`
     }
   } else {
     return Promise.resolve({
@@ -85,7 +84,7 @@ async function buildScene(asset: Asset) {
       image: {
         inlineData
       },
-      text: `${prompts.SCENE} the "reference scene"`
+      text: `use "reference scene"`
     }
   } else {
     return Promise.resolve({
@@ -101,7 +100,7 @@ async function buildLighting(asset: Asset) {
       image: {
         inlineData
       },
-      text: `${prompts.LIGHTING} the "reference lighting"`
+      text: `use the "reference lighting"`
     }
   } else {
     return Promise.resolve({
@@ -117,7 +116,7 @@ async function buildMood(asset: Asset) {
       image: {
         inlineData
       },
-      text: `${prompts.MOOD} the "reference mood"`
+      text: `use the "reference mood"`
     }
   } else {
     return Promise.resolve({
@@ -133,7 +132,7 @@ async function buildCamera(asset: Asset) {
       image: {
         inlineData
       },
-      text: `${prompts.CAMERA} the "reference camera"`
+      text: `use the "reference camera"`
     }
   } else {
     return Promise.resolve({

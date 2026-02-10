@@ -46,6 +46,7 @@ export const engine = {
     const json: JsonPrompt = {},
       ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
     // 1. Analyze inputs into structured json
+    merge(json, defaultAssets)
     if (reference) {
       const imageAnalyzer = new ImageAnalyzer(),
         image = uploadUrl(userId, reference)
@@ -58,9 +59,9 @@ export const engine = {
       merge(json, result)
     }
     // 2. Build assets — ensure face is always present
-    if (!assets?.face) {
-      assets = { ...assets, face: defaultAssets.face }
-    }
+    // if (!assets?.face) {
+    //   assets = { ...assets, face: defaultAssets.face }
+    // }
     const { parts = [], sections = [] } = await AssetsBuilder.build(assets)
     sections.forEach(s => {
       json[s.key as AssetType] = s.content
