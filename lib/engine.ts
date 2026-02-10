@@ -7,6 +7,7 @@ import AssetsBuilder from './assets-builder'
 import { defaultAssets } from './constants'
 import { Assets, AssetType, JsonPrompt } from './types'
 import { uploadUrl } from './utils'
+import { SYSTEM_PROMPT } from './prompts'
 
 export interface GenerateParams {
   userId: string
@@ -79,6 +80,7 @@ export const engine = {
       model: 'gemini-3-pro-image-preview',
       contents,
       config: {
+        systemInstruction: SYSTEM_PROMPT,
         responseModalities: ['TEXT', 'IMAGE'],
         imageConfig: {
           aspectRatio: '9:16',
