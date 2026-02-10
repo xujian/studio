@@ -10,9 +10,6 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
   type CarouselApi
 } from '@/components/ui'
 import { Button } from '@/components/button'
@@ -22,7 +19,8 @@ import { cn, photoUrl, uploadUrl } from '@/lib/utils'
 import { useMixins } from '@/hooks/use-mixins'
 import { useDeleteMoment, useDeletePhoto } from '@/hooks/use-moments'
 import { useBus } from '@/lib/bus'
-import { GalleryHorizontal, Image as ImageIcon, Loader2, StepForward, Trash, X } from 'lucide-react'
+import { GalleryHorizontal, Image as ImageIcon, StepForward, Trash, X } from 'lucide-react'
+import { DeleteConfirm } from './delete-confirm'
 import { MomentInfo } from './moment-info'
 
 interface MomentViewProps {
@@ -279,72 +277,28 @@ export function MomentView({
               <div className="flex-1"></div>
               <div className="flex flex-0 items-center gap-2">
                 {hasMultiplePhotos && currentPhoto && (
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        size="sm"
-                        className="cursor-pointer"
-                        variant="destructive"
-                        disabled={deletePhoto.isPending}>
-                        {deletePhoto.isPending ? (
-                          <Loader2 className="animate-spin" />
-                        ) : (<>
-                            <Trash /><ImageIcon />
-                          </>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="z-101 flex w-auto min-w-80 items-center justify-between rounded-4xl bg-black p-3"
-                      side="top"
-                      align="start">
-                      <p className="text-sm">Delete this photo?</p>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        disabled={deletePhoto.isPending}
-                        onClick={() =>
-                          deletePhoto.mutate({
-                            userId: moment.user_id,
-                            momentId: moment.id,
-                            photoId: currentPhoto.id
-                          })
-                        }>
-                        {deletePhoto.isPending ? 'Deleting...' : 'Confirm'}
-                      </Button>
-                    </PopoverContent>
-                  </Popover>
+                  <DeleteConfirm
+                    icon={<><Trash /><ImageIcon /></>}
+                    message="Delete this photo?"
+                    isPending={deletePhoto.isPending}
+                    action={() =>
+                      deletePhoto.mutate({
+                        userId: moment.user_id,
+                        momentId: moment.id,
+                        photoId: currentPhoto.id
+                      })
+                    }
+                  />
                 )}
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      size="sm"
-                      className="delete-button cursor-pointer"
-                      variant="destructive"
-                      disabled={deleteMoment.isPending}>
-                      {deleteMoment.isPending
-                        ? (<Loader2 className="animate-spin" />)
-                        : (<><Trash /><GalleryHorizontal /></>)}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    className="z-101 flex w-auto min-w-100 items-center justify-between rounded-4xl bg-black p-3"
-                    side="top"
-                    align="start">
-                    <p className="mb text-sm">
-                      Delete this moment and all the photos?
-                    </p>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      disabled={deleteMoment.isPending}
-                      onClick={() =>
-                        deleteMoment.mutate(moment.id, { onSuccess: onClose })
-                      }>
-                      {deleteMoment.isPending ? 'Deleting...' : 'Confirm'}
-                    </Button>
-                  </PopoverContent>
-                </Popover>
+                <DeleteConfirm
+                  icon={<><Trash /><GalleryHorizontal /></>}
+                  message="Delete this moment and all the photos?"
+                  isPending={deleteMoment.isPending}
+                  className="delete-button"
+                  action={() =>
+                    deleteMoment.mutate(moment.id, { onSuccess: onClose })
+                  }
+                />
               </div>
             </div>
             {/**@container */}
