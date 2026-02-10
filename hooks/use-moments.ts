@@ -78,6 +78,23 @@ export const useDeletePhoto = () => {
   })
 }
 
+export const useUpdateMomentTitle = () => {
+  const queryClient = useQueryClient()
+  const supabase = createClient()
+  return useMutation({
+    mutationFn: async ({ id, title }: { id: string; title: string }) => {
+      const { error } = await supabase
+        .from('moments')
+        .update({ title })
+        .eq('id', id)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['moments'] })
+    }
+  })
+}
+
 export const useDeleteMoment = () => {
   const queryClient = useQueryClient()
   const supabase = createClient()
