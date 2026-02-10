@@ -5,7 +5,7 @@ export const engineRequestSchema = z.object({
   prompt: z
     .string()
     // .min(1, 'Prompt is required')
-    .max(5000, 'Prompt too long (max 5000 characters)'),
+    .max(10240, 'Prompt too long (max 10240 characters)'),
   mixins: z
     .object({
       face: z.string().uuid('Invalid moment ID').optional(),
