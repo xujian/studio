@@ -7,7 +7,7 @@ import AssetsBuilder from './assets-builder'
 import { defaultAssets } from './constants'
 import { Assets, AssetType, JsonPrompt } from './types'
 import { uploadUrl } from './utils'
-import { SYSTEM_PROMPT } from './prompts'
+import { SYSTEM_PROMPT, TITLE_PROMPT } from './prompts'
 
 export interface GenerateParams {
   userId: string
@@ -19,6 +19,7 @@ export interface GenerateParams {
 interface GenerateResult {
   image: string // base64 encoded image
   mime: string
+  title: string
 }
 
 export const engine = {
@@ -71,6 +72,8 @@ export const engine = {
         text: [
           'Generate a high-quality portrait photo with the following prompt:',
           JSON.stringify(json),
+          '',
+          `Before the image, respond with exactly one line: TITLE: <${TITLE_PROMPT}>`,
         ].join('\n')
       }
     ]
@@ -97,13 +100,17 @@ export const engine = {
  */
 function extractGenerationResult (response: any): GenerateResult {
   const parts = response.candidates?.[0]?.content?.parts || []
+  let image = '', mime = '', title = ''
   for (const part of parts) {
     if (part.inlineData) {
-      return {
-        image: part.inlineData.data,
-        mime: part.inlineData.mimeType || 'image/png'
-      }
+      image = part.inlineData.data
+      mime = part.inlineData.mimeType || 'image/png'
+    }
+    if (part.text) {
+      const match = part.text.match(/TITLE:\s*(.+)/i)
+      if (match) title = match[1].trim()
     }
   }
-  throw new Error('No image found in Gemini response')
+  if (!image) throw new Error('No image found in Gemini response')
+  return { image, mime, title }
 }

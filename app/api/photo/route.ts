@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
   }
   generateParams.assets = Object.fromEntries(assets.map(a => [a.type, a]))
   // 5. Call Engine to generate image
-  const { image, mime } = await engine.generate(generateParams)
+  const { image, mime, title } = await engine.generate(generateParams)
   // 6. Convert base64 to buffer for upload
   const imageBuffer = Buffer.from(image, 'base64')
   const photoId = crypto.randomUUID()
@@ -147,7 +147,14 @@ export async function POST(request: NextRequest) {
   if (photoError) {
     throw new Error(`Failed to insert photo: ${photoError.message}`)
   }
-  // 9. Fetch complete moment with photos
+  // 9. Save title to moment (only on create, retries keep original)
+  if (mode === 'create' && title) {
+    await supabase
+      .from('moments')
+      .update({ title })
+      .eq('id', momentId)
+  }
+  // 10. Fetch complete moment with photos
   const { data: completeMoment, error: fetchError } = await supabase
     .from('moments')
     .select(`

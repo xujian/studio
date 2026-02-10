@@ -22,7 +22,8 @@ import { cn, photoUrl, uploadUrl } from '@/lib/utils'
 import { useMixins } from '@/hooks/use-mixins'
 import { useDeleteMoment, useDeletePhoto } from '@/hooks/use-moments'
 import { useBus } from '@/lib/bus'
-import { GalleryHorizontal, Image as ImageIcon, Loader2, StepForward, Trash, X } from 'lucide-react'
+import { Clock, GalleryHorizontal, Image as ImageIcon, Loader2, StepForward, Trash, X } from 'lucide-react'
+import { MomentInfo } from './moment-info'
 
 interface MomentViewProps {
   moment: MomentWithPhotos
@@ -107,7 +108,9 @@ export function MomentView({
         />
         {/* Photo Container with Carousel */}
         <div className="relative z-10 flex h-full w-full justify-between">
-          <div className="flex-1"></div>
+          <div className="flex-1">
+            <MomentInfo {...moment} />
+          </div>
           <div className="aspect-9/16 flex-0 p-4">
             {hasMultiplePhotos ? (
               <Carousel

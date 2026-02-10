@@ -153,3 +153,9 @@ STYLE & QUALITY:
 * non-AI aesthetic.
 * 8k resolution
 `
+
+
+export const TITLE_PROMPT = `
+Generate a 2-10 word English title, make it like a lyric or inner monologue of the subject, 
+capturing the mood and essence of this portrait.
+`

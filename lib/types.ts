@@ -30,6 +30,7 @@ export type Moment = {
   id: string
   user_id: string
   prompt: string
+  title?: string
   reference?: string,
   mixins?: Mixins
   final_prompt?: string

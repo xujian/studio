@@ -16,6 +16,7 @@ CREATE TABLE moments (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid REFERENCES profiles(id) ON DELETE CASCADE,
   prompt text NOT NULL,
+  title text, -- AI-generated evocative title for the moment
   mixins jsonb, -- baseline mixins for this moment
   final_prompt text,
   seed bigint,
