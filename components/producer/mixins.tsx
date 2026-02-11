@@ -5,6 +5,7 @@ import type { AssetType, AssetValue, Mixins } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { useAssets } from '@/hooks/use-assets'
 import { Popover, PopoverTrigger, PopoverContent } from '../ui'
+import { Peekable } from '@/components/peekable'
 import { MoreHorizontalIcon, XIcon } from 'lucide-react'
 
 export type MixinsProps = {
@@ -14,8 +15,7 @@ export type MixinsProps = {
 
 export function Mixins({ value = {}, onChange }: MixinsProps) {
   const { data: assets = [], isLoading } = useAssets()
-  const [openPopover, setOpenPopover] = React.useState<AssetType | null>(null),
-    [selected, setSelected] = React.useState<Mixins>(value) 
+  const [openPopover, setOpenPopover] = React.useState<AssetType | null>(null)
 
   // Group assets by type
   const assetsByType = React.useMemo(() => {
@@ -29,10 +29,6 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
     return grouped
   }, [assets])
 
-  React.useEffect(() => {
-    setSelected(value)
-  }, [value])
-
   const handleTogglePopover = (type: AssetType) => {
     setOpenPopover(prev => (prev === type ? null : type))
   }
@@ -42,17 +38,12 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
   }
 
   const handleSelect = (type: AssetType, assetId: string) => {
-    const v = {
-      ...selected,
-    }
+    const v = { ...value }
     if (v[type] === assetId) {
-      // Deselect if clicking the same asset
       delete v[type]
     } else {
-      // Select new asset
       v[type] = assetId
     }
-    setSelected(v)
     onChange?.(v)
     setOpenPopover(null)
   }
@@ -70,9 +61,9 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
         .filter(t => t.type !== 'face')
         .map(assetType => {
           const typeAssets = assetsByType[assetType.type] || []
-          const isSelected = selected.hasOwnProperty(assetType.type)
+          const isSelected = assetType.type in value
           const selectedAsset = isSelected
-            ? assets.find(a => a.id === selected[assetType.type])
+            ? assets.find(a => a.id === value[assetType.type])
             : null
           return (
             <Popover key={assetType.type} modal={false}>
@@ -92,7 +83,7 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
                 side="top"
                 sideOffset={0}
                 className="draw-up rounded-top glass w-48 overflow-hidden border-border p-2">
-                <div className="flex max-h-60 flex-col items-start justify-start gap-1 overflow-y-auto">
+                <div className="flex max-h-60 flex-col items-start justify-start gap-2 overflow-y-auto">
                   {isLoading ? (
                     <div className="p-2 text-xs text-muted-foreground">
                       Loading...
@@ -103,17 +94,24 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
                     </div>
                   ) : (
                     typeAssets.map(asset => (
-                      <Toggle
-                        key={asset.id}
-                        variant="outline"
-                        size="sm"
-                        className="mixin w-full justify-start data-[state=on]:bg-accent"
-                        pressed={selected[assetType.type] === asset.id}
-                        onPressedChange={() =>
-                          handleSelect(assetType.type, asset.id!)
-                        }>
-                        <span className="truncate">{asset.name}</span>
-                      </Toggle>
+                      <Peekable key={asset.id}
+                        content={asset.url || asset.content}
+                        title={asset.title}
+                        description={asset.description}
+                        side="right">
+                        <div>{/** to tix the toggle's pressed state */}
+                          <Toggle
+                            variant="outline"
+                            size="sm"
+                            className="mixin justify-start"
+                            pressed={value[assetType.type] === asset.id}
+                            onPressedChange={() =>
+                              handleSelect(assetType.type, asset.id!)
+                            }>
+                            <span className="truncate">{asset.name}</span>
+                          </Toggle>
+                        </div>
+                      </Peekable>
                     ))
                   )}
                 </div>

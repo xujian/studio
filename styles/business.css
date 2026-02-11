@@ -34,7 +34,9 @@
   @apply cursor-pointer rounded-full size-8 hover:bg-accent;
 }
 .mixin {
-  @apply bg-neutral-700 text-xs h-6 rounded-full px-2 hover:bg-amber-400 data-[state=on]:bg-amber-400 cursor-pointer;
+  @apply bg-neutral-700 text-xs h-6 rounded-full px-2 
+    hover:bg-amber-400/50 data-[state=on]:bg-amber-400/50 data-[state=on]:border-amber-400
+    cursor-pointer;
 }
 
 @keyframes draw-left {
