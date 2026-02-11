@@ -38,7 +38,7 @@ export function Peekable({
     if (typeof content !== 'string') return content
     if (isImageUrl(content)) {
       return (
-        <div className="peekable-preview flex flex-col rounded overflow-hidden">
+        <div className="peekable-preview flex flex-col rounded bg-black overflow-hidden">
           <Image
             src={content}
             alt="Preview"
@@ -47,15 +47,17 @@ export function Peekable({
             className="rounded max-w-80 max-h-80"
             unoptimized
           />
-          {title && <h4 className="truncate p-2 text-xs">{title}</h4>}
+          {title && <h4 className="truncate p-2 text-sm font-bold text-white">{title}</h4>}
           {description && <p className="truncate p-2 text-xs">{description}</p>}
         </div>
       )
     }
-    return (<div className="p-4 max-h-100">
-      {title && <h4 className="truncate p-2 text-xs">{title}</h4>}
-      <p className="text-sm">{content}</p>
-    </div>)
+    return (
+      <div className="p-4 bg-black text-neutral-100">
+        {title && <h4 className="truncate mb-2 text-[12px] font-bold leading-4">{title}</h4>}
+        <p className="text-xs text-neutral-500 max-h-40 overflow-hidden">{content}</p>
+      </div>
+    )
   }, [content])
 
   return (
@@ -66,7 +68,7 @@ export function Peekable({
         align={align}
         sideOffset={0}
         className={cn(
-          'max-w-xs rounded-lg border bg-popover p-0 text-popover-foreground shadow-lg',
+          'max-w-xs rounded overflow-hidden border p-0 bg-black shadow-lg',
           className,
         )}>
         {preview}
