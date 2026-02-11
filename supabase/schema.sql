@@ -29,6 +29,7 @@ CREATE TABLE assets (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid REFERENCES profiles(id) ON DELETE CASCADE, -- NULL = official Kanojo Studio asset
   name text NOT NULL,
+  title text,
   description text,
   type text NOT NULL, -- face, reference, attire, scene, etc.
   url text, -- if image-based asset

@@ -64,9 +64,10 @@ export type MomentWithPhotos = Moment & {
  */
 export type Asset = {
   id?: string
-  user_id?: string | null // NULL = official Kanojo Studio asset
+  user_id?: string // NULL = official Kanojo Studio asset
   name?: string
-  description?: string | null
+  title?: string
+  description?: string
   type: AssetType // face, reference, attire, scene, etc.
   url?: string | null // if image-based asset
   content?: string | null // if text-based asset

@@ -11,6 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui'
+import { Peekable } from '@/components/peekable'
 import { Asset } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { X } from 'lucide-react'
@@ -63,24 +64,27 @@ export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
           ) : (
             <div className="grid grid-cols-2 gap-2">
               {faces.map(face => (
-                <Button
-                  key={face.id}
-                  variant="outline"
-                  onClick={() => onSelect?.(face.id)}
-                  className={cn(
-                    'face rounded w-16 h-16 p-0 text-xs transition glow cursor-pointer',
-                    selected === face.id ? 'on' : ''
-                  )}
-                  title={face.name}>
-                  {face.url ? (
-                    <img
-                      src={face.url}
-                      alt={face.name}
-                    />
-                  ) : (
-                    face.name
-                  )}
-                </Button>
+                <Peekable key={face.id}
+                  content={face.url || face.name}
+                  title={face.title}
+                  description={face.description}>
+                  <Button
+                    variant="outline"
+                    onClick={() => onSelect?.(face.id!)}
+                    className={cn(
+                      'face rounded w-16 h-16 p-0 text-xs transition glow cursor-pointer',
+                      selected === face.id ? 'on' : ''
+                    )}>
+                    {face.url ? (
+                      <img
+                        src={face.url}
+                        alt={face.name}
+                      />
+                    ) : (
+                      face.name
+                    )}
+                  </Button>
+                </Peekable>
               ))}
             </div>
           )}

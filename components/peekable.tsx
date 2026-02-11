@@ -1,0 +1,76 @@
+'use client'
+
+import * as React from 'react'
+import Image from 'next/image'
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from '@/components/ui'
+import { cn } from '@/lib/utils'
+
+const IMAGE_EXT_RE = /\.(jpg|jpeg|png|gif|webp|svg|avif|bmp)(\?.*)?$/i
+
+function isImageUrl(value: string): boolean {
+  return IMAGE_EXT_RE.test(value)
+}
+
+interface PeekableProps {
+  children: React.ReactNode
+  content: React.ReactNode
+  title?: string
+  description?: string,
+  side?: 'top' | 'right' | 'bottom' | 'left'
+  align?: 'start' | 'center' | 'end'
+  className?: string
+}
+
+export function Peekable({
+  children,
+  content,
+  title,
+  description,
+  side = 'top',
+  align = 'start',
+  className,
+}: PeekableProps) {
+  const preview = React.useMemo(() => {
+    if (typeof content !== 'string') return content
+    if (isImageUrl(content)) {
+      return (
+        <div className="peekable-preview flex flex-col rounded overflow-hidden">
+          <Image
+            src={content}
+            alt="Preview"
+            width={200}
+            height={200}
+            className="rounded max-w-80 max-h-80"
+            unoptimized
+          />
+          {title && <h4 className="truncate p-2 text-xs">{title}</h4>}
+          {description && <p className="truncate p-2 text-xs">{description}</p>}
+        </div>
+      )
+    }
+    return (<div className="p-4 max-h-100">
+      {title && <h4 className="truncate p-2 text-xs">{title}</h4>}
+      <p className="text-sm">{content}</p>
+    </div>)
+  }, [content])
+
+  return (
+    <Tooltip delayDuration={800}>
+      <TooltipTrigger asChild>{children}</TooltipTrigger>
+      <TooltipContent
+        side={side}
+        align={align}
+        sideOffset={0}
+        className={cn(
+          'max-w-xs rounded-lg border bg-popover p-0 text-popover-foreground shadow-lg',
+          className,
+        )}>
+        {preview}
+      </TooltipContent>
+    </Tooltip>
+  )
+}
