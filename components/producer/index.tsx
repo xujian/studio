@@ -233,14 +233,16 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
           <div className="flex items-center gap-2">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Toggle
-                  pressed={expanded}
-                  type="button"
-                  variant="outline"
-                  className="button"
-                  onClick={toggleExpanded}>
-                  <GripHorizontal />
-                </Toggle>
+                <div>{/** to fix the toggle's state=closed problem */}
+                  <Toggle
+                    pressed={expanded}
+                    type="button"
+                    variant="outline"
+                    className="button data-[state=on]:bg-primary! data-[state=on]:text-primary-foreground"
+                    onClick={toggleExpanded}>
+                    <GripHorizontal />
+                  </Toggle>
+                </div>
               </TooltipTrigger>
               <TooltipContent align='center' side="top" sideOffset={10}>
                 mixins
