@@ -4,6 +4,13 @@ import Image from 'next/image'
 import { Peekable } from '@/components/peekable'
 import { Button } from '@/components/ui'
 import { Badge } from '@/components/ui/badge'
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import type { AssetWithPurchaseInfo } from '@/lib/types'
 import { assetUrl, cn } from '@/lib/utils'
 import { usePurchase } from '@/hooks/use-purchase'
@@ -25,13 +32,12 @@ export function StoreCard({ asset }: StoreCardProps) {
   }
 
   const card = (
-    <div
-      className={cn(
-        'group hover:elevation-2 relative flex flex-col overflow-hidden rounded-lg border bg-card transition-all',
-        isOwned && 'border-primary/30'
-      )}>
-      {/* Preview area */}
-      <div className="relative aspect-square w-full overflow-hidden bg-black">
+    <Card className={cn(
+      'group hover:elevation-2 gap-0 overflow-hidden p-0 transition-all',
+      isOwned && 'border-primary/30'
+    )}>
+      {/* Preview with price tag overlay */}
+      <CardContent className="relative aspect-square w-full overflow-hidden bg-black p-0">
         {hasImage ? (
           <Image
             src={assetUrl(asset.path!)}
@@ -49,41 +55,38 @@ export function StoreCard({ asset }: StoreCardProps) {
           </div>
         )}
 
-        {/* Owned badge */}
-        {isOwned && (
-          <div className="absolute top-2 right-2">
+        {/* Top-right corner tag */}
+        <div className="absolute top-2 right-2">
+          {isOwned ? (
             <Badge variant="default" className="gap-1 bg-primary/90 text-xs">
               <Check className="size-3" />
               Owned
             </Badge>
-          </div>
-        )}
-      </div>
+          ) : asset.price != null ? (
+            <Badge
+              variant="secondary"
+              className="cursor-pointer gap-1 text-xs"
+              onClick={handleBuy}>
+              {purchase.isPending
+                ? '...' 
+                : `${asset.price} CREDIT`
+              }
+            </Badge>
+          ) : null}
+        </div>
+      </CardContent>
 
-      {/* Info */}
-      <div className="flex flex-col gap-1 p-2">
-        <p className="truncate text-sm font-medium">
+      <CardFooter className="p-2">
+        <CardTitle className="truncate text-sm">
           {asset.title || asset.name}
-        </p>
-
-        {/* Price / Buy */}
-        {!isOwned && asset.price != null && (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleBuy}
-            disabled={purchase.isPending}
-            className="mt-1 w-full cursor-pointer gap-1 text-xs">
-            <Coins className="size-3" />
-            {purchase.isPending ? '...' : `${asset.price} credits`}
-          </Button>
-        )}
-      </div>
-    </div>
+        </CardTitle>
+      </CardFooter>
+    </Card>
   )
 
   return (
     <Peekable
+      size="xl"
       content={asset.path
         ? assetUrl(asset.path)
         : asset.content || asset.name || ''}

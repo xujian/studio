@@ -142,3 +142,5 @@ export type AssetWithPurchaseInfo = Asset & {
 }
 
 export type JsonPrompt = Partial<Record<AssetType, string | Record<string, string>>>
+
+export type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
