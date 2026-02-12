@@ -134,7 +134,19 @@ The Producer is the main creation interface where users combine inputs to genera
 - **Favorites**: Star and organize best results
 
 ### 3. Store
-- Users can buy official assets (faces, outfits, poses, scenes) from Kanojo Studio
+
+**Asset visibility rules:**
+
+| Condition | Category | Behavior |
+|-----------|----------|----------|
+| `is_public = true AND price IS NULL` | Official asset | Free for all users. Available in Studio without purchasing. Never shown in Store. |
+| `price IS NOT NULL` (even `price = 0`) | Store asset | Listed in the Store. Must be purchased (even if free) to add to user's library. |
+| `is_public = false AND price IS NULL` | Personal asset | Private to the owner. Created by user uploads. Not visible to others. |
+
+**Key rules:**
+- The Store only lists assets where `price IS NOT NULL`
+- Official free assets (`is_public = true, price IS NULL`) are automatically available to everyone — no purchase required, no Store listing
+- A `price = 0` asset is still a Store item — users must "purchase" (claim) it to add it to their library
 - Purchased assets are added to user's library for use in generations
 - Transactions tracked via purchases and credit history
 
@@ -185,10 +197,10 @@ assets (
   name text,
   description text,
   type text, -- face, reference, outfit, scene, etc.
-  url text,  -- if image-based asset
+  path text,  -- if image-based asset (relative path in assets storage bucket)
   content text,  -- if text-based asset (e.g., "red dress description")
-  is_public boolean default false,  -- true = visible in store
-  price integer,  -- credits cost (NULL = personal asset, not for sale)
+  is_public boolean default false,  -- true = official free asset (available to all, not in store)
+  price integer,  -- NOT NULL = listed in store (even 0). NULL = not for sale.
   created_at timestamptz
 )
 

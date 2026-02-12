@@ -382,6 +382,7 @@ AS $$
   LEFT JOIN public.purchases p ON p.asset_id = a.id AND p.buyer_id = user_uuid
   WHERE a.user_id = user_uuid
      OR p.id IS NOT NULL
+     OR (a.is_public = true AND a.price IS NULL)  -- official free assets
   ORDER BY a.created_at DESC;
 $$;
 
@@ -414,7 +415,7 @@ AS $$
       WHERE p.asset_id = a.id AND p.buyer_id = user_uuid
     ) AS is_purchased
   FROM public.assets a
-  WHERE a.is_public = true
+  WHERE a.price IS NOT NULL
   ORDER BY a.type, a.created_at DESC;
 $$;
 
