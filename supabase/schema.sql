@@ -385,6 +385,82 @@ AS $$
   ORDER BY a.created_at DESC;
 $$;
 
+-- Function to get all public store assets with purchase status for a user
+CREATE OR REPLACE FUNCTION get_store_assets(user_uuid uuid)
+RETURNS TABLE (
+  id uuid,
+  user_id uuid,
+  name text,
+  title text,
+  description text,
+  type text,
+  url text,
+  content text,
+  is_public boolean,
+  price integer,
+  created_at timestamptz,
+  is_purchased boolean
+)
+LANGUAGE SQL
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  SELECT
+    a.id, a.user_id, a.name, a.title, a.description,
+    a.type, a.url, a.content, a.is_public, a.price, a.created_at,
+    EXISTS (
+      SELECT 1 FROM public.purchases p
+      WHERE p.asset_id = a.id AND p.buyer_id = user_uuid
+    ) AS is_purchased
+  FROM public.assets a
+  WHERE a.is_public = true
+  ORDER BY a.type, a.created_at DESC;
+$$;
+
+-- Function to purchase an asset atomically
+-- Validates credits, inserts purchase (triggers credit deduction via existing trigger)
+CREATE OR REPLACE FUNCTION purchase_asset(asset_uuid uuid)
+RETURNS json
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  v_user_id uuid := auth.uid();
+  v_asset public.assets;
+  v_credits integer;
+BEGIN
+  -- Get the asset
+  SELECT * INTO v_asset FROM public.assets WHERE id = asset_uuid;
+  IF NOT FOUND THEN
+    RETURN json_build_object('success', false, 'error', 'Asset not found');
+  END IF;
+
+  -- Must be a public asset with a price
+  IF v_asset.is_public IS NOT TRUE OR v_asset.price IS NULL THEN
+    RETURN json_build_object('success', false, 'error', 'Asset is not for sale');
+  END IF;
+
+  -- Check if already purchased
+  IF EXISTS (SELECT 1 FROM public.purchases WHERE buyer_id = v_user_id AND asset_id = asset_uuid) THEN
+    RETURN json_build_object('success', false, 'error', 'Already purchased');
+  END IF;
+
+  -- Check credits
+  SELECT credits INTO v_credits FROM public.profiles WHERE id = v_user_id;
+  IF v_credits < v_asset.price THEN
+    RETURN json_build_object('success', false, 'error', 'Insufficient credits');
+  END IF;
+
+  -- Insert purchase (existing trigger handles credit deduction + transaction logging)
+  INSERT INTO public.purchases (buyer_id, asset_id, price)
+  VALUES (v_user_id, asset_uuid, v_asset.price);
+
+  RETURN json_build_object('success', true, 'remaining_credits', v_credits - v_asset.price);
+END;
+$$;
+
 -- =============================================
 -- Storage Policies
 -- =============================================
