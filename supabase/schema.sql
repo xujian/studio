@@ -32,7 +32,7 @@ CREATE TABLE assets (
   title text,
   description text,
   type text NOT NULL, -- face, reference, outfit, scene, etc.
-  url text, -- if image-based asset
+  path text, -- if image-based asset (relative path in assets bucket)
   content text, -- if text-based asset
   is_public boolean DEFAULT false, -- true = visible in store
   price integer, -- credits cost (NULL = personal asset, not for sale)
@@ -394,7 +394,7 @@ RETURNS TABLE (
   title text,
   description text,
   type text,
-  url text,
+  path text,
   content text,
   is_public boolean,
   price integer,
@@ -408,7 +408,7 @@ SET search_path = ''
 AS $$
   SELECT
     a.id, a.user_id, a.name, a.title, a.description,
-    a.type, a.url, a.content, a.is_public, a.price, a.created_at,
+    a.type, a.path, a.content, a.is_public, a.price, a.created_at,
     EXISTS (
       SELECT 1 FROM public.purchases p
       WHERE p.asset_id = a.id AND p.buyer_id = user_uuid

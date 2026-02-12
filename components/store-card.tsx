@@ -1,13 +1,13 @@
 'use client'
 
 import Image from 'next/image'
-import { Check, Coins } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui'
 import { Peekable } from '@/components/peekable'
-import { usePurchase } from '@/hooks/use-purchase'
+import { Button } from '@/components/ui'
+import { Badge } from '@/components/ui/badge'
 import type { AssetWithPurchaseInfo } from '@/lib/types'
-import { cn } from '@/lib/utils'
+import { assetUrl, cn } from '@/lib/utils'
+import { usePurchase } from '@/hooks/use-purchase'
+import { Check, Coins } from 'lucide-react'
 
 interface StoreCardProps {
   asset: AssetWithPurchaseInfo
@@ -16,7 +16,7 @@ interface StoreCardProps {
 export function StoreCard({ asset }: StoreCardProps) {
   const purchase = usePurchase()
   const isOwned = asset.is_purchased
-  const hasImage = !!asset.url
+  const hasImage = !!asset.path
 
   const handleBuy = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -25,15 +25,16 @@ export function StoreCard({ asset }: StoreCardProps) {
   }
 
   const card = (
-    <div className={cn(
-      'group relative flex flex-col overflow-hidden rounded-lg border bg-card transition-all hover:elevation-2',
-      isOwned && 'border-primary/30'
-    )}>
+    <div
+      className={cn(
+        'group hover:elevation-2 relative flex flex-col overflow-hidden rounded-lg border bg-card transition-all',
+        isOwned && 'border-primary/30'
+      )}>
       {/* Preview area */}
-      <div className="relative aspect-[9/16] w-full overflow-hidden bg-black">
+      <div className="relative aspect-square w-full overflow-hidden bg-black">
         {hasImage ? (
           <Image
-            src={asset.url!}
+            src={assetUrl(asset.path!)}
             alt={asset.name || 'Asset'}
             fill
             className="object-cover"
@@ -61,7 +62,9 @@ export function StoreCard({ asset }: StoreCardProps) {
 
       {/* Info */}
       <div className="flex flex-col gap-1 p-2">
-        <p className="truncate text-sm font-medium">{asset.title || asset.name}</p>
+        <p className="truncate text-sm font-medium">
+          {asset.title || asset.name}
+        </p>
 
         {/* Price / Buy */}
         {!isOwned && asset.price != null && (
@@ -70,8 +73,7 @@ export function StoreCard({ asset }: StoreCardProps) {
             variant="outline"
             onClick={handleBuy}
             disabled={purchase.isPending}
-            className="mt-1 w-full gap-1 text-xs cursor-pointer"
-          >
+            className="mt-1 w-full cursor-pointer gap-1 text-xs">
             <Coins className="size-3" />
             {purchase.isPending ? '...' : `${asset.price} credits`}
           </Button>
@@ -82,10 +84,11 @@ export function StoreCard({ asset }: StoreCardProps) {
 
   return (
     <Peekable
-      content={asset.url || asset.content || asset.name || ''}
+      content={asset.path
+        ? assetUrl(asset.path)
+        : asset.content || asset.name || ''}
       title={asset.title || asset.name}
-      description={asset.description}
-    >
+      description={asset.description}>
       {card}
     </Peekable>
   )

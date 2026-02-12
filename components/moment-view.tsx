@@ -199,7 +199,7 @@ export function MomentView({
                     alt="face"
                     src={
                       merged?.face
-                        ? assetsMap?.get(merged.face)?.url || '/face.png'
+                        ? assetsMap?.get(merged.face)?.path || '/face.png'
                         : '/face.png'
                     }
                     className="h-full w-full object-cover"
@@ -230,10 +230,10 @@ export function MomentView({
                         <Badge className="absolute top-1 left-1 z-10 bg-white/50">
                           {displayName}
                         </Badge>
-                        {asset?.url ? (
+                        {asset?.path ? (
                           <img
                             alt={asset.name || displayName}
-                            src={asset.url}
+                            src={asset.path}
                             className="h-full w-full object-cover"
                           />
                         ) : (

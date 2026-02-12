@@ -14,7 +14,7 @@ export const assetTypes = [
 export const defaultAssets: Assets = {
   face: {
     type: 'face',
-    url: 'https://rhxlulctluazrpqzooya.supabase.co/storage/v1/object/public/assets/face/ju.jpg',
+    path: 'face/ju.jpg',
   },
   // makeup: {
   //   type: 'makeup',

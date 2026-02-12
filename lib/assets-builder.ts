@@ -36,7 +36,7 @@ const AssetsBuilder = {
 }
 
 async function buildFace(asset: Asset) {
-  const inlineData = await fetchImage(asset.url!)
+  const inlineData = await fetchImage(asset.path!)
   return {
     image: {
       inlineData
@@ -46,8 +46,8 @@ async function buildFace(asset: Asset) {
 }
 
 async function buildMakeup(asset: Asset) {
-  if (asset.url) {
-    const inlineData = await fetchImage(asset.url)
+  if (asset.path) {
+    const inlineData = await fetchImage(asset.path)
     return {
       image: {
         inlineData
@@ -62,8 +62,8 @@ async function buildMakeup(asset: Asset) {
 }
 
 async function buildOutfit(asset: Asset) {
-  if (asset.url) {
-    const inlineData = await fetchImage(asset.url)
+  if (asset.path) {
+    const inlineData = await fetchImage(asset.path)
     return {
       image: {
         inlineData
@@ -78,8 +78,8 @@ async function buildOutfit(asset: Asset) {
 }
 
 async function buildScene(asset: Asset) {
-  if (asset.url) {
-    const inlineData = await fetchImage(asset.url)
+  if (asset.path) {
+    const inlineData = await fetchImage(asset.path)
     return {
       image: {
         inlineData
@@ -94,8 +94,8 @@ async function buildScene(asset: Asset) {
 }
 
 async function buildLighting(asset: Asset) {
-  if (asset.url) {
-    const inlineData = await fetchImage(asset.url)
+  if (asset.path) {
+    const inlineData = await fetchImage(asset.path)
     return {
       image: {
         inlineData
@@ -110,8 +110,8 @@ async function buildLighting(asset: Asset) {
 }
 
 async function buildMood(asset: Asset) {
-  if (asset.url) {
-    const inlineData = await fetchImage(asset.url)
+  if (asset.path) {
+    const inlineData = await fetchImage(asset.path)
     return {
       image: {
         inlineData
@@ -126,8 +126,8 @@ async function buildMood(asset: Asset) {
 }
 
 async function buildCamera(asset: Asset) {
-  if (asset.url) {
-    const inlineData = await fetchImage(asset.url)
+  if (asset.path) {
+    const inlineData = await fetchImage(asset.path)
     return {
       image: {
         inlineData

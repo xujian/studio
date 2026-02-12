@@ -13,7 +13,7 @@ import {
 } from '@/components/ui'
 import { Peekable } from '@/components/peekable'
 import { Asset } from '@/lib/types'
-import { cn } from '@/lib/utils'
+import { assetUrl, cn } from '@/lib/utils'
 import { X } from 'lucide-react'
 
 export type FacePickerProps = {
@@ -41,7 +41,7 @@ export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
                   className={cn('p-0 m-0 w-12 h-12 bg-black rounded cursor-pointer')}
                   style={{
                     backgroundImage: selected
-                      ? `url(${selectedFace?.url})`
+                      ? `url(${selectedFace?.path})`
                       : `url(${systemFace})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center top'
@@ -65,7 +65,7 @@ export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
             <div className="grid grid-cols-2 gap-2">
               {faces.map(face => (
                 <Peekable key={face.id}
-                  content={face.url || face.name}
+                  content={assetUrl(face.path!)}
                   title={face.title}
                   description={face.description}>
                   <Button
@@ -75,9 +75,9 @@ export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
                       'face rounded w-16 h-16 p-0 text-xs transition glow cursor-pointer',
                       selected === face.id ? 'on' : ''
                     )}>
-                    {face.url ? (
+                    {face.path ? (
                       <img
-                        src={face.url}
+                        src={assetUrl(face.path!)}
                         alt={face.name}
                       />
                     ) : (

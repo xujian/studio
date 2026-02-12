@@ -95,7 +95,7 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
                   ) : (
                     typeAssets.map(asset => (
                       <Peekable key={asset.id}
-                        content={asset.url || asset.content}
+                        content={asset.path || asset.content}
                         title={asset.title}
                         description={asset.description}
                         side="right">
