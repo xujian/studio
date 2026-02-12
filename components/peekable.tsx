@@ -8,6 +8,7 @@ import {
   TooltipContent,
 } from '@/components/ui'
 import { cn } from '@/lib/utils'
+import { Size } from '@/lib/types'
 
 const IMAGE_EXT_RE = /\.(jpg|jpeg|png|gif|webp|svg|avif|bmp)(\?.*)?$/i
 
@@ -19,16 +20,26 @@ interface PeekableProps {
   children: React.ReactNode
   content: React.ReactNode
   title?: string
-  description?: string,
+  description?: string
+  size?: Size
   side?: 'top' | 'right' | 'bottom' | 'left'
   align?: 'start' | 'center' | 'end'
   className?: string
+}
+
+const sizes = {
+  xs: 'max-w-24 max-h-24',
+  sm: 'max-w-32 max-h-32',
+  md: 'max-w-80 max-h-80',
+  lg: 'max-w-100 max-h-100',
+  xl: 'max-w-150 max-h-150',
 }
 
 export function Peekable({
   children,
   content,
   title,
+  size="md",
   description,
   side = 'top',
   align = 'start',
@@ -44,7 +55,7 @@ export function Peekable({
             alt="Preview"
             width={200}
             height={200}
-            className="rounded max-w-80 max-h-80"
+            className={cn('rounded w-full h-full', sizes[size])}
             unoptimized
           />
           {title && <h4 className="truncate p-2 text-sm font-bold text-white">{title}</h4>}

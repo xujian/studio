@@ -1,5 +1,6 @@
 import { Part } from "@google/genai"
 import { Asset, Assets, AssetType } from "./types"
+import { assetUrl } from "./utils"
 
 const AssetsBuilder = {
 
@@ -160,7 +161,7 @@ async function fetchImage(url: string): Promise<{
   mimeType: string
   data: string
 }> {
-  const image = await fetch(url)
+  const image = await fetch(assetUrl(url))
   if (!image.ok) {
     throw new Error(`Failed to fetch face image: ${image.statusText}`)
   }

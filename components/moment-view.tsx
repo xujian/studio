@@ -15,7 +15,7 @@ import {
 import { Button } from '@/components/button'
 import { assetTypes } from '@/lib/constants'
 import type { MomentWithPhotos } from '@/lib/types'
-import { cn, photoUrl, uploadUrl } from '@/lib/utils'
+import { assetUrl, cn, photoUrl, uploadUrl } from '@/lib/utils'
 import { useMixins } from '@/hooks/use-mixins'
 import { useDeleteMoment, useDeletePhoto } from '@/hooks/use-moments'
 import { useBus } from '@/lib/bus'
@@ -199,7 +199,7 @@ export function MomentView({
                     alt="face"
                     src={
                       merged?.face
-                        ? assetsMap?.get(merged.face)?.path || '/face.png'
+                        ? assetUrl(assetsMap?.get(merged.face)?.path!) || '/face.png'
                         : '/face.png'
                     }
                     className="h-full w-full object-cover"

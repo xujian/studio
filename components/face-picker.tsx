@@ -41,7 +41,7 @@ export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
                   className={cn('p-0 m-0 w-12 h-12 bg-black rounded cursor-pointer')}
                   style={{
                     backgroundImage: selected
-                      ? `url(${selectedFace?.path})`
+                      ? `url(${assetUrl(selectedFace?.path!)})`
                       : `url(${systemFace})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center top'
