@@ -31,7 +31,7 @@ CREATE TABLE assets (
   name text NOT NULL,
   title text,
   description text,
-  type text NOT NULL, -- face, reference, attire, scene, etc.
+  type text NOT NULL, -- face, reference, outfit, scene, etc.
   url text, -- if image-based asset
   content text, -- if text-based asset
   is_public boolean DEFAULT false, -- true = visible in store

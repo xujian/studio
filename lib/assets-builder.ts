@@ -61,14 +61,14 @@ async function buildMakeup(asset: Asset) {
   }
 }
 
-async function buildAttire(asset: Asset) {
+async function buildOutfit(asset: Asset) {
   if (asset.url) {
     const inlineData = await fetchImage(asset.url)
     return {
       image: {
         inlineData
       },
-      text: `use the "reference attire"`
+      text: `use the "reference outfit"`
     }
   } else {
     return Promise.resolve({
@@ -150,7 +150,7 @@ const assetMethods = new Map<
 >()
 assetMethods.set('face', buildFace)
 assetMethods.set('makeup', buildMakeup)
-assetMethods.set('attire', buildAttire)
+assetMethods.set('outfit', buildOutfit)
 assetMethods.set('scene', buildScene)
 assetMethods.set('lighting', buildLighting)
 assetMethods.set('camera', buildCamera)

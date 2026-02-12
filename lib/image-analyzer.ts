@@ -97,7 +97,7 @@ export class ImageAnalyzer {
     // Validate basic structure
     const requiredSections = [
       'subject',
-      'attire',
+      'outfit',
       'pose',
       'scene',
       'makeup',

@@ -4,7 +4,7 @@ export const assetTypes = [
   { name: 'Face', type: 'face' },
   { name: 'Makeup', type: 'makeup' },
   { name: 'Hair', type: 'hair' },
-  { name: 'Attire', type: 'attire' },
+  { name: 'Outfit', type: 'outfit' },
   { name: 'Scene', type: 'scene' },
   { name: 'Lighting', type: 'lighting' },
   { name: 'Camera', type: 'camera' },
@@ -24,8 +24,8 @@ export const defaultAssets: Assets = {
   //   type: 'hair',
   //   content: ''
   // },
-  attire: {
-    type: 'attire',
+  outfit: {
+    type: 'outfit',
     content: 'casual shorts and a simple top'
   },
   // scene: {

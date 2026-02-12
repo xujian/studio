@@ -5,7 +5,7 @@
 ---
 
 ## Key Idea
-To write long prompt is hard. This app let users to pick predefined settings of **face**, **pose**, **scene**, **attire**, use text descriptions or just images, input these settings into a prompt generation engine, and then use the prompt generated to produce a photo.
+To write long prompt is hard. This app let users to pick predefined settings of **face**, **pose**, **scene**, **outfit**, use text descriptions or just images, input these settings into a prompt generation engine, and then use the prompt generated to produce a photo.
 
 ## Narrow down the scope
 1. Only generate realistic photos for female, no man, no pets, no anime
@@ -16,13 +16,13 @@ To write long prompt is hard. This app let users to pick predefined settings of 
 ## Key Screens
 1. **Landing page/Login page**
 2. **Studio**: Main creation interface with Producer and moments
-3. **Store**: Official store to buy Kanojo Studio assets (faces, attires, poses, scenes)
+3. **Store**: Official store to buy Kanojo Studio assets (faces, outfits, poses, scenes)
 4. **Community**: Share and view generated images from users
 ---
 
 ## Key data models
 1. **Moment**: A generation session containing the original prompt, mixins (JSONB mapping asset types to asset IDs), and resulting photos. Can be shared to community.
-2. **Asset**: Reusable resources stored in user's library or marketplace. Can be faces, reference photos, attires, scenes, etc. (image-based or text-based).
+2. **Asset**: Reusable resources stored in user's library or marketplace. Can be faces, reference photos, outfits, scenes, etc. (image-based or text-based).
 3. **Photo**: Output image from a generation. Can override moment's mixins with photo-specific asset selections.
 4. **Post**: Moment shared to community, can be liked by users.
 5. **User/Profile**: User account with credits and settings.
@@ -70,7 +70,7 @@ The Producer is the main creation interface where users combine inputs to genera
   - **Pose**: Standing, sitting, dynamic, etc.
   - **Makeup**: Natural, Glamour, Editorial, etc.
   - **Hair**: Length, color, styling
-  - **Attire**: Formal, Casual, Costume, etc.
+  - **Outfit**: Formal, Casual, Costume, etc.
   - **Scene**: Studio, Outdoor, Urban, Fantasy, etc.
   - **Camera**: DSLR, Mirrorless, Smartphone, etc.
   - **Lighting**: Natural, Studio, Golden hour, etc.
@@ -79,7 +79,7 @@ The Producer is the main creation interface where users combine inputs to genera
 **Example use cases:**
 1. **Quick generation**: Face + text description ("beach sunset portrait")
 2. **Reference-based**: Face + uploaded pose reference image
-3. **Detailed control**: Face + structured settings (formal attire + studio lighting + professional vibe)
+3. **Detailed control**: Face + structured settings (formal outfit + studio lighting + professional vibe)
 4. **Mixed approach**: Face + reference image + text refinements + selected settings
 
 **Generation Engine Pipeline (`lib/engine.ts`):**
@@ -128,13 +128,13 @@ The Producer is the main creation interface where users combine inputs to genera
 ### 2. Assets Management
 - **Faces**: Reference face images saved to library
 - **References**: Reference images for pose/composition
-- **Attires**: Reference images or text descriptions for attires
+- **Outfits**: Reference images or text descriptions for outfits
 - **Scenes**: Reference images or text descriptions for scenes
 - **Moments**: View all past generations with parameters and output images
 - **Favorites**: Star and organize best results
 
 ### 3. Store
-- Users can buy official assets (faces, attires, poses, scenes) from Kanojo Studio
+- Users can buy official assets (faces, outfits, poses, scenes) from Kanojo Studio
 - Purchased assets are added to user's library for use in generations
 - Transactions tracked via purchases and credit history
 
@@ -184,7 +184,7 @@ assets (
   user_id uuid references profiles,  -- NULL = official Kanojo Studio asset
   name text,
   description text,
-  type text, -- face, reference, attire, scene, etc.
+  type text, -- face, reference, outfit, scene, etc.
   url text,  -- if image-based asset
   content text,  -- if text-based asset (e.g., "red dress description")
   is_public boolean default false,  -- true = visible in store
@@ -218,7 +218,7 @@ mixins (
   id uuid primary key,
   moment_id uuid references moments,
   asset_id uuid references assets,  -- nullable: references asset if from library
-  type text,  -- face, reference, attire, scene, etc.
+  type text,  -- face, reference, outfit, scene, etc.
   url text,  -- if ad-hoc upload (not from assets)
   content text,  -- if text input or prompt fragment
   created_at timestamptz

@@ -11,7 +11,7 @@ export const engineRequestSchema = z.object({
       face: z.string().uuid('Invalid moment ID').optional(),
       makeup: z.string().uuid('Invalid moment ID').optional(),
       hair: z.string().uuid('Invalid moment ID').optional(),
-      attire: z.string().uuid('Invalid moment ID').optional(),
+      outfit: z.string().uuid('Invalid moment ID').optional(),
       scene: z.string().uuid('Invalid moment ID').optional(),
       lighting: z.string().uuid('Invalid moment ID').optional(),
       camera: z.string().uuid('Invalid moment ID').optional(),

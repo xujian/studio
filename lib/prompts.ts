@@ -3,7 +3,7 @@
 export const DEFAULTS = {
   FACE: 'https://rhxlulctluazrpqzooya.supabase.co/storage/v1/object/public/assets/face/ju.jpg',
   MAKEUP: '',
-  ATTIRE: '',
+  OUTFIT: '',
   POSE: '',
   SCENE: '',
   LIGHTING: '',
@@ -25,7 +25,7 @@ export const EXAMPLE = `{
     "lips": "lip makeup from prompt or natural defaults",
     "overall": "makeup aesthetic from prompt style"
   },
-  "attire": {
+  "outfit": {
     "top": "upper garment details from prompt or inferred from style",
     "bottom": "lower garment details from prompt or inferred from style",
     "footwear": "footwear if mentioned",
@@ -72,7 +72,7 @@ export const EXAMPLE = `{
 export const SCHEMA = `{
   "subject": { "bodyType", "skinTone", "expression", "bodyLanguage" },
   "makeup": { "face", "eyes", "lips", "overall" },
-  "attire": { "top", "bottom", "footwear", "accessories", "overall" },
+  "outfit": { "top", "bottom", "footwear", "accessories", "overall" },
   "pose": { "position", "limbs", "angle", "energy" },
   "scene": { "setting", "background", "foreground", "atmosphere" },
   "lighting": { "direction", "quality", "shadows", "highlights", "mood" },
@@ -104,7 +104,7 @@ ${SCHEMA}
 CRITICAL RULES:
 - ONLY include sections and fields that the user directly mentions or clearly implies
 - Do NOT invent, assume, or fill in defaults for anything not in the input
-- If the user says "sitting on a bench in a park", output only pose and scene — nothing about attire, makeup, lighting, or camera
+- If the user says "sitting on a bench in a park", output only pose and scene — nothing about outfit, makeup, lighting, or camera
 - Be specific and vivid for what IS mentioned
 - for descriptions in the user input but not matching the SCHEMA, extract and fill into the "extra" key
 
@@ -115,9 +115,9 @@ ${FIXING}
 STEP 3. output the target JSON prompt
 
 Examples:
-- "casual outdoor portrait" → { "scene": { "setting": "outdoors" }, "attire": { "overall": "casual" } }
+- "casual outdoor portrait" → { "scene": { "setting": "outdoors" }, "outfit": { "overall": "casual" } }
 - "sitting on a bench" → { "pose": { "position": "sitting on a bench" } }
-- "red dress, golden hour" → { "attire": { "overall": "red dress" }, "lighting": { "quality": "golden hour" } }
+- "red dress, golden hour" → { "outfit": { "overall": "red dress" }, "lighting": { "quality": "golden hour" } }
 
 Return only the JSON object, nothing else.`
 
@@ -149,7 +149,10 @@ export const SYSTEM_PROMPT = `
 Create a portrait using the user prompt.
 
 STYLE & QUALITY:
-* Photorealistic editorial photography
+* Ultra-realistic, cinematic fashion photography.
+* High-end editorial quality, premium VFX polish.
+* Skin texture, fabric interaction, micro-details visible.
+* No plastic look, no AI artifacts.
 * high texture fidelity
 * natural proportions
 * cinematic depth

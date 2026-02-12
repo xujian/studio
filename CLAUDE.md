@@ -183,7 +183,7 @@ Core tables with RLS policies:
 
 4. **`assets`** - Reusable prompt components (faces, styles, scenes, etc.)
    - Fields: `id`, `user_id`, `name`, `type`, `url`, `content`, `is_public`, `price`, `created_at`
-   - Types: face, makeup, hair, attire, scene, lighting, camera
+   - Types: face, makeup, hair, outfit, scene, lighting, camera
    - Supports both image-based (URL) and text-based (content) assets
    - Marketplace functionality with credits system
 
@@ -211,14 +211,14 @@ All database and domain types are defined in `lib/types.ts`:
 - `AssetType` - Union type for asset categories
 - `Mixins` - Map of asset type to asset ID
 - `JsonPrompt` - Structured prompt format (output from ImageAnalyzer/PromptAnalyzer)
-  - Contains: subject, attire, pose, scene, makeup, lighting, camera sections
+  - Contains: subject, outfit, pose, scene, makeup, lighting, camera sections
   - Used for merging reference image analysis with text prompt analysis
 
 **JsonPrompt Structure:**
 ```typescript
 {
   subject: { bodyType, skinTone, expression, bodyLanguage },
-  attire: { top, bottom, footwear?, accessories?, overall },
+  outfit: { top, bottom, footwear?, accessories?, overall },
   pose: { position, limbs, angle, energy },
   scene: { setting, background, foreground, atmosphere },
   makeup: { face, eyes, lips, overall },
