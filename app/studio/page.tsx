@@ -12,8 +12,8 @@ import type { MomentWithPhotos } from '@/lib/types'
 import { useMoments } from '@/hooks/use-moments'
 
 export default function StudioPage() {
-  const [selectedMoment, setSelectedMoment] = useState<{
-    moment: MomentWithPhotos
+  const [selectedMomentId, setSelectedMomentId] = useState<{
+    momentId: string
     initialPhotoId: string
   } | null>(null)
 
@@ -36,10 +36,11 @@ export default function StudioPage() {
     data?.pages
       .flatMap(page => page.moments)
       .filter(m => m.photos.length > 0) || []
-  console.log(
-    'empty moments',
-    data?.pages.flatMap(page => page.moments).filter(m => m.photos.length == 0)
-  )
+
+  // Derive selected moment from live query data so it stays in sync after mutations
+  const selectedMoment = selectedMomentId
+    ? allMoments.find(m => m.id === selectedMomentId.momentId)
+    : null
 
   return (
     <section className="flex w-full flex-col items-start justify-center px-16 pb-52">
@@ -66,7 +67,7 @@ export default function StudioPage() {
               key={moment.id}
               moment={moment}
               onPhotoClick={(photo, moment) =>
-                setSelectedMoment({ moment, initialPhotoId: photo.id })
+                setSelectedMomentId({ momentId: moment.id, initialPhotoId: photo.id })
               }
             />
           ))}
@@ -85,11 +86,11 @@ export default function StudioPage() {
           )}
         </StaggerGrid>
       </LayoutGroup>
-      {selectedMoment && (
+      {selectedMoment && selectedMomentId && (
         <MomentView
-          moment={selectedMoment.moment}
-          initialPhotoId={selectedMoment.initialPhotoId}
-          onClose={() => setSelectedMoment(null)}
+          moment={selectedMoment}
+          initialPhotoId={selectedMomentId.initialPhotoId}
+          onClose={() => setSelectedMomentId(null)}
         />
       )}
       <Producer onGenerationComplete={handleGenerationComplete} />

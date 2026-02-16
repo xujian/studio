@@ -37,7 +37,6 @@ export function MomentView({
   const [isDragging, setIsDragging] = React.useState(false)
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
-  const [count, setCount] = React.useState(0)
   const $bus = useBus()
   const deleteMoment = useDeleteMoment()
   const deletePhoto = useDeletePhoto()
@@ -46,7 +45,8 @@ export function MomentView({
   const initialIndex = moment.photos.findIndex(p => p.id === initialPhotoId)
 
   const hasMultiplePhotos = moment.photos.length > 1
-  const currentPhoto = moment.photos[current]
+  const clampedCurrent = Math.min(current, moment.photos.length - 1)
+  const currentPhoto = moment.photos[clampedCurrent]
   const merged = {
     ...moment.mixins,
     ...currentPhoto?.mixins
@@ -56,15 +56,14 @@ export function MomentView({
   const nonFaceMixins = Object.entries(merged).filter(([key]) => key !== 'face')
   const emptyAssets = Array(4 - (nonFaceMixins.length % 4)).fill(null)
 
-  // Set up carousel API
+  // Set up carousel API and re-sync when photos change
   React.useEffect(() => {
     if (!api) return
-    setCount(api.scrollSnapList().length)
     setCurrent(api.selectedScrollSnap())
-    api.on('select', () => {
-      setCurrent(api.selectedScrollSnap())
-    })
-  }, [api])
+    const onSelect = () => setCurrent(api.selectedScrollSnap())
+    api.on('select', onSelect)
+    return () => { api.off('select', onSelect) }
+  }, [api, moment.photos.length])
   // Scroll to initial photo
   React.useEffect(() => {
     if (api && initialIndex >= 0) {
@@ -151,7 +150,7 @@ export function MomentView({
                 <CarouselNext className="right-4" />
                 {/* Dots indicator */}
                 <div className="absolute right-0 bottom-20 left-0 z-20 flex justify-center gap-2">
-                  {Array.from({ length: count }).map((_, index) => (
+                  {Array.from({ length: moment.photos.length }).map((_, index) => (
                     <div
                       key={index}
                       className={cn(
