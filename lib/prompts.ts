@@ -72,6 +72,7 @@ export const EXAMPLE = `{
 export const SCHEMA = `{
   "subject": { "bodyType", "skinTone", "expression", "bodyLanguage" },
   "makeup": { "face", "eyes", "lips", "overall" },
+  "hair": { "color", "style", "length", "texture" },
   "outfit": { "top", "bottom", "footwear", "accessories", "overall" },
   "pose": { "position", "limbs", "angle", "energy" },
   "scene": { "setting", "background", "foreground", "atmosphere" },

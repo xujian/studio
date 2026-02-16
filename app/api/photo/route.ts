@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { engine, type GenerateParams } from '@/lib/engine'
 import { createClient } from '@/lib/supabase/server'
-import type { Asset, Assets, AssetType, Mixins, Moment, MomentWithPhotos, Photo } from '@/lib/types'
+import type { AssetType, Mixins, Moment, MomentWithPhotos, Photo } from '@/lib/types'
 import { engineRequestSchema } from '@/lib/validations'
-import type { JsonPrompt } from '@/lib/types'
 
 // Configure route timeout for image generation (60 seconds)
 export const maxDuration = 60
@@ -37,8 +36,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   const userId = session.user.id
-  let momentId = input.momentId,
-    mixins: Mixins = input.mixins as Mixins,
+  let momentId = input.momentId
+  const mixins: Mixins = input.mixins as Mixins,
     /**
      * params to generate image
      */
@@ -54,9 +53,7 @@ export async function POST(request: NextRequest) {
     photoData: Pick<Photo, 'prompt' | 'mixins'> = {
       prompt: null,
       mixins: null
-    },
-    // the final JSON prompt
-    json: JsonPrompt = {}
+    }
   // 3. If moment provided, verify ownership and fetch baseline prompt/mixins
   if (mode === 'create') {
     // Create new moment with baseline prompt and mixins
@@ -122,7 +119,7 @@ export async function POST(request: NextRequest) {
   }
   generateParams.assets = Object.fromEntries(assets.map(a => [a.type, a]))
   // 5. Call Engine to generate image
-  const { image, mime, title } = await engine.generate(generateParams)
+  const { image, title } = await engine.generate(generateParams)
   // 6. Convert base64 to buffer for upload
   const imageBuffer = Buffer.from(image, 'base64')
   const photoId = crypto.randomUUID()

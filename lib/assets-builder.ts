@@ -32,6 +32,7 @@ const AssetsBuilder = {
         }
       }
     }
+    // console.log('----------------ASSETS BUILDER---------', parts, sections)
     return { parts, sections }
   }
 }
@@ -54,6 +55,22 @@ async function buildMakeup(asset: Asset) {
         inlineData
       },
       text: `use "reference makeup"`
+    }
+  } else {
+    return Promise.resolve({
+      text: asset.content!
+    })
+  }
+}
+
+async function buildHair(asset: Asset) {
+  if (asset.path) {
+    const inlineData = await fetchImage(asset.path)
+    return {
+      image: {
+        inlineData
+      },
+      text: `use "reference hair"`
     }
   } else {
     return Promise.resolve({
@@ -151,6 +168,7 @@ const assetMethods = new Map<
 >()
 assetMethods.set('face', buildFace)
 assetMethods.set('makeup', buildMakeup)
+assetMethods.set('hair', buildHair)
 assetMethods.set('outfit', buildOutfit)
 assetMethods.set('scene', buildScene)
 assetMethods.set('lighting', buildLighting)

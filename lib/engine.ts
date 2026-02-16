@@ -22,18 +22,23 @@ interface GenerateResult {
   title: string
 }
 
+/**
+ * Engine module to handle photo generation logic
+ * - Analyzes prompt and reference image to create structured json
+ * - Builds assets and assembles final prompt for Gemini
+ * - Calls Gemini API and extracts generated image
+ */
 export const engine = {
   /**
    * Generate a portrait photo via Gemini API
    *
    * Flow (per PRD):
-   * 1. Analyze inputs → structured json baseline
+   * 1. Analyze original inputs → structured json baseline
    *    - Reference image → ImageAnalyzer (full scene description)
    *    - Text prompt → PromptAnalyzer (only explicit mentions, merges on top)
-   * 2. Build assets → face image + text sections
-   *    - Face defaults to system face when not provided
+   * 2. Build assets → image + text sections
    *    - Asset sections override analyzer json
-   * 3. Assemble prompt → face image parts + combined json
+   * 3. Assemble prompt → image parts + combined json
    * 4. Generate via Gemini → extract base64 image
    */
   generate: async ({
@@ -42,7 +47,7 @@ export const engine = {
     assets,
     reference
   }: GenerateParams): Promise<GenerateResult> => {
-    console.log('----------------ENGINE---------', prompt, reference, assets)
+    // console.log('----------------ENGINE---------', prompt, reference, assets)
     const json: JsonPrompt = {},
       ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
     // 1. Analyze inputs into structured json
