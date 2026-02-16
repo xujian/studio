@@ -40,7 +40,7 @@ export function MomentCard({ moment, onPhotoClick }: MomentCardProps) {
   if (!hasMultiplePhotos) {
     const photo = moment.photos[0]
     return (
-      <div className="relative aspect-9/16 w-full cursor-pointer overflow-hidden rounded bg-muted">
+      <div className="relative aspect-9/16 w-full cursor-pointer overflow-hidden rounded-2xl bg-muted">
         <motion.div
           layoutId={photo.id}
           className="relative h-full w-full"
@@ -65,7 +65,7 @@ export function MomentCard({ moment, onPhotoClick }: MomentCardProps) {
   // Multiple photos - carousel
   return (
     <div
-      className="relative overflow-hidden rounded"
+      className="relative overflow-hidden rounded-2xl"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}>
       <Carousel setApi={setApi} opts={{ loop: false }}>

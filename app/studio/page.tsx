@@ -73,7 +73,7 @@ export default function StudioPage() {
           ))}
           {hasNextPage && (
             <div
-              className="relative flex aspect-9/16 w-full items-center justify-center rounded bg-muted p-4"
+              className="relative flex aspect-9/16 w-full items-center justify-center rounded-2xl bg-muted p-4"
               key="load-more">
               <Button
                 className="w-full rounded-full"

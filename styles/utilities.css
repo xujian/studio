@@ -71,6 +71,10 @@
   @apply h-full w-full object-cover;
 }
 
+.bg-image {
+  @apply bg-cover bg-center bg-no-repeat;
+}
+
 .full-bleed {
   @apply -mx-4;
 }

@@ -122,7 +122,7 @@ export function MomentView({
                     <CarouselItem key={photo.id} className="h-full">
                       <motion.div
                         layoutId={photo.id}
-                        className="relative h-full w-full cursor-grab overflow-hidden rounded-lg active:cursor-grabbing"
+                        className="relative h-full w-full cursor-grab overflow-hidden rounded-2xl active:cursor-grabbing"
                         drag="y"
                         dragConstraints={{ top: 0, bottom: 300 }}
                         dragElastic={0.2}
@@ -165,7 +165,7 @@ export function MomentView({
               // Single photo - no carousel
               <motion.div
                 layoutId={moment.photos[0].id}
-                className="relative h-full w-full cursor-grab overflow-hidden rounded-lg active:cursor-grabbing"
+                className="relative h-full w-full cursor-grab overflow-hidden rounded-2xl active:cursor-grabbing"
                 drag="y"
                 dragConstraints={{ top: 0, bottom: 300 }}
                 dragElastic={0.2}
@@ -204,19 +204,21 @@ export function MomentView({
                     className="h-full w-full object-cover"
                   />
                 </div>
-                {moment.reference && (<div className="reference relative rounded overflow-hidden">
-                  <Badge className="absolute top-1 left-1 bg-black/80 text-foreground">
-                    Reference image
-                  </Badge>
-                  <img
-                    alt="reference"
-                    src={uploadUrl(moment.user_id, moment.reference)}
-                    className="max-h-50 max-w-50 object-cover"
-                  />
-                </div>)}
+                {moment.reference && (
+                  <div className="reference relative rounded-lg border overflow-hidden">
+                    <Badge className="absolute top-1 left-1 bg-black/80 text-foreground">
+                      Reference image
+                    </Badge>
+                    <img
+                      alt="reference"
+                      src={uploadUrl(moment.user_id, moment.reference)}
+                      className="max-h-50 max-w-50 object-cover"
+                    />
+                  </div>
+                )}
               </div>
               {nonFaceMixins.length > 0 && (
-                <div className="mixins grid grid-cols-2 gap-px overflow-hidden rounded-2xl border bg-white/10 @sm:grid-cols-3 @lg:grid-cols-4">
+                <div className="mixins grid grid-cols-2 gap-px overflow-hidden rounded border bg-white/10 @sm:grid-cols-3 @lg:grid-cols-4">
                   {nonFaceMixins.map(([type, assetId]) => {
                     const assetType = assetTypes.find(t => t.type === type)
                     const displayName = assetType?.name || type

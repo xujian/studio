@@ -38,13 +38,11 @@ export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
               <PopoverTrigger asChild>
                 <Button
                   variant={selected ? "ghost" :  "outline"}
-                  className={cn('p-0 m-0 w-12 h-12 bg-black rounded cursor-pointer')}
+                  className={cn('p-0 m-0 w-18 h-18 border bg-image rounded-xl cursor-pointer')}
                   style={{
                     backgroundImage: selected
                       ? `url(${assetUrl(selectedFace?.path!)})`
                       : `url(${systemFace})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center top'
                   }} />
               </PopoverTrigger>
             </TooltipTrigger>
@@ -52,8 +50,8 @@ export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
               <p>Choose face</p>
             </TooltipContent>
           </Tooltip>
-        <PopoverContent className="draw-left min-h-20 w-80 mt-4 bg-black rounded-xl glass p-2"
-          side="left" sideOffset={12} align="start">
+        <PopoverContent className="draw-left min-h-20 w-80 mt-4 bg-black rounded-2xl glass p-1"
+          side="left" sideOffset={4} align="start">
           {faces.length === 0 ? (
             <div className="flex flex-col items-center gap-2 p-4">
               <p className="text-sm text-muted-foreground text-center">No face assets yet</p>
@@ -62,7 +60,7 @@ export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-4 gap-1">
               {faces.map(face => (
                 <Peekable key={face.id}
                   content={assetUrl(face.path!)}
@@ -72,7 +70,7 @@ export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
                     variant="outline"
                     onClick={() => onSelect?.(face.id!)}
                     className={cn(
-                      'face rounded w-16 h-16 p-0 text-xs transition glow cursor-pointer',
+                      'face rounded w-18 h-18 p-0 text-xs transition border cursor-pointer',
                       selected === face.id ? 'on' : ''
                     )}>
                     {face.path ? (
@@ -94,7 +92,7 @@ export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
       {selected && (
         <Button
           onClick={() => onSelect?.('')}
-          className="absolute h-4 w-4 px-0! py-0 left-4 -bottom-1 cursor-pointer bg-black hover:bg-amber-800 text-white">
+          className="absolute h-4 w-4 px-0! py-0 left-7 bottom-0 cursor-pointer bg-black hover:bg-amber-800 text-white">
           <X />
         </Button>
       )}

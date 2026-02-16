@@ -1,6 +1,7 @@
 :root {
   --tube: rgba(255, 234, 0, 0.804);
   --glow: rgba(45,255,196,0.31);
+  --edge: 4px;
 }
 
 .tube.on {

@@ -158,25 +158,23 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
     <div
       className={cn(
         'producer fixed bottom-4 left-1/2 z-50 w-full max-w-2xl -translate-x-1/2',
-        'glass animate-float-up rounded-4xl bg-accent/80',
+        'glass animate-float-up rounded-2xl bg-accent/80',
         'transition-all duration-300 overflow-hidden',
         className
       )}>
-      <div
-        className={cn('-mb-7 flex px-8 opacity-0 transition-all duration-300', {
-          'mb-0 opacity-100': expanded
-        })}>
+      <div className={cn('-mb-7 flex px-8 opacity-0 transition-all duration-300',
+          expanded ? 'mb-0 opacity-100' : ''
+        )}>
         <Mixins value={mixins} onChange={setMixins} />
       </div>
-      <div className="gap -m-px flex flex-col overflow-hidden rounded-4xl border border-white/50 bg-black/20 p-4">
-        <div className="gap flex items-start">
-          <div className="h-12 w-12"></div>
+      <div className="relative flex flex-col gap-1 -m-px overflow-hidden rounded-2xl border border-white/50 bg-black/20 p-1">
+        <div className="inputs gap-1 flex items-stretch">
+          <div className="h-18 w-18"></div>
           {/** the reference image */}
-          <div
-            className={cn(
-              'reference transtion-all relative overflow-hidden rounded duration-500',
+          <div className={cn(
+              'reference transtion-all relative overflow-hidden rounded-xl duration-500',
               reference
-                ? 'h-20 w-20 border'
+                ? 'h-40 w-32 border'
                 : 'h-8 w-8'
             )}>
             <input
@@ -199,7 +197,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
                     <Button
                       type="button"
                       size="icon"
-                      className="absolute top-0 right-0 h-4 w-4 rounded-full bg-black/60 text-white hover:bg-black/80"
+                      className="absolute top-1 right-1 h-4 w-4 rounded-full bg-black/60 text-white hover:bg-black/80"
                       onClick={handleReferenceClear}>
                       <X className="h-3 w-3" />
                     </Button>
@@ -219,18 +217,21 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
                   </Button>
                 )}
           </div>
-          <div className={cn('flex-1')}>
+          <div className={cn('flex-1 p-1')}>
             <Textarea
               placeholder="Describe the portrait you want to create..."
-              className="max-h-24 min-h-12 resize-none rounded-none border-none bg-transparent! p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              className={cn([
+                'min-h-20 h-full text-xs resize-none rounded-none border-none bg-transparent!',
+                'p-0 focus-visible:ring-0 focus-visible:ring-offset-0',
+                expanded ? '' : 'max-h-20'].join(' '))}
               value={prompt}
               onChange={handlePromptChange}
               disabled={isPending}
             />
           </div>
         </div>
-        <div className="flex justify-between">
-          <div className="flex items-center gap-2">
+        <div className="buttons flex justify-between">
+          <div className="flex items-center gap-1">
             <Tooltip>
               <TooltipTrigger asChild>
                 <div>{/** to fix the toggle's state=closed problem */}
@@ -238,7 +239,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
                     pressed={expanded}
                     type="button"
                     variant="outline"
-                    className="button data-[state=on]:bg-primary! data-[state=on]:text-primary-foreground"
+                    className="rounded-xl h-10 w-18 data-[state=on]:bg-primary! data-[state=on]:text-primary-foreground"
                     onClick={toggleExpanded}>
                     <GripHorizontal />
                   </Toggle>
@@ -249,14 +250,14 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
               </TooltipContent>
             </Tooltip>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             {/* New/Clear button (only visible in retry mode) */}
             {mode === 'retry' && (
               <Button
                 type="button"
                 variant="outline"
                 tooltip="retry"
-                className="icon-button"
+                className="h-10 w-10 rounded-xl"
                 onClick={handleNew}
                 disabled={isPending}>
                 <X />
@@ -266,7 +267,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
             <Button
               type="button"
               variant="outline"
-              className="icon-button"
+              className="h-10 w-10 rounded-xl"
               tooltip="generate"
               onClick={handleGenerate}
               disabled={isPending || couldNotSubmit}>
@@ -285,8 +286,8 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
       {/* Face Picker */}
       <div
         className={cn(
-          'absolute left-4 transition-all duration-500',
-          expanded ? 'top-10' : 'top-4'
+          'absolute left-1 transition-all duration-500',
+          expanded ? 'top-8' : 'top-1'
         )}>
         <FacePicker
           faces={filterAssets('face')}

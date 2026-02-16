@@ -33,7 +33,7 @@ export default function Sidebar() {
 
   return (
     <div className="fixed top-1/2 left-8 z-40 -translate-y-1/2">
-      <div className="relative flex flex-col p-2 gap-2 glass rounded-full">
+      <div className="relative flex flex-col p-1 gap-1 glass rounded-full">
         {tools.map(tool => {
           const Icon = tool.icon
           return (
@@ -49,7 +49,7 @@ export default function Sidebar() {
                   ? 'bg-white text-black shadow-[0_4px_16px_rgba(255,255,255,0.15)]'
                   : 'text-white/50 hover:bg-white/10 hover:text-white'
               )}>
-              <Icon className="size-5" />
+              <Icon className="size-6" />
             </Button>
           )
         })}
@@ -65,7 +65,7 @@ export default function Sidebar() {
                 'rounded-full transition-all duration-300 cursor-pointer',
                 'text-white/50 hover:bg-white/10 hover:text-white',
               )}>
-              <Icon className="size-5" />
+              <Icon className="size-6" />
             </Button>
           )
         })}
