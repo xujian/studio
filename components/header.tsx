@@ -2,9 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useRouter } from 'next/navigation'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Profile } from '@/components/profile'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/context/auth-provider'
 import { cn } from '@/lib/utils'
@@ -12,13 +11,7 @@ import { Aperture, ShoppingBag, Earth } from 'lucide-react'
 
 export const Header = () => {
   const pathname = usePathname()
-  const router = useRouter()
-  const { user, signOut } = useAuth()
-
-  const handleSignOut = async () => {
-    await signOut()
-    router.push('/login')
-  }
+  const { user } = useAuth()
 
   const routes = [
     { href: '/studio', label: 'Studio', icon: Aperture },
@@ -42,12 +35,12 @@ export const Header = () => {
           <img src="/kanojo.svg" className='h-12' alt="Kanojo Studio" />
         </Link>
       </div>
-      <nav className="flex items-center elevation-2 rounded-full gap-0 glass h-10">
+      <nav className="flex items-center elevation-2 rounded-full p-1 gap-0 glass h-10">
         {routes.map(route => (
           <Link key={route.href} href={route.href}>
             <Button
               variant={pathname === route.href ? 'default' : 'ghost'}
-              className={cn('h-9.5 rounded-full min-w-30 justify-start gap-1 pl-1 pr-6 cursor-pointer',
+              className={cn('h-8 rounded-full min-w-30 justify-start gap-1 pl-1 pr-6 cursor-pointer',
                 pathname === route.href ? 'bg-white/90': ''
               )}>
               <div className="icon">
@@ -60,15 +53,7 @@ export const Header = () => {
       </nav>
       <div className="flex flex-1 items-center justify-end gap">
         <ThemeToggle />
-        <Avatar className="h-8 w-8">
-          <AvatarImage src={user.userMetadata?.avatar_url} />
-          <AvatarFallback>
-            {user.userMetadata?.fullName?.[0] || user.email?.[0]}
-          </AvatarFallback>
-        </Avatar>
-        <Button variant="ghost" size="sm" onClick={handleSignOut}>
-          Sign out
-        </Button>
+        <Profile />
       </div>
     </header>
   )
