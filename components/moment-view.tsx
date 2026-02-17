@@ -19,7 +19,9 @@ import { assetUrl, cn, photoUrl, uploadUrl } from '@/lib/utils'
 import { useMixins } from '@/hooks/use-mixins'
 import { useDeleteMoment, useDeletePhoto } from '@/hooks/use-moments'
 import { useBus } from '@/lib/bus'
-import { GalleryHorizontal, Image as ImageIcon, StepForward, Trash, X } from 'lucide-react'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui'
+import { useSharePost, useUnsharePost } from '@/hooks/use-posts'
+import { GalleryHorizontal, Globe, GlobeLock, Image as ImageIcon, Loader2, StepForward, Trash, X } from 'lucide-react'
 import { DeleteConfirm } from './delete-confirm'
 import { MomentInfo } from './moment-info'
 
@@ -27,19 +29,41 @@ interface MomentViewProps {
   moment: MomentWithPhotos
   initialPhotoId: string
   onClose: () => void
+  readOnly?: boolean
+  author?: { id: string; name: string | null; avatar: string | null }
 }
 
 export function MomentView({
   moment,
   initialPhotoId,
-  onClose
+  onClose,
+  readOnly = false,
+  author
 }: MomentViewProps) {
   const [isDragging, setIsDragging] = React.useState(false)
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
+  const [shared, setShared] = React.useState(false)
   const $bus = useBus()
   const deleteMoment = useDeleteMoment()
   const deletePhoto = useDeletePhoto()
+  const sharePost = useSharePost()
+  const unsharePost = useUnsharePost()
+
+  // Check if this moment is shared (only for owner view)
+  React.useEffect(() => {
+    if (readOnly) return
+    ;(async () => {
+      const { createClient } = await import('@/lib/supabase/client')
+      const sb = createClient()
+      const { data } = await sb
+        .from('posts')
+        .select('id')
+        .eq('moment_id', moment.id)
+        .maybeSingle()
+      setShared(!!data)
+    })()
+  }, [moment.id, readOnly])
 
   // Find initial photo index
   const initialIndex = moment.photos.findIndex(p => p.id === initialPhotoId)
@@ -106,7 +130,31 @@ export function MomentView({
         {/* Photo Container with Carousel */}
         <div className="relative z-10 flex h-full w-full justify-between">
           <div className="flex-1">
-            <MomentInfo {...moment} />
+            {readOnly && author ? (
+              <div className="flex h-full w-full flex-col gap-3 p-4">
+                <div className="flex items-center gap-3">
+                  <Avatar className="size-10">
+                    {author.avatar && <AvatarImage src={author.avatar} alt={author.name || ''} />}
+                    <AvatarFallback>{(author.name || '?')[0]}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-semibold text-white">{author.name || 'Anonymous'}</p>
+                  </div>
+                </div>
+                {moment.title && (
+                  <h1 className="text-3xl font-bold text-white">{moment.title}</h1>
+                )}
+                {moment.created_at && (
+                  <p className="text-sm text-gray-400">
+                    {new Date(moment.created_at).toLocaleString('en-US', {
+                      month: 'short', day: 'numeric', year: 'numeric'
+                    })}
+                  </p>
+                )}
+              </div>
+            ) : (
+              <MomentInfo {...moment} />
+            )}
           </div>
           <div className="aspect-9/16 flex-0 p-4">
             {hasMultiplePhotos ? (
@@ -265,42 +313,65 @@ export function MomentView({
                   <p className="text-xs text-white">{currentPhoto.prompt || moment.prompt || '(EMPTY)'}</p>
                 </motion.div>
               </div>
-              <div className="flex flex-0 items-center gap-2">
-                <Button
-                  size="icon"
-                  tooltip="load setting and redo this photo"
-                  className="bg-background cursor-pointer"
-                  variant="ghost"
-                  onClick={redo}>
-                  <StepForward />
-                </Button>
-              </div>
-              <div className="flex-1"></div>
-              <div className="flex flex-0 items-center gap-2">
-                {hasMultiplePhotos && currentPhoto && (
-                  <DeleteConfirm
-                    icon={<><Trash /><ImageIcon /></>}
-                    message="Delete this photo?"
-                    isPending={deletePhoto.isPending}
-                    action={() =>
-                      deletePhoto.mutate({
-                        userId: moment.user_id,
-                        momentId: moment.id,
-                        photoId: currentPhoto.id
-                      })
-                    }
-                  />
-                )}
-                <DeleteConfirm
-                  icon={<><Trash /><GalleryHorizontal /></>}
-                  message="Delete this moment and all the photos?"
-                  isPending={deleteMoment.isPending}
-                  className="delete-button"
-                  action={() =>
-                    deleteMoment.mutate(moment.id, { onSuccess: onClose })
-                  }
-                />
-              </div>
+              {!readOnly && (
+                <>
+                  <div className="flex flex-0 items-center gap-2">
+                    <Button
+                      size="icon"
+                      tooltip="load setting and redo this photo"
+                      className="bg-background cursor-pointer"
+                      variant="ghost"
+                      onClick={redo}>
+                      <StepForward />
+                    </Button>
+                    <Button
+                      size="icon"
+                      tooltip={shared ? 'unshare from community' : 'share to community'}
+                      className="bg-background cursor-pointer"
+                      variant="ghost"
+                      disabled={sharePost.isPending || unsharePost.isPending}
+                      onClick={() => {
+                        if (shared) {
+                          unsharePost.mutate(moment.id, { onSuccess: () => setShared(false) })
+                        } else {
+                          sharePost.mutate(moment.id, { onSuccess: () => setShared(true) })
+                        }
+                      }}>
+                      {sharePost.isPending || unsharePost.isPending
+                        ? <Loader2 className="animate-spin" />
+                        : shared ? <Globe /> : <GlobeLock />
+                      }
+                    </Button>
+                  </div>
+                  <div className="flex-1"></div>
+                  <div className="flex flex-0 items-center gap-2">
+                    {hasMultiplePhotos && currentPhoto && (
+                      <DeleteConfirm
+                        icon={<><Trash /><ImageIcon /></>}
+                        message="Delete this photo?"
+                        isPending={deletePhoto.isPending}
+                        action={() =>
+                          deletePhoto.mutate({
+                            userId: moment.user_id,
+                            momentId: moment.id,
+                            photoId: currentPhoto.id
+                          })
+                        }
+                      />
+                    )}
+                    <DeleteConfirm
+                      icon={<><Trash /><GalleryHorizontal /></>}
+                      message="Delete this moment and all the photos?"
+                      isPending={deleteMoment.isPending}
+                      className="delete-button"
+                      action={() =>
+                        deleteMoment.mutate(moment.id, { onSuccess: onClose })
+                      }
+                    />
+                  </div>
+                </>
+              )}
+              {readOnly && <div className="flex-1"></div>}
             </div>
             {/**@container */}
           </div>

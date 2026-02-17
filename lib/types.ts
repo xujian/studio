@@ -87,13 +87,17 @@ export type Mixins = {
 }
 
 /**
- * Moments shared by users
+ * Community post with moment, author, and like info
  */
 export type Post = {
   id: string
   user_id: string
   moment_id: string
   created_at: string
+  moment: MomentWithPhotos
+  author: { id: string; name: string | null; avatar: string | null }
+  likes_count: number
+  liked: boolean
 }
 
 /**
@@ -125,16 +129,6 @@ export type Transaction = {
   related_id: string | null // purchase_id, moment_id, etc.
   description: string | null
   created_at: string
-}
-
-// Extended types with relations
-export type PostWithMoment = Post & {
-  moment: MomentWithPhotos
-}
-
-export type PostWithLikes = Post & {
-  likes: Like[]
-  likes_count: number
 }
 
 export type AssetWithPurchaseInfo = Asset & {

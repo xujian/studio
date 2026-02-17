@@ -135,6 +135,14 @@ CREATE POLICY "Users can insert own profile"
   ON profiles FOR INSERT
   WITH CHECK (auth.uid() = id);
 
+CREATE POLICY "Can view profiles of post authors"
+  ON profiles FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM posts WHERE posts.user_id = profiles.id
+    )
+  );
+
 -- Moments
 ALTER TABLE moments ENABLE ROW LEVEL SECURITY;
 
@@ -153,6 +161,14 @@ CREATE POLICY "Users can update own moments"
 CREATE POLICY "Users can delete own moments"
   ON moments FOR DELETE
   USING (auth.uid() = user_id);
+
+CREATE POLICY "Can view moments of public posts"
+  ON moments FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM posts WHERE posts.moment_id = moments.id
+    )
+  );
 
 -- Assets
 ALTER TABLE assets ENABLE ROW LEVEL SECURITY;
@@ -417,6 +433,66 @@ AS $$
   FROM public.assets a
   WHERE a.price IS NOT NULL
   ORDER BY a.type, a.created_at DESC;
+$$;
+
+-- Function to get community posts with like counts and user like status
+CREATE OR REPLACE FUNCTION get_posts(user_uuid uuid, page_limit int DEFAULT 20, page_offset int DEFAULT 0)
+RETURNS TABLE (
+  id uuid,
+  user_id uuid,
+  moment_id uuid,
+  created_at timestamptz,
+  moment jsonb,
+  author jsonb,
+  likes_count bigint,
+  liked boolean
+)
+LANGUAGE SQL
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  SELECT
+    p.id,
+    p.user_id,
+    p.moment_id,
+    p.created_at,
+    jsonb_build_object(
+      'id', m.id,
+      'user_id', m.user_id,
+      'prompt', m.prompt,
+      'title', m.title,
+      'mixins', m.mixins,
+      'status', m.status,
+      'created_at', m.created_at,
+      'photos', COALESCE(
+        (SELECT jsonb_agg(
+          jsonb_build_object(
+            'id', ph.id,
+            'moment_id', ph.moment_id,
+            'prompt', ph.prompt,
+            'mixins', ph.mixins,
+            'created_at', ph.created_at
+          ) ORDER BY ph.created_at DESC
+        ) FROM public.photos ph WHERE ph.moment_id = m.id),
+        '[]'::jsonb
+      )
+    ) AS moment,
+    jsonb_build_object(
+      'id', pr.id,
+      'name', pr.name,
+      'avatar', pr.avatar
+    ) AS author,
+    (SELECT COUNT(*) FROM public.likes l WHERE l.post_id = p.id) AS likes_count,
+    EXISTS (
+      SELECT 1 FROM public.likes l WHERE l.post_id = p.id AND l.user_id = user_uuid
+    ) AS liked
+  FROM public.posts p
+  JOIN public.moments m ON m.id = p.moment_id
+  JOIN public.profiles pr ON pr.id = p.user_id
+  ORDER BY p.created_at DESC
+  LIMIT page_limit
+  OFFSET page_offset;
 $$;
 
 -- Function to purchase an asset atomically
