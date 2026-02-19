@@ -10,7 +10,7 @@ import type { Post } from '@/lib/types'
 
 const PAGE_SIZE = 20
 
-export const usePosts = () => {
+export const usePosts = (initialPosts?: Post[]) => {
   const supabase = createClient()
 
   return useInfiniteQuery({
@@ -37,7 +37,13 @@ export const usePosts = () => {
       if (!lastPage.hasMore) return undefined
       return allPages.length * PAGE_SIZE
     },
-    initialPageParam: 0
+    initialPageParam: 0,
+    ...(initialPosts && {
+      initialData: {
+        pages: [{ posts: initialPosts, hasMore: initialPosts.length === PAGE_SIZE }],
+        pageParams: [0]
+      }
+    })
   })
 }
 
