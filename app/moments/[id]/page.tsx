@@ -1,4 +1,4 @@
-import { MomentModal } from '@/components/moment-modal'
+import { MomentView } from '@/components/moment-view'
 import { fetchMoment } from '@/lib/moments'
 
 export default async function MomentPage({
@@ -13,7 +13,7 @@ export default async function MomentPage({
   const { moment, readOnly, author } = await fetchMoment(id)
 
   return (
-    <MomentModal
+    <MomentView
       moment={moment}
       initialPhotoId={photo || moment.photos[0]?.id}
       readOnly={readOnly}
