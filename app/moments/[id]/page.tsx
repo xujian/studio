@@ -13,11 +13,13 @@ export default async function MomentPage({
   const { moment, readOnly, author } = await fetchMoment(id)
 
   return (
-    <MomentView
-      moment={moment}
-      initialPhotoId={photo || moment.photos[0]?.id}
-      readOnly={readOnly}
-      author={author}
-    />
+    <div className="h-[calc(100vh-6rem)]">
+      <MomentView
+        moment={moment}
+        initialPhotoId={photo || moment.photos[0]?.id}
+        readOnly={readOnly}
+        author={author}
+      />
+    </div>
   )
 }
