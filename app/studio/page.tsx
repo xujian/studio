@@ -1,8 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { LayoutGroup } from 'motion/react'
-import { MomentView } from '@/components/moment-view'
 import { MomentCard } from '@/components/moment-card'
 import { StaggerGrid } from '@/components/stagger-grid'
 import { MomentSkeleton } from '@/components/moment-skeleton'
@@ -12,10 +11,7 @@ import type { MomentWithPhotos } from '@/lib/types'
 import { useMoments } from '@/hooks/use-moments'
 
 export default function StudioPage() {
-  const [selectedMomentId, setSelectedMomentId] = useState<{
-    momentId: string
-    initialPhotoId: string
-  } | null>(null)
+  const router = useRouter()
 
   const {
     data,
@@ -27,7 +23,6 @@ export default function StudioPage() {
   } = useMoments()
 
   const handleGenerationComplete = (moment: MomentWithPhotos) => {
-    // Optional: Could add UI feedback here (toast, animation, etc.)
     console.log('Generation complete:', moment)
   }
 
@@ -36,11 +31,6 @@ export default function StudioPage() {
     data?.pages
       .flatMap(page => page.moments)
       .filter(m => m.photos.length > 0) || []
-
-  // Derive selected moment from live query data so it stays in sync after mutations
-  const selectedMoment = selectedMomentId
-    ? allMoments.find(m => m.id === selectedMomentId.momentId)
-    : null
 
   return (
     <section className="flex w-full flex-col items-start justify-center px-16 pb-52">
@@ -67,7 +57,7 @@ export default function StudioPage() {
               key={moment.id}
               moment={moment}
               onPhotoClick={(photo, moment) =>
-                setSelectedMomentId({ momentId: moment.id, initialPhotoId: photo.id })
+                router.push(`/moments/${moment.id}?photo=${photo.id}`)
               }
             />
           ))}
@@ -86,13 +76,6 @@ export default function StudioPage() {
           )}
         </StaggerGrid>
       </LayoutGroup>
-      {selectedMoment && selectedMomentId && (
-        <MomentView
-          moment={selectedMoment}
-          initialPhotoId={selectedMomentId.initialPhotoId}
-          onClose={() => setSelectedMomentId(null)}
-        />
-      )}
       <Producer onGenerationComplete={handleGenerationComplete} />
     </section>
   )

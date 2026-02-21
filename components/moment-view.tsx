@@ -28,7 +28,7 @@ import { MomentInfo } from './moment-info'
 interface MomentViewProps {
   moment: MomentWithPhotos
   initialPhotoId: string
-  onClose: () => void
+  onClose?: () => void
   readOnly?: boolean
   author?: { id: string; name: string | null; avatar: string | null }
 }
@@ -97,6 +97,7 @@ export function MomentView({
 
   // ESC key listener
   React.useEffect(() => {
+    if (!onClose) return
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose()
@@ -113,7 +114,7 @@ export function MomentView({
       mixins: { ...moment.mixins, ...currentPhoto?.mixins },
       reference: moment.reference || undefined,
     })
-    onClose()
+    onClose?.()
   }
 
   return (
@@ -125,7 +126,7 @@ export function MomentView({
           initial={{ opacity: 0 }}
           animate={{ opacity: isDragging ? 0.5 : 1 }}
           exit={{ opacity: 0 }}
-          onClick={onClose}
+          onClick={() => onClose?.()}
         />
         {/* Photo Container with Carousel */}
         <div className="relative z-10 flex h-full w-full justify-between">
@@ -178,7 +179,7 @@ export function MomentView({
                         onDragEnd={(e, info) => {
                           setIsDragging(false)
                           if (info.offset.y > 150) {
-                            onClose()
+                            onClose?.()
                           }
                         }}>
                         <Image
@@ -221,7 +222,7 @@ export function MomentView({
                 onDragEnd={(e, info) => {
                   setIsDragging(false)
                   if (info.offset.y > 150) {
-                    onClose()
+                    onClose?.()
                   }
                 }}>
                 <Image
@@ -365,7 +366,7 @@ export function MomentView({
                       isPending={deleteMoment.isPending}
                       className="delete-button"
                       action={() =>
-                        deleteMoment.mutate(moment.id, { onSuccess: onClose })
+                        deleteMoment.mutate(moment.id, { onSuccess: () => onClose?.() })
                       }
                     />
                   </div>
@@ -378,13 +379,15 @@ export function MomentView({
         </div>
 
         {/* Close Button */}
-        <Button
-          onClick={onClose}
-          variant="outline"
-          size="icon"
-          className="absolute top-4 right-4 z-20">
-          <X className="h-4 w-4" />
-        </Button>
+        {onClose && (
+          <Button
+            onClick={onClose}
+            variant="outline"
+            size="icon"
+            className="absolute top-4 right-4 z-20">
+            <X className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     </AnimatePresence>
   )
