@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { PostGrid } from '@/components/post-grid'
+import { PostCard } from '@/components/post-card'
 import type { Post } from '@/lib/types'
 
 const PAGE_SIZE = 20
@@ -43,7 +43,23 @@ export default async function CommunityPage() {
           No posts yet. Be the first to share a moment!
         </div>
       ) : (
-        <PostGrid initialPosts={allPosts} sections={sections} />
+        <div className="flex flex-col gap-10">
+          {sections.map(section => (
+            <section key={section.title} className="flex flex-col gap-4">
+              <h2 className="my-0 text-lg font-semibold">{section.title}</h2>
+              <div className="scrollbar-none -mx-16 flex gap-4 overflow-x-auto px-16 pb-4">
+                {section.posts.map(post => (
+                  <div key={post.id} className="w-48 shrink-0 md:w-56">
+                    <PostCard
+                      post={post}
+                      href={`/moments/${post.moment.id}?photo=${post.moment.photos[0]?.id}`}
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
       )}
     </section>
   )

@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import * as React from 'react'
 import { motion } from 'motion/react'
 import {
@@ -21,10 +22,10 @@ import { useLikePost } from '@/hooks/use-posts'
 
 interface PostCardProps {
   post: Post
-  onClick: (post: Post) => void
+  href: string
 }
 
-export function PostCard({ post, onClick }: PostCardProps) {
+export function PostCard({ post, href }: PostCardProps) {
   const [isHovered, setIsHovered] = React.useState(false)
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
@@ -82,21 +83,22 @@ export function PostCard({ post, onClick }: PostCardProps) {
         className="relative aspect-9/16 w-full cursor-pointer overflow-hidden rounded-2xl bg-muted"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}>
-        <motion.div
-          className="relative h-full w-full"
-          onClick={() => onClick(post)}
-          whileHover={{ scale: 1.05 }}
-          transition={{ duration: 0.3 }}>
-          <Image
-            className="object-cover"
-            src={photoUrl(moment.user_id, moment.id, photo.id)}
-            alt={moment.prompt}
-            fill
-            sizes="(min-width: 1280px) 16vw, (min-width: 768px) 25vw, 50vw"
-            loading="lazy"
-            unoptimized
-          />
-        </motion.div>
+        <Link href={href}>
+          <motion.div
+            className="relative h-full w-full"
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.3 }}>
+            <Image
+              className="object-cover"
+              src={photoUrl(moment.user_id, moment.id, photo.id)}
+              alt={moment.prompt}
+              fill
+              sizes="(min-width: 1280px) 16vw, (min-width: 768px) 25vw, 50vw"
+              loading="lazy"
+              unoptimized
+            />
+          </motion.div>
+        </Link>
         {overlay}
       </div>
     )
@@ -112,21 +114,22 @@ export function PostCard({ post, onClick }: PostCardProps) {
           {moment.photos.map(photo => (
             <CarouselItem key={photo.id}>
               <div className="relative aspect-9/16 w-full cursor-pointer overflow-hidden rounded bg-muted">
-                <motion.div
-                  className="relative h-full w-full"
-                  onClick={() => onClick(post)}
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ duration: 0.3 }}>
-                  <Image
-                    className="object-cover"
-                    src={photoUrl(moment.user_id, moment.id, photo.id)}
-                    alt={moment.prompt}
-                    fill
-                    sizes="(min-width: 1280px) 16vw, (min-width: 768px) 25vw, 50vw"
-                    loading="lazy"
-                    unoptimized
-                  />
-                </motion.div>
+                <Link href={href}>
+                  <motion.div
+                    className="relative h-full w-full"
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.3 }}>
+                    <Image
+                      className="object-cover"
+                      src={photoUrl(moment.user_id, moment.id, photo.id)}
+                      alt={moment.prompt}
+                      fill
+                      sizes="(min-width: 1280px) 16vw, (min-width: 768px) 25vw, 50vw"
+                      loading="lazy"
+                      unoptimized
+                    />
+                  </motion.div>
+                </Link>
               </div>
             </CarouselItem>
           ))}
