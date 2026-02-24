@@ -1,10 +1,52 @@
-import { StoreGrid } from '@/components/store-grid'
+import { createClient } from '@/lib/supabase/server'
+import { StoreCard } from '@/components/store-card'
+import type { AssetWithPurchaseInfo } from '@/lib/types'
+import { assetTypes } from '@/lib/constants'
 
-export default function StorePage() {
+export default async function StorePage() {
+  const supabase = await createClient()
+
+  const {
+    data: { session }
+  } = await supabase.auth.getSession()
+
+  const userId = session?.user?.id ?? '00000000-0000-0000-0000-000000000000'
+
+  const { data } = await supabase.rpc('get_store_assets', {
+    user_uuid: userId
+  })
+
+  const assets = (data || []) as AssetWithPurchaseInfo[]
+
+  const sections = assetTypes
+    .map(t => ({
+      type: t.type,
+      name: t.name,
+      assets: assets.filter(a => a.type === t.type)
+    }))
+    .filter(s => s.assets.length > 0)
+
   return (
     <section className="flex w-full flex-col px-16 pb-16 pt-2">
-      <h1 className="mb-6 text-2xl font-semibold">Store</h1>
-      <StoreGrid />
+      <h1 className="mb-8 text-2xl font-semibold">Store</h1>
+      {sections.length === 0 ? (
+        <div className="py-20 text-center text-muted-foreground">
+          No assets available yet
+        </div>
+      ) : (
+        <div className="flex flex-col gap-10">
+          {sections.map(section => (
+            <div key={section.type}>
+              <h2 className="mb-3 text-lg font-semibold">{section.name}</h2>
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+                {section.assets.map(asset => (
+                  <StoreCard key={asset.id} asset={asset} />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </section>
   )
 }
