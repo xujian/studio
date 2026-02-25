@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { useRef, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Textarea, Toggle, Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui'
 import { Button } from '@/components/button'
 import { createClient } from '@/lib/supabase/client'
@@ -22,6 +23,9 @@ interface ProducerProps {
 }
 
 export function Producer({ className, onGenerationComplete }: ProducerProps) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
   const [momentId, setMomentId] = useState<string>(''),
     [prompt, setPrompt] = useState(''),
     [mixins, setMixins] = useState<MixinsType>({}),
@@ -40,6 +44,16 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
      * the UI mode
      */
     [expanded, setExpanded] = useState(false)
+
+  // Pre-apply asset from store "Use" button (?use=assetId&type=assetType)
+  React.useEffect(() => {
+    const useId = searchParams.get('use')
+    const useType = searchParams.get('type')
+    if (useId && useType) {
+      setMixins(prev => ({ ...prev, [useType]: useId }))
+      router.replace('/studio')
+    }
+  }, [searchParams])
 
   React.useEffect(() => {
     const supabase = createClient()

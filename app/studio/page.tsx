@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import { LayoutGroup } from 'motion/react'
 import { MomentCard } from '@/components/moment-card'
@@ -76,7 +77,9 @@ export default function StudioPage() {
           )}
         </StaggerGrid>
       </LayoutGroup>
-      <Producer onGenerationComplete={handleGenerationComplete} />
+      <Suspense>
+        <Producer onGenerationComplete={handleGenerationComplete} />
+      </Suspense>
     </section>
   )
 }

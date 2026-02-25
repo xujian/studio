@@ -27,6 +27,7 @@ export const usePurchase = () => {
       toast.success('Asset purchased!')
       queryClient.invalidateQueries({ queryKey: ['store'] })
       queryClient.invalidateQueries({ queryKey: ['assets'] })
+      queryClient.invalidateQueries({ queryKey: ['profile'] })
     },
     onError: (error: Error) => {
       toast.error(error.message)
