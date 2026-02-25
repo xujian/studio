@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ThemeToggle } from '@/components/theme-toggle'
 import { Profile } from '@/components/profile'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/context/auth-provider'
@@ -51,8 +50,7 @@ export const Header = () => {
           </Link>
         ))}
       </nav>
-      <div className="flex flex-1 items-center justify-end gap">
-        <ThemeToggle />
+      <div className="flex flex-1 items-center justify-end">
         <Profile />
       </div>
     </header>

@@ -1,6 +1,8 @@
 'use client'
 
+import { useSyncExternalStore } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTheme } from 'next-themes'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -8,12 +10,20 @@ import {
   PopoverContent,
   PopoverTrigger
 } from '@/components/ui/popover'
+import { Credits } from '@/components/credits'
 import { useAuth } from '@/context/auth-provider'
-import { LogOut, Settings, User } from 'lucide-react'
+import { LogOut, Moon, Settings, Sun, User } from 'lucide-react'
 
 export const Profile = () => {
   const router = useRouter()
   const { user, signOut } = useAuth()
+  const { theme, setTheme, resolvedTheme } = useTheme()
+
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  )
 
   if (!user) return null
 
@@ -24,6 +34,7 @@ export const Profile = () => {
 
   const name = user.userMetadata?.fullName || user.email
   const initials = user.userMetadata?.fullName?.[0] || user.email?.[0]
+  const currentTheme = theme === 'system' ? resolvedTheme : theme
 
   return (
     <Popover>
@@ -44,6 +55,9 @@ export const Profile = () => {
             </p>
           )}
         </div>
+
+        <Credits className="mb-1 rounded-lg" />
+
         <Button
           variant="ghost"
           size="sm"
@@ -60,6 +74,20 @@ export const Profile = () => {
           <Settings className="h-4 w-4" />
           Settings
         </Button>
+        {mounted && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full cursor-pointer justify-start gap-2"
+            onClick={() => setTheme(currentTheme === 'dark' ? 'light' : 'dark')}>
+            {currentTheme === 'dark' ? (
+              <Sun className="h-4 w-4" />
+            ) : (
+              <Moon className="h-4 w-4" />
+            )}
+            {currentTheme === 'dark' ? 'Light mode' : 'Dark mode'}
+          </Button>
+        )}
         <Button
           variant="ghost"
           size="sm"

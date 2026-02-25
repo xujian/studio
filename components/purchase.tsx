@@ -7,10 +7,12 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import type { AssetWithPurchaseInfo } from '@/lib/types'
-import { assetUrl } from '@/lib/utils'
+import { assetUrl, cn } from '@/lib/utils'
 import { useProfile } from '@/hooks/use-profile'
 import { usePurchase } from '@/hooks/use-purchase'
-import { Check, Coins, Loader2, X } from 'lucide-react'
+import { Credits } from '@/components/credits'
+import { Price } from '@/components/price'
+import { Check, Loader2, X } from 'lucide-react'
 
 interface PurchaseModalProps {
   asset: AssetWithPurchaseInfo
@@ -53,9 +55,7 @@ export function PurchaseModal({
         showCloseButton={false}>
         <DialogTitle className="sr-only">Purchase Asset</DialogTitle>
         {/* Hero — full bleed */}
-        <div
-          className="relative w-full overflow-hidden bg-black"
-          style={{ aspectRatio: '3/4' }}>
+        <div className="relative aspect-square rounded-2xl w-full overflow-hidden bg-black">
           {hasImage ? (
             <Image
               src={assetUrl(asset.path!)}
@@ -92,53 +92,47 @@ export function PurchaseModal({
                 <Check className="size-3" />
                 Owned
               </Badge>
-            ) : asset.price != null ? (
-              <Badge className="gap-1 border-white/20 bg-white/10 text-xs text-white backdrop-blur-sm">
-                <Coins className="size-3" />
-                {asset.price}
-              </Badge>
             ) : null}
           </div>
         </div>
 
         {/* Info panel */}
-        <div className="flex flex-col gap-4 p-5">
+        <div className="flex flex-col gap-4 p-4">
           <div className="flex flex-col gap-1">
             <h2 className="text-base leading-tight font-semibold">
               {asset.title || asset.name}
             </h2>
             {asset.description && (
-              <p className="text-sm leading-relaxed text-muted-foreground">
+              <p className="text-sm leading-tight text-muted-foreground">
                 {asset.description}
               </p>
             )}
           </div>
-
+        </div>
+        <div className="p-1 flex flex-col gap-2">
           {/* Credit balance — only for unowned purchasable assets */}
-          {profile && !isOwned && asset.price != null && (
-            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Coins className="size-3" />
-              {profile.credits} credits available
-            </p>
+          {asset.price != null && (
+            <Price value={asset.price} variant="button" />
           )}
-
           {/* Action */}
           {isOwned ? (
-            <Button className="w-full rounded-full" onClick={handleUse}>
+            <Button className="button w-full rounded-full" onClick={handleUse}>
               Use
             </Button>
           ) : (
             <Button
-              className="w-full rounded-full"
+              className={cn('w-full rounded-xl cursor-pointer',
+                purchase.isPending && 'animate-pulse',
+                canAfford ? 'bg-green-500 hover:bg-green-700' : 'bg-muted text-muted-foreground'
+              )}
               onClick={handleBuy}
               disabled={purchase.isPending || !canAfford}>
-              {purchase.isPending ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : !canAfford ? (
-                'Not enough credits'
-              ) : (
-                `Buy · ${asset.price} Credits`
-              )}
+              {purchase.isPending
+                ? (<Loader2 className="size-4 animate-spin" />)
+                : canAfford
+                  ? 'BUY'
+                  : 'Credits Unsufficient'
+              }
             </Button>
           )}
         </div>

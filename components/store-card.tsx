@@ -11,7 +11,8 @@ import {
 } from '@/components/ui/card'
 import type { AssetWithPurchaseInfo } from '@/lib/types'
 import { assetUrl, cn } from '@/lib/utils'
-import { Check, Coins } from 'lucide-react'
+import { Check } from 'lucide-react'
+import { Price } from '@/components/price'
 import { PurchaseModal } from '@/components/purchase'
 
 interface StoreCardProps {
@@ -58,10 +59,7 @@ export function StoreCard({ asset }: StoreCardProps) {
                 Owned
               </Badge>
             ) : asset.price != null ? (
-              <Badge variant="secondary" className="gap-1 text-xs">
-                <Coins className="size-3" />
-                {asset.price}
-              </Badge>
+              <Price value={asset.price} />
             ) : null}
           </div>
         </CardContent>
