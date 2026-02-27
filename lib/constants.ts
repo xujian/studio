@@ -46,3 +46,10 @@ export const defaultAssets: Assets = {
   // },
 }
 
+export const CREDIT_PACKAGES = [
+  { id: 'starter', label: 'Starter', credits: 100,  price: 500  },
+  { id: 'popular', label: 'Popular', credits: 500,  price: 2000 },
+  { id: 'pro',     label: 'Pro',     credits: 1500, price: 5000 },
+] as const
+
+export type CreditPackageId = typeof CREDIT_PACKAGES[number]['id']
