@@ -612,3 +612,15 @@ USING (
   bucket_id = 'uploads' AND
   auth.uid()::text = (storage.foldername(name))[1]
 );
+
+-- Function to safely add credits to a user's profile (used by Stripe webhook)
+CREATE OR REPLACE FUNCTION add_credits(user_uuid uuid, amount integer)
+RETURNS void
+LANGUAGE SQL
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  UPDATE public.profiles
+  SET credits = credits + amount
+  WHERE id = user_uuid;
+$$;
