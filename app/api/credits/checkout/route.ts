@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createClient } from '@/lib/supabase/server'
-import { CREDIT_PACKAGES, CreditPackageId } from '@/lib/constants'
+import { CREDIT_PACKAGES } from '@/lib/constants'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
   }
 
   const formData = await req.formData()
-  const packageId = formData.get('packageId') as CreditPackageId
+  const packageId = formData.get('packageId')
 
   const pkg = CREDIT_PACKAGES.find(p => p.id === packageId)
   if (!pkg) {

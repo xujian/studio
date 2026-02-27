@@ -8,7 +8,11 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
 export async function POST(req: NextRequest) {
   const body = await req.text()
-  const sig = req.headers.get('stripe-signature')!
+  const sig = req.headers.get('stripe-signature')
+
+  if (!sig) {
+    return NextResponse.json({ error: 'Missing stripe-signature' }, { status: 400 })
+  }
 
   let event: Stripe.Event
 
@@ -27,6 +31,12 @@ export async function POST(req: NextRequest) {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session
+
+    // Only fulfill for paid sessions — async payment methods complete before payment
+    if (session.payment_status !== 'paid') {
+      return NextResponse.json({ received: true })
+    }
+
     const userId = session.metadata?.userId
     const credits = parseInt(session.metadata?.credits ?? '0', 10)
 
@@ -36,6 +46,18 @@ export async function POST(req: NextRequest) {
 
     const supabase = createAdminClient()
 
+    // Idempotency: skip if this session was already processed
+    const { data: existing } = await supabase
+      .from('transactions')
+      .select('id')
+      .eq('stripe_session_id', session.id)
+      .maybeSingle()
+
+    if (existing) {
+      return NextResponse.json({ received: true })
+    }
+
+    // Add credits to profile
     const { error: profileError } = await supabase.rpc('add_credits', {
       user_uuid: userId,
       amount: credits,
@@ -46,11 +68,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to add credits' }, { status: 500 })
     }
 
+    // Record transaction with stripe_session_id for idempotency
     await supabase.from('transactions').insert({
       user_id: userId,
       type: 'credit_purchase',
       amount: credits,
       related_id: null,
+      stripe_session_id: session.id,
       description: `Purchased ${credits} credits`,
     })
   }

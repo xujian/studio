@@ -84,6 +84,7 @@ CREATE TABLE transactions (
   type text NOT NULL, -- 'asset_purchase', 'generation_cost', 'credit_purchase', 'refund'
   amount integer NOT NULL, -- negative = debit, positive = credit
   related_id uuid, -- purchase_id, moment_id, etc. (nullable)
+  stripe_session_id text,
   description text,
   created_at timestamptz DEFAULT now()
 );
@@ -115,6 +116,9 @@ CREATE INDEX idx_purchases_asset_id ON purchases(asset_id);
 
 CREATE INDEX idx_transactions_user_id ON transactions(user_id);
 CREATE INDEX idx_transactions_created_at ON transactions(created_at DESC);
+CREATE UNIQUE INDEX idx_transactions_stripe_session_id
+  ON transactions(stripe_session_id)
+  WHERE stripe_session_id IS NOT NULL;
 
 -- =============================================
 -- Row Level Security (RLS) Policies
@@ -616,11 +620,17 @@ USING (
 -- Function to safely add credits to a user's profile (used by Stripe webhook)
 CREATE OR REPLACE FUNCTION add_credits(user_uuid uuid, amount integer)
 RETURNS void
-LANGUAGE SQL
+LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = ''
 AS $$
+BEGIN
   UPDATE public.profiles
   SET credits = credits + amount
   WHERE id = user_uuid;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Profile not found for user_uuid: %', user_uuid;
+  END IF;
+END;
 $$;
