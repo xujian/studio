@@ -107,8 +107,6 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   updated_at timestamptz DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
-CREATE INDEX IF NOT EXISTS idx_subscriptions_stripe_subscription_id ON subscriptions(stripe_subscription_id);
 
 -- =============================================
 -- Indexes
@@ -155,6 +153,9 @@ CREATE POLICY "Users can view own profile"
 CREATE POLICY "Users can update own profile"
   ON profiles FOR UPDATE
   USING (auth.uid() = id);
+
+-- Prevent authenticated users from directly writing server-managed columns
+REVOKE UPDATE (stripe_customer_id, subscription_tier) ON profiles FROM authenticated;
 
 CREATE POLICY "Users can insert own profile"
   ON profiles FOR INSERT
@@ -696,7 +697,7 @@ BEGIN
   INSERT INTO public.transactions (user_id, type, amount, description)
   VALUES (
     user_uuid,
-    'credit_purchase',
+    'subscription_reset',
     credit_amount,
     'Monthly subscription reset: ' || tier || ' plan (' || credit_amount || ' credits)'
   );
