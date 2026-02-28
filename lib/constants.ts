@@ -56,7 +56,7 @@ export type CreditPackageId = typeof CREDIT_PACKAGES[number]['id']
 
 export const SUBSCRIPTION_PLANS = [
   {
-    id: 'basic' as const,
+    id: 'basic',
     label: 'Basic',
     price: 900,         // cents
     credits: 100,
@@ -64,7 +64,7 @@ export const SUBSCRIPTION_PLANS = [
     description: 'For casual creators',
   },
   {
-    id: 'creator' as const,
+    id: 'creator',
     label: 'Creator',
     price: 1900,
     credits: 300,
@@ -73,7 +73,7 @@ export const SUBSCRIPTION_PLANS = [
     popular: true,
   },
   {
-    id: 'pro' as const,
+    id: 'pro',
     label: 'Pro',
     price: 3900,
     credits: 800,

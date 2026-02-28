@@ -1,6 +1,7 @@
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import { CamelCasedProperties } from 'type-fest'
-import { assetTypes, SubscriptionTier } from './constants'
+import { assetTypes } from './constants'
+import type { SubscriptionTier } from './constants'
 
 export const assetTypeNames = assetTypes.map(t => t.type)
 
