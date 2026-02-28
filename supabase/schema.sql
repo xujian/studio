@@ -11,6 +11,11 @@ CREATE TABLE profiles (
   created_at timestamptz DEFAULT now()
 );
 
+-- Add subscription tracking to profiles
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS stripe_customer_id text UNIQUE;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS subscription_tier text DEFAULT 'free';
+-- Values: 'free' | 'basic' | 'creator' | 'pro'
+
 -- Moments table (user generations)
 CREATE TABLE moments (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -88,6 +93,22 @@ CREATE TABLE transactions (
   description text,
   created_at timestamptz DEFAULT now()
 );
+
+-- Subscriptions table (active subscription per user)
+CREATE TABLE IF NOT EXISTS subscriptions (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES profiles(id) ON DELETE CASCADE UNIQUE,
+  stripe_subscription_id text UNIQUE NOT NULL,
+  stripe_customer_id text NOT NULL,
+  tier text NOT NULL, -- 'basic' | 'creator' | 'pro'
+  status text NOT NULL, -- 'active' | 'past_due' | 'canceled'
+  current_period_end timestamptz NOT NULL,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id);
+CREATE INDEX IF NOT EXISTS idx_subscriptions_stripe_subscription_id ON subscriptions(stripe_subscription_id);
 
 -- =============================================
 -- Indexes
@@ -285,6 +306,13 @@ ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can view own transactions"
   ON transactions FOR SELECT
+  USING (auth.uid() = user_id);
+
+-- Subscriptions RLS
+ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own subscription"
+  ON subscriptions FOR SELECT
   USING (auth.uid() = user_id);
 
 -- =============================================
@@ -632,5 +660,45 @@ BEGIN
   IF NOT FOUND THEN
     RAISE EXCEPTION 'Profile not found for user_uuid: %', user_uuid;
   END IF;
+END;
+$$;
+
+-- Function to reset credits at the start of a new billing period
+CREATE OR REPLACE FUNCTION reset_subscription_credits(user_uuid uuid, tier text)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  credit_amount integer;
+BEGIN
+  -- Map tier to credit amount
+  credit_amount := CASE tier
+    WHEN 'basic'   THEN 100
+    WHEN 'creator' THEN 300
+    WHEN 'pro'     THEN 800
+    ELSE 0
+  END;
+
+  IF credit_amount = 0 THEN
+    RAISE EXCEPTION 'Unknown subscription tier: %', tier;
+  END IF;
+
+  UPDATE public.profiles
+  SET credits = credit_amount
+  WHERE id = user_uuid;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Profile not found for user_uuid: %', user_uuid;
+  END IF;
+
+  INSERT INTO public.transactions (user_id, type, amount, description)
+  VALUES (
+    user_uuid,
+    'credit_purchase',
+    credit_amount,
+    'Monthly subscription reset: ' || tier || ' plan (' || credit_amount || ' credits)'
+  );
 END;
 $$;
