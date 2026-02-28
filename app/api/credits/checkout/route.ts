@@ -65,8 +65,8 @@ export async function POST(req: NextRequest) {
       .eq('id', session.user.id)
       .single()
 
-    // Already on this tier — redirect back
-    if (profile?.subscription_tier === planId) {
+    // Already subscribed (any tier) — send to portal to change plan instead
+    if (profile?.subscription_tier && profile.subscription_tier !== 'free') {
       return NextResponse.redirect(`${baseUrl}/credits`, 303)
     }
 

@@ -52,7 +52,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Missing subscription metadata' }, { status: 400 })
       }
 
-      const stripeSubscription = await stripe.subscriptions.retrieve(subscriptionId) as unknown as Stripe.Subscription & { current_period_end: number }
+      const stripeSubscription = await stripe.subscriptions.retrieve(subscriptionId)
+      const periodEnd = stripeSubscription.items.data[0].current_period_end
 
       await supabase.from('subscriptions').upsert({
         user_id: userId,
@@ -60,13 +61,24 @@ export async function POST(req: NextRequest) {
         stripe_customer_id: session.customer as string,
         tier: planId,
         status: 'active',
-        current_period_end: new Date(stripeSubscription.current_period_end * 1000).toISOString(),
+        current_period_end: new Date(periodEnd * 1000).toISOString(),
       }, { onConflict: 'user_id' })
 
       await supabase
         .from('profiles')
         .update({ subscription_tier: planId })
         .eq('id', userId)
+
+      // Idempotency: skip if this checkout session was already processed
+      const { data: existingSub } = await supabase
+        .from('transactions')
+        .select('id')
+        .eq('stripe_session_id', session.id)
+        .maybeSingle()
+
+      if (existingSub) {
+        return NextResponse.json({ received: true })
+      }
 
       const { error } = await supabase.rpc('reset_subscription_credits', {
         user_uuid: userId,
@@ -77,6 +89,15 @@ export async function POST(req: NextRequest) {
         console.error('Failed to grant initial subscription credits:', error)
         return NextResponse.json({ error: 'Failed to grant credits' }, { status: 500 })
       }
+
+      // Record with stripe_session_id for idempotency
+      await supabase.from('transactions').insert({
+        user_id: userId,
+        type: 'subscription_reset',
+        amount: credits,
+        stripe_session_id: session.id,
+        description: `Subscription started: ${planId} plan (${credits} credits)`,
+      })
 
       return NextResponse.json({ received: true })
     }
@@ -122,17 +143,30 @@ export async function POST(req: NextRequest) {
 
   // ─── Monthly renewal ──────────────────────────────────────────────────────
   if (event.type === 'invoice.payment_succeeded') {
-    const invoice = event.data.object as Stripe.Invoice
+    const invoice = event.data.object as Stripe.Invoice & { subscription: string }
 
     // First invoice is handled by checkout.session.completed above
     if (invoice.billing_reason === 'subscription_create') {
       return NextResponse.json({ received: true })
     }
 
-    const subscriptionId = (invoice as Stripe.Invoice & { subscription: string }).subscription
-    const stripeSubscription = await stripe.subscriptions.retrieve(subscriptionId) as unknown as Stripe.Subscription & { current_period_end: number }
+    // Idempotency: skip if this invoice was already processed
+    const { data: existingRenewal } = await supabase
+      .from('transactions')
+      .select('id')
+      .eq('stripe_session_id', invoice.id)
+      .maybeSingle()
+
+    if (existingRenewal) {
+      return NextResponse.json({ received: true })
+    }
+
+    const subscriptionId = invoice.subscription
+    const stripeSubscription = await stripe.subscriptions.retrieve(subscriptionId)
     const userId = stripeSubscription.metadata?.userId
     const planId = stripeSubscription.metadata?.planId
+    const credits = parseInt(stripeSubscription.metadata?.credits ?? '0', 10)
+    const periodEnd = stripeSubscription.items.data[0].current_period_end
 
     if (!userId || !planId) {
       console.error('Missing subscription metadata on renewal:', subscriptionId)
@@ -143,7 +177,7 @@ export async function POST(req: NextRequest) {
       .from('subscriptions')
       .update({
         status: 'active',
-        current_period_end: new Date(stripeSubscription.current_period_end * 1000).toISOString(),
+        current_period_end: new Date(periodEnd * 1000).toISOString(),
         updated_at: new Date().toISOString(),
       })
       .eq('stripe_subscription_id', subscriptionId)
@@ -157,6 +191,15 @@ export async function POST(req: NextRequest) {
       console.error('Failed to reset subscription credits:', error)
       return NextResponse.json({ error: 'Failed to reset credits' }, { status: 500 })
     }
+
+    // Record with invoice.id in stripe_session_id for idempotency
+    await supabase.from('transactions').insert({
+      user_id: userId,
+      type: 'subscription_reset',
+      amount: credits,
+      stripe_session_id: invoice.id,
+      description: `Subscription renewed: ${planId} plan (${credits} credits)`,
+    })
   }
 
   // ─── Payment failed ───────────────────────────────────────────────────────
@@ -175,6 +218,10 @@ export async function POST(req: NextRequest) {
     const subscription = event.data.object as Stripe.Subscription
     const userId = subscription.metadata?.userId
 
+    if (!userId) {
+      console.error('Missing userId metadata on subscription.deleted:', subscription.id)
+    }
+
     await supabase
       .from('subscriptions')
       .update({ status: 'canceled', updated_at: new Date().toISOString() })
@@ -190,9 +237,14 @@ export async function POST(req: NextRequest) {
 
   // ─── Plan upgrade / downgrade ─────────────────────────────────────────────
   if (event.type === 'customer.subscription.updated') {
-    const subscription = event.data.object as unknown as Stripe.Subscription & { current_period_end: number }
+    const subscription = event.data.object as Stripe.Subscription
     const userId = subscription.metadata?.userId
     const planId = subscription.metadata?.planId
+    const periodEnd = subscription.items.data[0].current_period_end
+
+    if (!userId || !planId) {
+      console.error('Missing userId/planId metadata on subscription.updated:', subscription.id)
+    }
 
     if (userId && planId) {
       await supabase
@@ -200,7 +252,7 @@ export async function POST(req: NextRequest) {
         .update({
           tier: planId,
           status: subscription.status as 'active' | 'past_due' | 'canceled',
-          current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+          current_period_end: new Date(periodEnd * 1000).toISOString(),
           updated_at: new Date().toISOString(),
         })
         .eq('stripe_subscription_id', subscription.id)

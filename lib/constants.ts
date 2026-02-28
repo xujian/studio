@@ -54,6 +54,8 @@ export const CREDIT_PACKAGES = [
 
 export type CreditPackageId = typeof CREDIT_PACKAGES[number]['id']
 
+// WARNING: SUBSCRIPTION_PLANS references server-only env vars (STRIPE_*_PRICE_ID).
+// Only import this in Server Components, Route Handlers, or server actions — never in 'use client' files.
 export const SUBSCRIPTION_PLANS = [
   {
     id: 'basic',
