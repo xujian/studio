@@ -1,6 +1,6 @@
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import { CamelCasedProperties } from 'type-fest'
-import { assetTypes } from './constants'
+import { assetTypes, SubscriptionTier } from './constants'
 
 export const assetTypeNames = assetTypes.map(t => t.type)
 
@@ -23,6 +23,8 @@ export type Profile = {
   name: string | null
   avatar: string | null
   credits: number
+  stripe_customer_id: string | null
+  subscription_tier: SubscriptionTier
   created_at: string
 }
 
@@ -124,11 +126,23 @@ export type Purchase = {
 export type Transaction = {
   id: string
   user_id: string
-  type: 'asset_purchase' | 'generation_cost' | 'credit_purchase' | 'refund'
+  type: 'asset_purchase' | 'generation_cost' | 'credit_purchase' | 'refund' | 'subscription_reset'
   amount: number // negative = debit, positive = credit
   related_id: string | null // purchase_id, moment_id, etc.
   description: string | null
   created_at: string
+}
+
+export type Subscription = {
+  id: string
+  user_id: string
+  stripe_subscription_id: string
+  stripe_customer_id: string
+  tier: SubscriptionTier
+  status: 'active' | 'past_due' | 'canceled'
+  current_period_end: string
+  created_at: string
+  updated_at: string
 }
 
 export type AssetWithPurchaseInfo = Asset & {

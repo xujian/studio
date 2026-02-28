@@ -53,3 +53,34 @@ export const CREDIT_PACKAGES = [
 ] as const
 
 export type CreditPackageId = typeof CREDIT_PACKAGES[number]['id']
+
+export const SUBSCRIPTION_PLANS = [
+  {
+    id: 'basic' as const,
+    label: 'Basic',
+    price: 900,         // cents
+    credits: 100,
+    stripePriceId: process.env.STRIPE_BASIC_PRICE_ID!,
+    description: 'For casual creators',
+  },
+  {
+    id: 'creator' as const,
+    label: 'Creator',
+    price: 1900,
+    credits: 300,
+    stripePriceId: process.env.STRIPE_CREATOR_PRICE_ID!,
+    description: 'For regular users',
+    popular: true,
+  },
+  {
+    id: 'pro' as const,
+    label: 'Pro',
+    price: 3900,
+    credits: 800,
+    stripePriceId: process.env.STRIPE_PRO_PRICE_ID!,
+    description: 'For power users',
+  },
+] as const
+
+export type SubscriptionTier = 'free' | 'basic' | 'creator' | 'pro'
+export type SubscriptionPlanId = typeof SUBSCRIPTION_PLANS[number]['id']
