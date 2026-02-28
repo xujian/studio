@@ -678,10 +678,10 @@ BEGIN
     WHEN 'basic'   THEN 100
     WHEN 'creator' THEN 300
     WHEN 'pro'     THEN 800
-    ELSE 0
+    ELSE NULL
   END;
 
-  IF credit_amount = 0 THEN
+  IF credit_amount IS NULL THEN
     RAISE EXCEPTION 'Unknown subscription tier: %', tier;
   END IF;
 
