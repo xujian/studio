@@ -15,7 +15,7 @@ const PORTRAITS = [
 
 export const Hero = () => {
   return (
-    <section className="relative w-screen left-1/2 -translate-x-1/2 -mt-8 overflow-hidden h-[90vh]">
+    <section aria-label="Hero" className="relative w-screen left-1/2 -translate-x-1/2 -mt-8 overflow-hidden h-[90vh]">
       {/* Portrait mosaic */}
       <div className="absolute inset-0 grid grid-cols-5 gap-2 p-2 scale-105">
         {PORTRAITS.map((p) => (
@@ -27,6 +27,9 @@ export const Hero = () => {
             <img
               src={`https://picsum.photos/seed/${p.seed}/400/711`}
               alt=""
+              width={400}
+              height={711}
+              loading="lazy"
               className="w-full h-full object-cover"
             />
           </div>
@@ -44,7 +47,7 @@ export const Hero = () => {
 
       {/* Content */}
       <div className="relative z-10 flex h-full flex-col items-center justify-center gap-6 text-center px-4">
-        <div className="logo w-10 h-10 text-white" aria-hidden />
+        <div className="logo w-10 h-10 text-white" aria-hidden="true" />
         <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white leading-tight">
           Your personal<br />portrait studio.
         </h1>
