@@ -1,262 +1,137 @@
-# Project Specification: Kanojo Studio
+# Kanojo Studio — Product Requirements Document
+
+_Last updated: 2026-03-01_
+
+---
 
 ## Vision
-**Kanojo Studio** is a AI portrait photography app for female.
+
+**"Your personal portrait studio."**
+
+**Kanojo Studio** is an AI portrait photography app focused on young women — generating beautiful, realistic portraits in a curated, opinionated creative space. Not a general AI tool. Not a social network. A focused experience built around faces, style, and self-expression. The 9:16 portrait format is a feature, not a constraint — it signals intentionality.
+
+**Target users:**
+- **Young women** — generating portraits of themselves for expression, aspiration, and content
+- **Male fans/partners** — generating portraits of a face they're drawn to ("their Kanojo")
+
+The emotional tone should feel closer to a high-end beauty app than a tech tool. Soft, curated, feminine-leaning aesthetic — but not exclusionary.
+
+**Primary jobs-to-be-done (in order):**
+1. Creative expression — "I want to imagine myself in different styles, outfits, scenarios"
+2. Aspiration/fantasy — "I want to see a more idealized or editorial version of myself"
+3. Content creation — "I need beautiful portrait content for social media, profiles, etc."
+
+Every feature decision should ask: _does this make her feel more in control and more creative?_
+
 ---
 
-## Key Idea
-To write long prompt is hard. This app let users to pick predefined settings of **face**, **pose**, **scene**, **outfit**, use text descriptions or just images, input these settings into a prompt generation engine, and then use the prompt generated to produce a photo.
+## Scope Constraints
 
-## Narrow down the scope
-1. Only generate realistic photos for female, no man, no pets, no anime
-2. Aspect ratio: 9:16 (portrait)
-3. Face is optional - if not provided, system uses a default face
+1. Only generate realistic photos of female subjects — no men, pets, or anime
+2. Aspect ratio: 9:16 (portrait) only
+3. Face is optional — if not provided, system uses a default face
+
 ---
 
-## Key Screens
-1. **Landing page/Login page**
-2. **Studio**: Main creation interface with Producer and moments
-3. **Store**: Official store to buy Kanojo Studio assets (faces, outfits, poses, scenes)
-4. **Community**: Share and view generated images from users
----
+## The Full Loop
 
-## Key data models
-1. **Moment**: A generation session containing the original prompt, mixins (JSONB mapping asset types to asset IDs), and resulting photos. Can be shared to community.
-2. **Asset**: Reusable resources stored in user's library or marketplace. Can be faces, reference photos, outfits, scenes, etc. (image-based or text-based).
-3. **Photo**: Output image from a generation. Can override moment's mixins with photo-specific asset selections.
-4. **Post**: Moment shared to community, can be liked by users.
-5. **User/Profile**: User account with credits and settings.
+Every surface feeds the next:
 
+```
+Store → acquire face + mixins
+  ↓
+Studio → generate portrait (costs credits)
+  ↓
+Moments → revisit, iterate, perfect
+  ↓
+Community → share a portrait (optional)
+  ↓
+Viewers discover assets used → back to Store
+```
 
-## Key UI components
-1. **Header**: 
-2. **Sidebar**: let user to manage assets, 
-3. **Producer**: let user to input prompt, mix prompts and generate photos
-4. **Moments**: list generations and photos
-5. **Store**: list assets to sell
-6. **Community**: list generated images from community
----
-
-## Tech Stack
-| Layer        | Technology                                      |
-| ------------ | ----------------------------------------------- |
-| Framework    | Next.js 16 (App Router)                         |
-| Styling      | Tailwind CSS 4 (CSS variables for theming)      |
-| UI           | Shadcn UI + Lucide React                        |
-| Backend      | Supabase (Auth, PostgreSQL, Storage, Realtime)  |
-| AI Engine    | Google Gemini (Multimodal & Vision)             |
-| State/Forms  | React Hook Form + Zod + TanStack Query          |
-
-## Configuration
-App settings managed in `config.ts`:
-- **Generation cost**: Credits per generation
-- **Default face**: System default face URL when user doesn't provide one
-- **New user credits**: Starting credits (10)
-- **Asset pricing**: Pricing tiers for store assets
+**The flywheel:**
+Better assets in Store → better generations → more sharing → more discovery → more users → more creators submit assets → better Store
 
 ---
 
 ## Core Features
 
-### 1. The Producer (Unified Generation Interface)
+### 1. The Studio (Generation)
 
-The Producer is the main creation interface where users combine inputs to generate photos.
+The creative workspace — where a user directs her portrait shoot. The UI should feel like a creative director's mood board, not a settings panel.
 
-**Input methods (can be combined):**
-- **Face**: Select from library or upload new reference face (optional - uses system default if not provided)
-- **Reference Image**: Upload for pose/composition guidance (optional)
-- **Text Description**: Natural language prompt (optional)
-- **Structured Settings** (optional):
-  - **Pose**: Standing, sitting, dynamic, etc.
-  - **Makeup**: Natural, Glamour, Editorial, etc.
-  - **Hair**: Length, color, styling
-  - **Outfit**: Formal, Casual, Costume, etc.
-  - **Scene**: Studio, Outdoor, Urban, Fantasy, etc.
-  - **Camera**: DSLR, Mirrorless, Smartphone, etc.
-  - **Lighting**: Natural, Studio, Golden hour, etc.
-  - **Vibe**: Professional, Cinematic, Vintage, Editorial, etc.
+- **Face selector** — pick from your collected faces (the anchor)
+- **Mixins** — stack acquired assets: outfit, makeup, hair, scene, lighting, camera
+- **Text prompt** — optional natural language to describe mood or details
+- **Reference image** — optional upload to guide pose or composition
+- **Generate** — produces a 9:16 portrait, saved to Moments
 
-**Example use cases:**
-1. **Quick generation**: Face + text description ("beach sunset portrait")
-2. **Reference-based**: Face + uploaded pose reference image
-3. **Detailed control**: Face + structured settings (formal outfit + studio lighting + professional vibe)
-4. **Mixed approach**: Face + reference image + text refinements + selected settings
+---
 
-**Generation Engine Pipeline (`lib/engine.ts`):**
+### 2. Moments (Your Gallery)
 
-```
-┌─────────────┐     ┌─────────────┐
-│  Reference   │     │    Text      │
-│    Image     │     │   Prompt     │
-└──────┬──────┘     └──────┬──────┘
-       │                    │
-       ▼                    ▼
- ImageAnalyzer        PromptAnalyzer
- (full scene)        (explicit only)
-       │                    │
-       └──────┬─────────────┘
-              │ deep merge (prompt overrides reference)
-              ▼
-        Structured JSON
-              │
-              │  ┌─────────────┐
-              │  │   Assets     │
-              │  │ (face, etc.) │
-              │  └──────┬──────┘
-              │         │
-              │    AssetsBuilder
-              │    ├─ face image parts (default face if none)
-              │    └─ text sections
-              │         │
-              └────┬────┘
-                   │ asset sections override json
-                   ▼
-           Combined JSON Prompt
-                   │
-                   ▼
-         Gemini API (image gen)
-                   │
-                   ▼
-          Base64 image result
-```
+Every generation is saved as a Moment — capturing the face, mixins, and prompt used.
 
-1. **Analyze inputs** — Reference image → `ImageAnalyzer` (detailed scene baseline). Text prompt → `PromptAnalyzer` (only explicit mentions). Deep merged, prompt overrides reference.
-2. **Build assets** — Face defaults to system face when not provided. `AssetsBuilder` produces image parts (for face) and text sections (for other assets). Sections override corresponding json keys.
-3. **Assemble prompt** — Face image parts + single combined JSON prompt. No redundant data.
-4. **Generate** — Gemini API with portrait aspect ratio (9:16), 2K resolution.
+- **Variations** — generate multiple portraits within one Moment (same baseline, small tweaks)
+- **Revisit & regenerate** — reopen any Moment, adjust mixins, generate new variations
+- **Private by default** — no sharing pressure
 
-### 2. Assets Management
-- **Faces**: Reference face images saved to library
-- **References**: Reference images for pose/composition
-- **Outfits**: Reference images or text descriptions for outfits
-- **Scenes**: Reference images or text descriptions for scenes
-- **Moments**: View all past generations with parameters and output images
-- **Favorites**: Star and organize best results
+---
 
-### 3. Store
+### 3. The Store
+
+Where users discover and acquire assets — faces, outfits, makeup, hair, scenes, lighting, camera styles.
+
+- **Browse by category** — filter by asset type
+- **Free & paid** — many assets are free to lower the barrier to entry
+- **Acquire** — spend credits to add to your collection instantly
+- **Platform-curated + creator-submitted** — (later) community can publish assets
+
+The Store is the primary discovery surface — new assets = reason to come back.
 
 **Asset visibility rules:**
 
 | Condition | Category | Behavior |
 |-----------|----------|----------|
 | `is_public = true AND price IS NULL` | Official asset | Free for all users. Available in Studio without purchasing. Never shown in Store. |
-| `price IS NOT NULL` (even `price = 0`) | Store asset | Listed in the Store. Must be purchased (even if free) to add to user's library. |
-| `is_public = false AND price IS NULL` | Personal asset | Private to the owner. Created by user uploads. Not visible to others. |
-
-**Key rules:**
-- The Store only lists assets where `price IS NOT NULL`
-- Official free assets (`is_public = true, price IS NULL`) are automatically available to everyone — no purchase required, no Store listing
-- A `price = 0` asset is still a Store item — users must "purchase" (claim) it to add it to their library
-- Purchased assets are added to user's library for use in generations
-- Transactions tracked via purchases and credit history
-
-### 4. Community
-- Users can share their generated images to the community (as posts)
-- Users can view and like other users' posts
----
-
-## UI/UX Requirements
-
-### Design Principles
-- **Dark Mode**: Default theme with optional light mode.
-- **Responsive**: Mobile-first, works on all devices.
-- **Premium Feel**: Glassmorphism, smooth animations, micro-interactions.
-- **Accessibility**: Proper contrast, keyboard navigation, ARIA labels.
+| `price IS NOT NULL` (even `price = 0`) | Store asset | Listed in the Store. Must be purchased (even if free) to add to library. |
+| `is_public = false AND price IS NULL` | Personal asset | Private to the owner. Not visible to others. |
 
 ---
 
-## Database Schema (Supabase)
+### 4. Credits & Subscriptions
 
-```sql
--- Users (handled by Supabase Auth)
+Designed to feel generous, not punishing.
 
--- Profiles
-profiles (
-  id uuid references auth.users,
-  name text,
-  avatar text,
-  credits integer default 10,
-  created_at timestamptz
-)
+- **Free tier** — limited monthly credits, can acquire free Store assets, browse everything
+- **Basic / Pro / Max subscriptions** — monthly credit allowance, scales with tier
+- **Credit packs** — one-time purchases to burst beyond allowance
+- **Free assets** — always free, no credits required
 
--- Generations: user generation
-moments (
-  id uuid primary key,
-  user_id uuid references profiles,
-  prompt text,
-  final_prompt text,
-  seed bigint,
-  status text, -- pending, processing, completed, failed
-  created_at timestamptz
-)
+The goal: free users feel the value before hitting a wall, not the wall before the value.
 
--- Reusable resources (personal library + official store)
-assets (
-  id uuid primary key,
-  user_id uuid references profiles,  -- NULL = official Kanojo Studio asset
-  name text,
-  description text,
-  type text, -- face, reference, outfit, scene, etc.
-  path text,  -- if image-based asset (relative path in assets storage bucket)
-  content text,  -- if text-based asset (e.g., "red dress description")
-  is_public boolean default false,  -- true = official free asset (available to all, not in store)
-  price integer,  -- NOT NULL = listed in store (even 0). NULL = not for sale.
-  created_at timestamptz
-)
+**Monetization touchpoints:**
+- Hit credit limit → subscribe or buy a credit pack
+- Want a premium face or mixin → spend credits in Store
+- Discover assets in Community → acquire them
 
--- Asset purchases (only for official store items)
-purchases (
-  id uuid primary key,
-  buyer_id uuid references profiles,
-  asset_id uuid references assets,
-  price integer,  -- credits spent at time of purchase
-  created_at timestamptz,
-  unique(buyer_id, asset_id)
-)
+---
 
--- Credit transaction history
-transactions (
-  id uuid primary key,
-  user_id uuid references profiles,
-  type text,  -- 'asset_purchase', 'generation_cost', 'credit_purchase', 'refund'
-  amount integer,  -- negative = debit, positive = credit
-  related_id uuid,  -- purchase_id, moment_id, etc. (nullable)
-  description text,
-  created_at timestamptz
-)
+### 5. Community (Minimal MVP)
 
--- Inputs used in a specific generation
-mixins (
-  id uuid primary key,
-  moment_id uuid references moments,
-  asset_id uuid references assets,  -- nullable: references asset if from library
-  type text,  -- face, reference, outfit, scene, etc.
-  url text,  -- if ad-hoc upload (not from assets)
-  content text,  -- if text input or prompt fragment
-  created_at timestamptz
-)
+A public inspiration wall — showing what's possible with the tool.
 
---- Photos output from a generation
-photos (
-  id uuid primary key,
-  moment_id uuid references moments,
-  url text,
-  created_at timestamptz
-)
+- **Feed of public portraits** — opt-in, users choose to share a generation
+- **No social graph** — no follows, comments, or likes for now
+- **Asset discovery** — tapping a portrait shows which face + mixins were used, with a path to acquire them
 
--- Community posts
-posts (
-  id uuid primary key,
-  user_id uuid references profiles,
-  moment_id uuid references moments,
-  created_at timestamptz
-)
+Community is a marketing surface disguised as a feature — showcases output quality and funnels viewers into the Store.
 
--- Likes (many-to-many)
-likes (
-  id uuid primary key,
-  post_id uuid references posts,
-  user_id uuid references profiles,
-  created_at timestamptz,
-  unique(post_id, user_id)
-)
+---
+
+## Design Principles
+
+- **Dark mode** default with optional light mode
+- **Mobile-first** — responsive across all devices
+- **Premium feel** — glassmorphism, smooth animations, micro-interactions
+- **Accessibility** — proper contrast, keyboard navigation, ARIA labels
