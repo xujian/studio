@@ -8,8 +8,8 @@ import { CommunityShowcase } from '@/components/landing/community-showcase'
 
 export default async function Home() {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (session) redirect('/studio')
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) redirect('/studio')
 
   return (
     <div className="flex flex-col gap-24 pb-24">
