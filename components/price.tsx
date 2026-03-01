@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import { Sparkle } from 'lucide-react'
+import { Zap } from 'lucide-react'
 
 interface PriceProps {
   value: number
@@ -22,7 +22,7 @@ export function Price({ value, variant = 'badge', className }: PriceProps) {
         )}>
         <span className="text-muted-foreground text-xs">PRICE</span>
         <span className="flex items-center gap-1">
-          <Sparkle className="size-3 text-yellow-400" />
+          <Zap className="size-3 text-yellow-400" />
           {value}
         </span>
       </span>
@@ -36,7 +36,7 @@ export function Price({ value, variant = 'badge', className }: PriceProps) {
         'border-border bg-secondary text-secondary-foreground',
         className
       )}>
-      <Sparkle className="size-3" />
+      <Zap className="size-3 text-yellow-400" />
       {value}
     </span>
   )

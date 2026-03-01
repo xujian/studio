@@ -11,7 +11,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import type { Subscription } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { Sparkle, Zap, CreditCard } from 'lucide-react'
+import { Zap, CreditCard } from 'lucide-react'
 import { Credits } from '@/components/credits'
 
 export default async function CreditsPage() {
@@ -84,7 +84,7 @@ export default async function CreditsPage() {
                       <span className="text-sm text-muted-foreground">/mo</span>
                     </p>
                     <p className="mt-1 flex items-baseline gap-1">
-                      <Sparkle className="size-4 text-yellow-400" />
+                      <Zap className="size-4 text-yellow-400" />
                       <span className="font-semibold">
                         {plan.credits.toLocaleString()}
                       </span>
@@ -170,7 +170,7 @@ export default async function CreditsPage() {
                     <span className="text-sm text-muted-foreground">USD</span>
                   </p>
                   <div className="flex items-center gap-1 text-sm">
-                    <Sparkle className="size-4 text-yellow-400" />
+                    <Zap className="size-4 text-yellow-400" />
                     <span className="font-semibold">
                       {pkg.credits.toLocaleString()}
                     </span>

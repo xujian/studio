@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { useProfile } from '@/hooks/use-profile'
-import { Sparkle } from 'lucide-react'
+import { Zap } from 'lucide-react'
 
 export interface CreditsProps extends React.HTMLAttributes<HTMLDivElement> {
   prefix?: string
@@ -27,7 +27,7 @@ export function Credits({ prefix = '', className, ...props }: CreditsProps) {
         {...props}>
         <div className="flex items-center gap-1">
           <span className="font-medium">{prefix}</span>
-          <Sparkle className="size-4 text-yellow-400" />
+          <Zap className="size-4 text-yellow-400" />
           <span className="number font-bold">{profile.credits}</span>
         </div>
         <div>CREDITS</div>
