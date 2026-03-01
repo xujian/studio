@@ -14,7 +14,7 @@ CREATE TABLE profiles (
 -- Add subscription tracking to profiles
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS stripe_customer_id text UNIQUE;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS subscription_tier text DEFAULT 'free';
--- Values: 'free' | 'basic' | 'creator' | 'pro'
+-- Values: 'free' | 'basic' | 'pro' | 'max'
 
 -- Moments table (user generations)
 CREATE TABLE moments (
@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   user_id uuid REFERENCES profiles(id) ON DELETE CASCADE UNIQUE,
   stripe_subscription_id text UNIQUE NOT NULL,
   stripe_customer_id text NOT NULL,
-  tier text NOT NULL, -- 'basic' | 'creator' | 'pro'
+  tier text NOT NULL, -- 'basic' | 'pro' | 'max'
   status text NOT NULL, -- 'active' | 'past_due' | 'canceled'
   current_period_end timestamptz NOT NULL,
   created_at timestamptz DEFAULT now(),
@@ -676,9 +676,9 @@ DECLARE
 BEGIN
   -- Map tier to credit amount
   credit_amount := CASE tier
-    WHEN 'basic'   THEN 100
-    WHEN 'creator' THEN 300
-    WHEN 'pro'     THEN 800
+    WHEN 'basic' THEN 100
+    WHEN 'pro'   THEN 250
+    WHEN 'max'   THEN 600
     ELSE NULL
   END;
 

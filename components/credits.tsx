@@ -9,7 +9,7 @@ export interface CreditsProps extends React.HTMLAttributes<HTMLDivElement> {
   prefix?: string
 }
 
-export function Credits({ prefix = 'CREDITS', className, ...props }: CreditsProps) {
+export function Credits({ prefix = '', className, ...props }: CreditsProps) {
   const { data: profile, isLoading } = useProfile()
 
   if (isLoading || profile == null) return null
@@ -18,18 +18,19 @@ export function Credits({ prefix = 'CREDITS', className, ...props }: CreditsProp
     <Link href="/credits" className="w-full">
       <div
         className={cn(
-          'flex h-9 items-center justify-between rounded-full px-3',
-          'text-xs tabular-nums',
+          'credits flex h-9 items-center justify-between rounded-full gap-4',
+          'text-sm tabular-nums',
           'cursor-pointer w-full',
           'hover:bg-accent transition-colors',
           className
         )}
         {...props}>
-        <div>{prefix}</div>
         <div className="flex items-center gap-1">
+          <span className="font-medium">{prefix}</span>
           <Sparkle className="size-4 text-yellow-400" />
-          {profile.credits}
+          <span className="number font-bold">{profile.credits}</span>
         </div>
+        <div>CREDITS</div>
       </div>
     </Link>
   )
