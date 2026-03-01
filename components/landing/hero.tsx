@@ -29,7 +29,6 @@ export const Hero = () => {
               alt=""
               width={400}
               height={711}
-              loading="lazy"
               className="w-full h-full object-cover"
             />
           </div>
