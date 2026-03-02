@@ -6,6 +6,7 @@ import { Features } from '@/components/landing/features'
 import { Pricing } from '@/components/landing/pricing'
 import { CommunityShowcase } from '@/components/landing/community-showcase'
 import { Footer } from '@/components/landing/footer'
+import { StudioDemo } from '@/components/landing/studio-demo'
 
 export default async function Home() {
   // const supabase = await createClient()
@@ -15,6 +16,7 @@ export default async function Home() {
   return (
     <div className="flex flex-col gap-24">
       <Hero />
+      <StudioDemo />
       <HowItWorks />
       <Features />
       <Pricing />
