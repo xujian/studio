@@ -21,7 +21,7 @@ export default function RootLayout({
   modal: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="scroll-smooth">
       <head>
         <link rel="icon" href="/logo.svg" type="image/svg+xml" />
       </head>
