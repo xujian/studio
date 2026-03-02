@@ -26,7 +26,7 @@ export const Header = () => {
     <header className="fixed top-4 z-50 h-16 flex w-full items-center justify-between px-8">
       <div className="flex flex-1 items-center">
         <Link
-          href="/studio"
+          href="/"
           className={cn(
             'text-xl font-bold',
             'transition-all duration-300',
