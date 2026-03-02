@@ -31,8 +31,11 @@ export const Hero = () => {
 
       {/* Content */}
       <div className="relative z-10 flex h-full flex-col items-center justify-center gap-6 px-4 text-center">
-        <h1 className="text-5xl leading-tight font-bold tracking-tight text-white md:text-7xl">
-          Your Personal Photo Studio
+        <h1
+          className="font-playfair font-bold text-white leading-none"
+          style={{ fontSize: 'clamp(3rem, 10vw, 9rem)', letterSpacing: '-0.03em' }}
+        >
+          Your Personal<br />Photo Studio
         </h1>
         <p className="max-w-md text-lg text-white/70">
           Generate stunning portraits in seconds.
