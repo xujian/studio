@@ -507,7 +507,7 @@ brew install stripe/stripe-cli/stripe
 
 ```bash
 stripe login
-stripe listen --forward-to http://kanojo.dev.io/api/webhooks/stripe
+stripe listen --forward-to http://kanojostudio.com/api/webhooks/stripe
 ```
 
 Stripe CLI will print a webhook signing secret — make sure it matches `STRIPE_WEBHOOK_SECRET` in `.env.local`.
@@ -520,7 +520,7 @@ pnpm dev
 
 **Step 4: Manual test flow**
 
-1. Navigate to `http://kanojo.dev.io/credits`
+1. Navigate to `http://kanojostudio.com/credits`
 2. Verify current balance shown
 3. Click "Buy Now" on any package
 4. On Stripe Checkout: use test card `4242 4242 4242 4242`, any future date, any CVC
