@@ -5,5 +5,4 @@ node_modules
 .gitignore
 tasks/
 supabase/
-*.md
 Caddyfile
