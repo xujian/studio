@@ -1,13 +1,6 @@
 services:
   studio:
-    build:
-      context: .
-      args:
-        # NEXT_PUBLIC_* are baked into the bundle at build time.
-        # Changing these here after a build has no effect.
-        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
-        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
-        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+    image: ghcr.io/xujian/studio:latest
     environment:
       # Server-side secrets injected at runtime only
       GEMINI_API_KEY: ${GEMINI_API_KEY}
