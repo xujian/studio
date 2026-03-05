@@ -18,8 +18,6 @@ services:
       # letsencrypt-companion SSL
       LETSENCRYPT_HOST: kanojostudio.com
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
-    networks:
-      - nginx-proxy
     restart: unless-stopped
 
 networks:
