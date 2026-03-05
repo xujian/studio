@@ -229,16 +229,5 @@ export function GET() {
 
 ```bash
 git pull
-
-# Build with a version tag so you can roll back
-VERSION=v1.2.0 docker compose build
-VERSION=v1.2.0 docker compose up -d
+docker compose up -d --build
 ```
-
-**Rolling back:**
-
-```bash
-VERSION=v1.1.0 docker compose up -d
-```
-
-> Omitting `VERSION` uses the `latest` tag and overwrites the previous image.

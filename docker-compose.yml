@@ -1,6 +1,5 @@
 services:
   studio:
-    image: studio:${VERSION:-latest}
     build:
       context: .
       args:
