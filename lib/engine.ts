@@ -86,7 +86,7 @@ export const engine = {
     console.log('============================BEFORE GENERATE=====prompt:', json, parts)
     // 4. Generate
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-image-preview',
+      model: process.env.NANO_BANANA_MODEL!,
       contents,
       config: {
         systemInstruction: SYSTEM_PROMPT,

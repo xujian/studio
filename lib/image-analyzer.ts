@@ -37,7 +37,7 @@ export class ImageAnalyzer {
     // Call Gemini Vision API
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
+      model: process.env.NANO_BANANA_MODEL!,
       contents: [
         {
           parts: [
