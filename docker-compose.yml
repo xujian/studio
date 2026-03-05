@@ -12,6 +12,8 @@ services:
     environment:
       # Server-side secrets injected at runtime only
       GEMINI_API_KEY: ${GEMINI_API_KEY}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
       # nginx-proxy routing
       VIRTUAL_HOST: kanojostudio.com
       VIRTUAL_PORT: 4242
