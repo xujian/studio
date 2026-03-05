@@ -50,3 +50,6 @@ jobs:
             docker compose pull
             docker compose up -d
             docker image prune -f
+            # Ensure nginx-proxy buffer config for large Next.js headers
+            docker exec nginx-proxy sh -c 'echo "proxy_buffer_size 128k; proxy_buffers 4 256k; proxy_busy_buffers_size 256k;" > /etc/nginx/vhost.d/kanojostudio.com'
+            docker exec nginx-proxy nginx -s reload
