@@ -1,25 +1,23 @@
+import { storageUrl } from '@/lib/utils'
 import { CtaButton } from './cta-button'
 
-const PORTRAITS = [
-  { name: 'hero-1', offset: '0px' },
-  { name: 'hero-2', offset: '40px' },
-  { name: 'hero-3', offset: '0px' },
-  { name: 'hero-4', offset: '60px' },
-  { name: 'hero-5', offset: '20px' },
-]
+const PORTRAITS = ['hero-1', 'hero-2', 'hero-3', 'hero-4', 'hero-5']
 
 export const Hero = () => {
   return (
     <section
       aria-label="Hero"
-      className="relative left-1/2 h-[90vh] w-screen -translate-x-1/2 overflow-hidden">
+      className="relative left-1/2 h-[60vh] w-screen -translate-x-1/2 overflow-hidden">
+      {/* <div className="absolute w-full inset-0 h-full bg-cover bg-center" style={{
+        backgroundImage: `url(${storageUrl('landing/hero.jpg')})`
+      }}/> */}
       <div className="absolute inset-0 grid grid-cols-5 gap-1 p-1">
-        {PORTRAITS.map(p => (
+        {PORTRAITS.map(name => (
           <div
-            key={p.name}
+            key={name}
             className="relative overflow-hidden rounded-xl">
             <img
-              src={`https://rhxlulctluazrpqzooya.supabase.co/storage/v1/object/public/landing//${p.name}.jpg`}
+              src={storageUrl(`landing/${name}.jpg`)}
               alt=""
               width={400}
               height={711}
@@ -28,17 +26,18 @@ export const Hero = () => {
           </div>
         ))}
       </div>
+      {/* Gradient overlay for text readability */}
+      <div className="absolute inset-0 bg-linear-to-b from-black/0 via-black/70 to-black/0" />
 
       {/* Content */}
       <div className="relative z-10 flex h-full flex-col items-center justify-center gap-6 px-4 text-center">
         <h1
-          className="font-playfair font-bold text-white leading-none"
-          style={{ fontSize: 'clamp(3rem, 10vw, 9rem)', letterSpacing: '-0.03em' }}
-        >
+          className="font-playfair font-bold text-shadow-blue-900 leading-none"
+          style={{ fontSize: 'clamp(3rem, 10vw, 6rem)', letterSpacing: '-0.03em' }}>
           Your Personal<br />Photo Studio
         </h1>
         <p className="max-w-md text-lg text-white/70">
-          Generate stunning portraits in seconds.
+          She was a feeling. Now she's a photograph.
         </p>
         <CtaButton size="lg" />
       </div>

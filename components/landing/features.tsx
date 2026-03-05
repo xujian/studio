@@ -1,54 +1,80 @@
-import { Card, CardContent } from '@/components/ui/card'
-import { Sparkles, ShoppingBag, Images } from 'lucide-react'
+import { cn, storageUrl } from '@/lib/utils'
+import { CtaButton } from './cta-button'
 
-const FEATURES = [
+/**
+ * distinctive features of Kanojo Studio
+ */
+const SECTIONS = [
   {
-    icon: Sparkles,
-    title: 'The Studio',
-    description: 'Combine a face, Mixins, and a prompt. Generate stunning 9:16 portraits in seconds. Iterate endlessly.',
-    color: 'text-violet-400 bg-violet-400/10',
+    label: 'Imagination',
+    headline: 'She belongs in every world you imagine.',
+    sub: "Upload any image. The light, the mood, the world — she's already there.",
+    flip: false,
   },
   {
-    icon: ShoppingBag,
-    title: 'The Store',
-    description: 'Browse faces, outfits, scenes, and more. Many free. New drops regularly. Build your collection.',
-    color: 'text-pink-400 bg-pink-400/10',
+    label: 'Emotion',
+    headline: 'Photographs that feel like something.',
+    sub: 'Soft morning light. Bold confidence. Melancholic dusk. Set the mood — the portrait builds itself.',
+    flip: true,
+    image: 'feature-moods.jpg'
   },
   {
-    icon: Images,
-    title: 'Your Moments',
-    description: 'Every generation saved. Revisit, tweak, and generate variations anytime. Your creative history.',
-    color: 'text-sky-400 bg-sky-400/10',
+    label: 'Scene Worlds',
+    headline: 'Not a backdrop. A world.',
+    sub: 'A rainy Parisian café. A Tokyo street after midnight. A sunlit bedroom at dawn. She steps inside.',
+    flip: false,
+    image: 'feature-scenes.jpg'
   },
+  {
+    label: 'Looks',
+    headline: 'A complete look. One tap.',
+    sub: 'Hair, outfit, lighting, scene — curated to work as one. Browse by feel, not by category.',
+    flip: true,
+    image: 'feature-looks.jpg'
+  },
+  {
+    label: 'The Shoot',
+    headline: 'Not one lucky frame. A shoot.',
+    sub: 'Every session gives you a set of portraits — different angles, expressions, small variations. The way real photography works.',
+    flip: false
+  }
 ]
 
 export const Features = () => {
   return (
-    <section aria-label="Features" className="flex flex-col items-center gap-12 px-4">
-      <div className="text-center">
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
-          Everything you need
-        </p>
-        <h2 className="font-playfair text-3xl md:text-4xl font-bold">
-          Built for one thing.<br />Done perfectly.
-        </h2>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
-        {FEATURES.map((f) => (
-          <Card key={f.title} className="flex flex-col gap-6 p-6 glass elevation-2 glow-primary-hover transition-all">
-            <CardContent className="p-0 flex flex-col gap-4">
-              <div className={`icon w-12 h-12 rounded-2xl ${f.color}`}>
-                <f.icon className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold mb-2">{f.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{f.description}</p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+    <section aria-label="Features" className="flex flex-col gap-32 px-4">
+      {SECTIONS.map(s => (
+        <div
+          key={s.label}
+          className={cn(
+            `mx-auto flex w-full max-w-5xl flex-col items-center`,
+            `gap-12 md:flex-row`,
+            'bg-cover bg-center',
+            s.flip ? 'md:flex-row-reverse' : ''
+          )}
+          style={{ backgroundImage: `url(${storageUrl(`landing/${s.image}`)})` }}>
+          {/* Text */}
+          <div className="flex flex-1 flex-col gap-6">
+            <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+              {s.label}
+            </p>
+            <h2
+              className="font-playfair leading-tight font-bold"
+              style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)' }}>
+              {s.headline}
+            </h2>
+            <p className="max-w-sm text-lg leading-relaxed text-muted-foreground">
+              {s.sub}
+            </p>
+            <div>
+              <CtaButton size="sm" />
+            </div>
+          </div>
+          {/* empty Placeholder */}
+          <div className="flex w-full flex-1 justify-center">
+          </div>
+        </div>
+      ))}
     </section>
   )
 }

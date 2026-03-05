@@ -1,6 +1,7 @@
+import { storageUrl } from '@/lib/utils'
 import { CtaButton } from './cta-button'
 
-const SCREENSHOT_URL = 'https://rhxlulctluazrpqzooya.supabase.co/storage/v1/object/public/landing/demo.png'
+const SCREENSHOT_URL = storageUrl('landing/demo.png')
 
 export const StudioDemo = () => {
   return (
@@ -18,13 +19,7 @@ export const StudioDemo = () => {
       </div>
 
       {/* Screenshot frame */}
-      <div className="w-full max-w-5xl rounded-2xl overflow-hidden elevation-3 ring-1 ring-white/10">
-        {/* Fake app chrome */}
-        <div className="flex items-center gap-2 px-4 py-3 bg-[#1a1a1a] border-b border-white/5">
-          <span className="w-3 h-3 rounded-full bg-white/20" />
-          <span className="w-3 h-3 rounded-full bg-white/20" />
-          <span className="w-3 h-3 rounded-full bg-white/20" />
-        </div>
+      <div className="w-full max-w-5xl rounded-2xl overflow-hidden">
         <img
           src={SCREENSHOT_URL}
           alt="Kanojo Studio interface showing the Producer with face picker, mixin tabs, and prompt input"

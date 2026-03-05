@@ -8,11 +8,11 @@ const LINKS = [
 
 export const Footer = () => {
   return (
-    <footer className="border-t border-border mt-8 py-12 px-4">
+    <footer className="mt-8 py-12 px-4">
       <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex flex-col items-center md:items-start gap-1">
-          <div className="logo w-8 h-8 text-foreground" aria-hidden="true" />
-          <p className="text-xs text-muted-foreground">Your personal portrait studio.</p>
+          <img src="/kanojo.svg" alt="Kanojo Studio Logo" className="w-40 h-20" />
+          <p className="text-sm text-muted-foreground">Your personal portrait studio</p>
         </div>
 
         <nav className="flex items-center gap-6">

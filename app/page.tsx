@@ -17,8 +17,8 @@ export default async function Home() {
     <div className="flex flex-col gap-24">
       <Hero />
       <StudioDemo />
-      <HowItWorks />
       <Features />
+      <HowItWorks />
       <Pricing />
       <CommunityShowcase />
       <Footer />
