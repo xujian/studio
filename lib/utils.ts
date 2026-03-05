@@ -29,3 +29,10 @@ export const assetUrl = (path: string) =>
     '/storage/v1/object/public/assets/',
     `${path}`
   ].join('')
+
+  export const storageUrl = (path: string) =>
+  [
+    `${process.env.NEXT_PUBLIC_SUPABASE_URL}`,
+    '/storage/v1/object/public/',
+    `${path}`
+  ].join('')
