@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import {
   Button,
@@ -13,6 +14,10 @@ import type { Subscription } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { Zap, CreditCard } from 'lucide-react'
 import { Credits } from '@/components/credits'
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+}
 
 export default async function CreditsPage() {
   const supabase = await createClient()

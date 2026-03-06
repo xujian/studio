@@ -1,5 +1,10 @@
+import type { Metadata } from 'next'
 import { MomentView } from '@/components/moment-view'
 import { fetchMoment } from '@/lib/moments'
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+}
 
 export default async function MomentPage({
   params,

@@ -1,6 +1,16 @@
 import { createClient } from '@/lib/supabase/server'
 import { PostCard } from '@/components/post-card'
 import type { Post } from '@/lib/types'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Community — AI Portrait Gallery',
+  description:
+    'Browse AI portrait photos created by the Kanojo Studio community. Get inspired and start creating your own.',
+  alternates: {
+    canonical: 'https://kanojostudio.com/community',
+  },
+}
 
 const PAGE_SIZE = 20
 

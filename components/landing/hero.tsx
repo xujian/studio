@@ -11,14 +11,14 @@ export const Hero = () => {
       {/* <div className="absolute w-full inset-0 h-full bg-cover bg-center" style={{
         backgroundImage: `url(${storageUrl('landing/hero.jpg')})`
       }}/> */}
-      <div className="absolute inset-0 grid grid-cols-5 gap-1 p-1">
-        {PORTRAITS.map(name => (
+      <div className="absolute inset-0 grid grid-cols-5 gap-2 p-2">
+        {PORTRAITS.map((name, index) => (
           <div
             key={name}
             className="relative overflow-hidden rounded-xl">
             <img
               src={storageUrl(`landing/${name}.jpg`)}
-              alt=""
+              alt={`AI-generated portrait photo ${index + 1}`}
               width={400}
               height={711}
               className="h-full w-full object-cover"

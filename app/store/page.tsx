@@ -2,6 +2,16 @@ import { createClient } from '@/lib/supabase/server'
 import { StoreCard } from '@/components/store-card'
 import type { AssetWithPurchaseInfo } from '@/lib/types'
 import { assetTypes } from '@/lib/constants'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Asset Store — Styles, Scenes & Looks',
+  description:
+    'Browse portrait styles, lighting presets, scenes, and outfits for your AI portrait studio. Expand your creative toolkit.',
+  alternates: {
+    canonical: 'https://kanojostudio.com/store',
+  },
+}
 
 export default async function StorePage() {
   const supabase = await createClient()
