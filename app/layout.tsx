@@ -76,7 +76,6 @@ export default function RootLayout({
             {children}
           </main>
           {modal}
-          <Sidebar />
         </Providers>
       </body>
     </html>

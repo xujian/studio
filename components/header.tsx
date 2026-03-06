@@ -10,17 +10,12 @@ import { Aperture, ShoppingBag, Earth } from 'lucide-react'
 
 export const Header = () => {
   const pathname = usePathname()
-  const { user } = useAuth()
 
   const routes = [
     { href: '/studio', label: 'Studio', icon: Aperture },
     { href: '/store', label: 'Store', icon: ShoppingBag },
     { href: '/community', label: 'Community', icon: Earth },
   ]
-
-  if (!user) return (
-    <header className="sticky top-4 z-50 h-16 flex w-full items-center justify-between px-4"></header>
-  )
 
   return (
     <header className="fixed top-4 z-50 h-16 flex w-full items-center justify-between px-8">

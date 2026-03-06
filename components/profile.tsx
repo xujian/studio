@@ -1,8 +1,10 @@
 'use client'
 
-import { useSyncExternalStore } from 'react'
-import { useRouter } from 'next/navigation'
 import { useTheme } from 'next-themes'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useSyncExternalStore } from 'react'
+import { Credits } from '@/components/credits'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -10,9 +12,8 @@ import {
   PopoverContent,
   PopoverTrigger
 } from '@/components/ui/popover'
-import { Credits } from '@/components/credits'
 import { useAuth } from '@/context/auth-provider'
-import { LogOut, Moon, Settings, Sun, User } from 'lucide-react'
+import { LogOut, Moon, Settings, Sun, CircleUserRound } from 'lucide-react'
 
 export const Profile = () => {
   const router = useRouter()
@@ -25,7 +26,12 @@ export const Profile = () => {
     () => false
   )
 
-  if (!user) return null
+  if (!user)
+    return (
+      <Link href="/login">
+        <CircleUserRound className="h-8 w-8" />
+      </Link>
+    )
 
   const handleSignOut = async () => {
     await signOut()
@@ -63,7 +69,7 @@ export const Profile = () => {
           size="sm"
           className="w-full cursor-pointer justify-start gap-2"
           onClick={() => router.push('/studio')}>
-          <User className="h-4 w-4" />
+          <CircleUserRound className="h-8 w-8" />
           Profile
         </Button>
         <Button
@@ -79,7 +85,9 @@ export const Profile = () => {
             variant="ghost"
             size="sm"
             className="w-full cursor-pointer justify-start gap-2"
-            onClick={() => setTheme(currentTheme === 'dark' ? 'light' : 'dark')}>
+            onClick={() =>
+              setTheme(currentTheme === 'dark' ? 'light' : 'dark')
+            }>
             {currentTheme === 'dark' ? (
               <Sun className="h-4 w-4" />
             ) : (
