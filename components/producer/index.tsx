@@ -312,12 +312,12 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
       {/* Error display */}
       <div className={cn([
           'absolute glass flex items-center justify-between bottom-0 right-0 left-0 rounded-full',
-          'bg-destructive/80! text-xs h-14 p-2 pl-4',
+          'bg-destructive/80! text-xs h-12 p-2 pl-4',
           'text-destructive-foreground',
           error ? 'translate-y-0' : 'translate-y-full',
         ].join(' '))}>
         {error && error.message}
-        <Button className="absolute top-3 right-3 icon-button" onClick={clearError}>
+        <Button className="absolute top-2 right-2 icon-button" onClick={clearError}>
           <X />
         </Button>
       </div>
