@@ -1,5 +1,5 @@
 <svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="128" height="128" fill="#FF383C"/>
+<rect width="128" height="128" fill="#282828"/>
 <g opacity="0.8">
 <rect x="112" y="112" width="16" height="16" fill="white"/>
 <rect x="112" y="112" width="16" height="16" stroke="white"/>
@@ -9,20 +9,20 @@
 <rect x="96" y="112" width="16" height="16" stroke="white"/>
 </g>
 <g opacity="0.6">
-<rect x="80" y="112" width="16" height="16" fill="white"/>
-<rect x="80" y="112" width="16" height="16" stroke="white"/>
+<rect x="80.0002" y="112" width="16" height="16" fill="white"/>
+<rect x="80.0002" y="112" width="16" height="16" stroke="white"/>
 </g>
 <g opacity="0.5">
-<rect x="64" y="112" width="16" height="16" fill="white"/>
-<rect x="64" y="112" width="16" height="16" stroke="white"/>
+<rect x="64.0002" y="112" width="16" height="16" fill="white"/>
+<rect x="64.0002" y="112" width="16" height="16" stroke="white"/>
 </g>
 <g opacity="0.4">
-<rect x="48" y="112" width="16" height="16" fill="white"/>
-<rect x="48" y="112" width="16" height="16" stroke="white"/>
+<rect x="47.9998" y="112" width="16" height="16" fill="white"/>
+<rect x="47.9998" y="112" width="16" height="16" stroke="white"/>
 </g>
 <g opacity="0.3">
-<rect x="32" y="112" width="16" height="16" fill="white"/>
-<rect x="32" y="112" width="16" height="16" stroke="white"/>
+<rect x="31.9998" y="112" width="16" height="16" fill="white"/>
+<rect x="31.9998" y="112" width="16" height="16" stroke="white"/>
 </g>
 <g opacity="0.2">
 <rect x="16" y="112" width="16" height="16" fill="white"/>
@@ -32,4 +32,6 @@
 <rect y="112" width="16" height="16" fill="white"/>
 <rect y="112" width="16" height="16" stroke="white"/>
 </g>
+<path d="M10 100V8H23.1491V53.4002L48.1176 8H62.7811L42.688 44.6037L64 100H50.0752L34.3406 59.9432L23.1491 81.0983V100H10Z" fill="white" fill-opacity="0.8"/>
+<path d="M89.4923 100C83.544 100 78.6295 98.2704 74.7668 94.8025C70.9223 91.3436 69 86.0387 69 78.8878V52.148C69 44.9076 70.9223 39.5846 74.7668 36.1615C78.6295 32.7204 83.544 31 89.4923 31C91.3783 31 93.5 31.2331 95.8757 31.6811C98.2422 32.1112 101.316 33.7063 105.088 36.4482L106.72 31.7526H118V99.2832H106.72L105.088 94.5876C101.316 97.3386 98.2422 98.9246 95.8757 99.3547C93.5 99.7848 91.3783 100 89.4923 100ZM93.1918 88.709C96.6737 88.709 99.5208 87.7055 101.751 85.6981C103.973 83.691 105.088 80.886 105.088 77.2747V53.7611C105.088 50.0601 103.973 47.2285 101.751 45.2659C99.5208 43.3124 96.6737 42.3267 93.1918 42.3267C90.3083 42.3267 87.7149 43.2856 85.3939 45.1943C83.0725 47.0852 81.912 49.9436 81.912 53.7611V77.2747C81.912 81.0743 83.0725 83.933 85.3939 85.8415C87.7149 87.7591 90.3083 88.709 93.1918 88.709Z" fill="white" fill-opacity="0.8"/>
 </svg>
