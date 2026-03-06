@@ -8,12 +8,14 @@ import { defaultAssets } from './constants'
 import { Assets, AssetType, JsonPrompt } from './types'
 import { uploadUrl } from './utils'
 import { SYSTEM_PROMPT, TITLE_PROMPT } from './prompts'
+import { logger } from './axiom/server'
 
 export interface GenerateParams {
   userId: string
   prompt: string
   assets?: Assets
   reference?: string
+  requestId: string
 }
 
 interface GenerateResult {
@@ -45,9 +47,9 @@ export const engine = {
     userId,
     prompt,
     assets,
-    reference
+    reference,
+    requestId
   }: GenerateParams): Promise<GenerateResult> => {
-    // console.log('----------------ENGINE---------', prompt, reference, assets)
     const json: JsonPrompt = {},
       ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
     // 1. Analyze inputs into structured json
@@ -83,28 +85,47 @@ export const engine = {
         ].join('\n')
       }
     ]
-    console.log('============================BEFORE GENERATE=====prompt:', json, parts)
     // 4. Generate
-    const response = await ai.models.generateContent({
-      model: process.env.NANO_BANANA_MODEL!,
-      contents,
-      config: {
-        systemInstruction: SYSTEM_PROMPT,
-        responseModalities: ['TEXT', 'IMAGE'],
-        imageConfig: {
-          aspectRatio: '9:16',
-          imageSize: '2K'
+    const geminiStart = Date.now()
+    let response: Awaited<ReturnType<typeof ai.models.generateContent>>
+    try {
+      response = await ai.models.generateContent({
+        model: process.env.NANO_BANANA_MODEL!,
+        contents,
+        config: {
+          systemInstruction: SYSTEM_PROMPT,
+          responseModalities: ['TEXT', 'IMAGE'],
+          imageConfig: {
+            aspectRatio: '9:16',
+            imageSize: '2K'
+          }
         }
-      }
+      })
+    } catch (err) {
+      logger.error('gemini.failed', {
+        request_id: requestId,
+        latencyMs: Date.now() - geminiStart,
+        error: err instanceof Error ? err.message : String(err),
+      })
+      throw err
+    }
+
+    const result = extractGenerationResult(response, requestId)
+    logger.info('gemini.success', {
+      request_id: requestId,
+      latencyMs: Date.now() - geminiStart,
+      title: result.title,
+      promptJson: json,
+      candidateCount: response.candidates?.length ?? 0,
     })
-    return extractGenerationResult(response)
+    return result
   }
 }
 
 /**
  * Extract base64 image data from Gemini response
  */
-function extractGenerationResult (response: any): GenerateResult {
+function extractGenerationResult (response: any, requestId: string): GenerateResult {
   const parts = response.candidates?.[0]?.content?.parts || []
   let image = '', mime = '', title = ''
   for (const part of parts) {
@@ -117,6 +138,12 @@ function extractGenerationResult (response: any): GenerateResult {
       if (match) title = match[1].trim()
     }
   }
-  if (!image) throw new Error('No image found in Gemini response')
+  if (!image) {
+    logger.error('gemini.refused', {
+      request_id: requestId,
+      response: JSON.stringify(response)
+    })
+    throw new Error('Generation refused')
+  }
   return { image, mime, title }
 }
