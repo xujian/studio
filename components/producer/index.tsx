@@ -23,6 +23,7 @@ interface ProducerProps {
 }
 
 export function Producer({ className, onGenerationComplete }: ProducerProps) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -162,15 +163,31 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
     setExpanded(!expanded)
   }
 
-  const filterAssets = (type?: AssetType) => {
+  const handleTextareaWheel = (e: React.WheelEvent<HTMLTextAreaElement>) => {
+    const el = textareaRef.current
+    if (!el) return
+    const isAtTop = el.scrollTop <= 0
+    const isAtBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1 // -1 容错
+    const scrollingUp = e.deltaY < 0
+    const scrollingDown = e.deltaY > 0
+    if (
+      (scrollingDown && !isAtBottom) ||
+      (scrollingUp && !isAtTop)
+    ) {
+      return
+    }
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+const filterAssets = (type?: AssetType) => {
     if (!type) return assets
     return assets.filter(asset => asset.type === type)
   }
 
 
   return (
-    <div
-      className={cn(
+    <div className={cn(
         'producer fixed bottom-4 left-1/2 z-50 w-full max-w-2xl -translate-x-1/2',
         'glass animate-float-up rounded-2xl bg-accent/80',
         'transition-all duration-300 overflow-hidden',
@@ -181,8 +198,8 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
         )}>
         <Mixins value={mixins} onChange={setMixins} />
       </div>
-      <div className="relative flex flex-col gap-1 -m-px overflow-hidden rounded-2xl border border-white/50 bg-black/20 p-1">
-        <div className="inputs gap-1 flex items-stretch">
+      <div className="relative -m-px overflow-hidden rounded-2xl border border-white/50 bg-black/20 p-1">
+        <div className="inputs min-h-32 gap-1 flex items-stretch">
           <div className="h-18 w-18"></div>
           {/** the reference image */}
           <div className={cn(
@@ -231,70 +248,71 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
                   </Button>
                 )}
           </div>
-          <div className={cn('flex-1 p-1')}>
+          <div className={cn('flex-1 p-1 pr-0 h-full')}>
             <Textarea
+              ref={textareaRef}
+              data-lenis-prevent-wheel
               placeholder="Describe the portrait you want to create..."
               className={cn([
-                'min-h-20 h-full text-xs resize-none rounded-none border-none bg-transparent!',
+                'min-h-32 h-full text-xs resize-none rounded-none border-none bg-transparent!',
                 'p-0 focus-visible:ring-0 focus-visible:ring-offset-0',
-                expanded ? '' : 'max-h-20'].join(' '))}
+                '[&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-track]:bg-transparent'].join(' '))}
               value={prompt}
               onChange={handlePromptChange}
+              onWheel={handleTextareaWheel}
               disabled={isPending}
             />
           </div>
         </div>
-        <div className="buttons flex justify-between">
-          <div className="flex items-center gap-1">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div>{/** to fix the toggle's state=closed problem */}
-                  <Toggle
-                    pressed={expanded}
-                    type="button"
-                    variant="outline"
-                    className="rounded-xl h-10 w-18 data-[state=on]:bg-primary! data-[state=on]:text-primary-foreground"
-                    onClick={toggleExpanded}>
-                    <GripHorizontal />
-                  </Toggle>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent align='center' side="top" sideOffset={10}>
-                mixins
-              </TooltipContent>
-            </Tooltip>
-          </div>
-          <div className="flex items-center gap-1">
-            {/* New/Clear button (only visible in retry mode) */}
-            {mode === 'retry' && (
-              <Button
-                type="button"
-                variant="outline"
-                tooltip="retry"
-                className="h-10 w-10 rounded-xl"
-                onClick={handleNew}
-                disabled={isPending}>
-                <X />
-              </Button>
-            )}
-            {/* Generate/Retry button */}
+        <div className="absolute bottom-0 left-0 p-1">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>{/** to fix the toggle's state=closed problem */}
+                <Toggle
+                  pressed={expanded}
+                  type="button"
+                  variant="outline"
+                  className="rounded-xl h-10 w-18 data-[state=on]:bg-primary! data-[state=on]:text-primary-foreground"
+                  onClick={toggleExpanded}>
+                  <GripHorizontal />
+                </Toggle>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent align='center' side="top" sideOffset={10}>
+              mixins
+            </TooltipContent>
+          </Tooltip>
+        </div>
+        <div className="absolute bottom-0 right-0 p-1 flex gap-1">
+          {/* New/Clear button (only visible in retry mode) */}
+          {mode === 'retry' && (
             <Button
               type="button"
               variant="outline"
-              className="h-10 w-10 rounded-xl"
-              tooltip="generate"
-              onClick={handleGenerate}
-              disabled={isPending || couldNotSubmit}>
-              {isPending
-                ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  )
-                : mode === 'create'
-                  ? (<ArrowUp />)
-                  : (<RotateCcw />)
-              }
+              tooltip="retry"
+              className="h-10 w-10 rounded-xl bg-primary! text-primary-foreground"
+              onClick={handleNew}
+              disabled={isPending}>
+              <X />
             </Button>
-          </div>
+          )}
+          {/* Generate/Retry button */}
+          <Button
+            type="button"
+            variant="outline"
+            className="h-10 w-10 rounded-xl bg-primary! text-primary-foreground"
+            tooltip="generate"
+            onClick={handleGenerate}
+            disabled={isPending || couldNotSubmit}>
+            {isPending
+              ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                )
+              : mode === 'create'
+                ? (<ArrowUp />)
+                : (<RotateCcw />)
+            }
+          </Button>
         </div>
       </div>
       {/* Face Picker */}
