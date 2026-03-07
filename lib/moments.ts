@@ -8,6 +8,7 @@ export async function fetchMoment(id: string) {
   const { data: moment, error } = await supabase
     .from('moments')
     .select('*, photos(*)')
+    .order('created_at', { referencedTable: 'photos', ascending: false })
     .eq('id', id)
     .single()
 
