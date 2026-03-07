@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import * as React from 'react'
 import { motion } from 'motion/react'
+import { Button } from '@/components/button'
 import {
   Badge,
   Carousel,
@@ -12,18 +13,25 @@ import {
   CarouselPrevious,
   type CarouselApi
 } from '@/components/ui'
-import { Button } from '@/components/button'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui'
+import { useBus } from '@/lib/bus'
 import { assetTypes } from '@/lib/constants'
 import type { MomentWithPhotos } from '@/lib/types'
 import { assetUrl, cn, photoUrl, uploadUrl } from '@/lib/utils'
 import { useMixins } from '@/hooks/use-mixins'
 import { useDeleteMoment, useDeletePhoto } from '@/hooks/use-moments'
-import { useBus } from '@/lib/bus'
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui'
 import { useSharePost, useUnsharePost } from '@/hooks/use-posts'
-import { GalleryHorizontal, Globe, GlobeLock, Image as ImageIcon, Loader2, StepForward, Trash } from 'lucide-react'
 import { DeleteConfirm } from './delete-confirm'
 import { MomentInfo } from './moment-info'
+import {
+  GalleryHorizontal,
+  Globe,
+  GlobeLock,
+  Image as ImageIcon,
+  Loader2,
+  RotateCcw,
+  Trash
+} from 'lucide-react'
 
 export interface MomentViewProps {
   moment: MomentWithPhotos
@@ -87,7 +95,9 @@ export function MomentView({
     setCurrent(api.selectedScrollSnap())
     const onSelect = () => setCurrent(api.selectedScrollSnap())
     api.on('select', onSelect)
-    return () => { api.off('select', onSelect) }
+    return () => {
+      api.off('select', onSelect)
+    }
   }, [api, moment.photos.length])
   // Scroll to initial photo
   React.useEffect(() => {
@@ -101,24 +111,30 @@ export function MomentView({
       momentId: moment.id,
       prompt: currentPhoto?.prompt || moment.prompt,
       mixins: { ...moment.mixins, ...currentPhoto?.mixins },
-      reference: moment.reference || undefined,
+      reference: moment.reference || undefined
     })
     onClose?.()
   }
 
-  const dragProps = onClose ? {
-    drag: 'y' as const,
-    dragConstraints: { top: 0, bottom: 300 },
-    dragElastic: 0.2,
-    onDragStart: () => onDragStateChange?.(true),
-    onDragEnd: (_e: MouseEvent | TouchEvent | PointerEvent, info: { offset: { y: number } }) => {
-      onDragStateChange?.(false)
-      if (info.offset.y > 150) onClose()
-    },
-    className: "relative h-full w-full cursor-grab overflow-hidden rounded-2xl active:cursor-grabbing",
-  } : {
-    className: "relative h-full w-full overflow-hidden rounded-2xl",
-  }
+  const dragProps = onClose
+    ? {
+        drag: 'y' as const,
+        dragConstraints: { top: 0, bottom: 300 },
+        dragElastic: 0.2,
+        onDragStart: () => onDragStateChange?.(true),
+        onDragEnd: (
+          _e: MouseEvent | TouchEvent | PointerEvent,
+          info: { offset: { y: number } }
+        ) => {
+          onDragStateChange?.(false)
+          if (info.offset.y > 150) onClose()
+        },
+        className:
+          'relative h-full w-full cursor-grab overflow-hidden rounded-2xl active:cursor-grabbing'
+      }
+    : {
+        className: 'relative h-full w-full overflow-hidden rounded-2xl'
+      }
 
   return (
     <div className="relative z-10 flex h-full w-full justify-between">
@@ -127,11 +143,15 @@ export function MomentView({
           <div className="flex h-full w-full flex-col gap-3 p-4">
             <div className="flex items-center gap-3">
               <Avatar className="size-10">
-                {author.avatar && <AvatarImage src={author.avatar} alt={author.name || ''} />}
+                {author.avatar && (
+                  <AvatarImage src={author.avatar} alt={author.name || ''} />
+                )}
                 <AvatarFallback>{(author.name || '?')[0]}</AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-semibold text-white">{author.name || 'Anonymous'}</p>
+                <p className="font-semibold text-white">
+                  {author.name || 'Anonymous'}
+                </p>
               </div>
             </div>
             {moment.title && (
@@ -140,7 +160,9 @@ export function MomentView({
             {moment.created_at && (
               <p className="text-sm text-gray-400">
                 {new Date(moment.created_at).toLocaleString('en-US', {
-                  month: 'short', day: 'numeric', year: 'numeric'
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
                 })}
               </p>
             )}
@@ -206,7 +228,7 @@ export function MomentView({
       </div>
       <div className="attributes flex-1">
         <div className="@container flex h-full flex-col gap-4 pt-16 pr-4 pb-4">
-          <div className="flex items-start justify-start gap">
+          <div className="gap flex items-start justify-start">
             <div className="face relative">
               <Badge className="absolute top-1 left-1 bg-black/80 text-foreground">
                 Face
@@ -215,14 +237,15 @@ export function MomentView({
                 alt="face"
                 src={
                   merged?.face
-                    ? assetUrl(assetsMap?.get(merged.face)?.path!) || '/face.png'
+                    ? assetUrl(assetsMap?.get(merged.face)?.path!) ||
+                      '/face.png'
                     : '/face.png'
                 }
                 className="h-full w-full object-cover"
               />
             </div>
             {moment.reference && (
-              <div className="reference relative rounded-lg border overflow-hidden">
+              <div className="reference relative overflow-hidden rounded-lg border">
                 <Badge className="absolute top-1 left-1 bg-black/80 text-foreground">
                   Reference image
                 </Badge>
@@ -279,7 +302,9 @@ export function MomentView({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}>
-              <p className="text-xs text-white">{currentPhoto.prompt || moment.prompt || '(EMPTY)'}</p>
+              <p className="text-xs text-white">
+                {currentPhoto.prompt || moment.prompt || '(EMPTY)'}
+              </p>
             </motion.div>
           </div>
           {!readOnly && (
@@ -288,35 +313,49 @@ export function MomentView({
                 <Button
                   size="icon"
                   tooltip="load setting and redo this photo"
-                  className="bg-background cursor-pointer"
+                  className="cursor-pointer bg-primary text-primary-foreground"
                   variant="ghost"
                   onClick={redo}>
-                  <StepForward />
+                  <RotateCcw />
                 </Button>
                 <Button
                   size="icon"
-                  tooltip={shared ? 'unshare from community' : 'share to community'}
-                  className="bg-background cursor-pointer"
+                  tooltip={
+                    shared ? 'unshare from community' : 'share to community'
+                  }
+                  className="cursor-pointer bg-primary text-primary-foreground"
                   variant="ghost"
                   disabled={sharePost.isPending || unsharePost.isPending}
                   onClick={() => {
                     if (shared) {
-                      unsharePost.mutate(moment.id, { onSuccess: () => setShared(false) })
+                      unsharePost.mutate(moment.id, {
+                        onSuccess: () => setShared(false)
+                      })
                     } else {
-                      sharePost.mutate(moment.id, { onSuccess: () => setShared(true) })
+                      sharePost.mutate(moment.id, {
+                        onSuccess: () => setShared(true)
+                      })
                     }
                   }}>
-                  {sharePost.isPending || unsharePost.isPending
-                    ? <Loader2 className="animate-spin" />
-                    : shared ? <Globe /> : <GlobeLock />
-                  }
+                  {sharePost.isPending || unsharePost.isPending ? (
+                    <Loader2 className="animate-spin" />
+                  ) : shared ? (
+                    <Globe />
+                  ) : (
+                    <GlobeLock />
+                  )}
                 </Button>
               </div>
               <div className="flex-1"></div>
               <div className="flex flex-0 items-center gap-2">
                 {hasMultiplePhotos && currentPhoto && (
                   <DeleteConfirm
-                    icon={<><Trash /><ImageIcon /></>}
+                    icon={
+                      <>
+                        <Trash />
+                        <ImageIcon />
+                      </>
+                    }
                     message="Delete this photo?"
                     isPending={deletePhoto.isPending}
                     action={() =>
@@ -329,12 +368,19 @@ export function MomentView({
                   />
                 )}
                 <DeleteConfirm
-                  icon={<><Trash /><GalleryHorizontal /></>}
+                  icon={
+                    <>
+                      <Trash />
+                      <GalleryHorizontal />
+                    </>
+                  }
                   message="Delete this moment and all the photos?"
                   isPending={deleteMoment.isPending}
                   className="delete-button"
                   action={() =>
-                    deleteMoment.mutate(moment.id, { onSuccess: () => onClose?.() })
+                    deleteMoment.mutate(moment.id, {
+                      onSuccess: () => onClose?.()
+                    })
                   }
                 />
               </div>
