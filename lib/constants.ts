@@ -90,7 +90,7 @@ export const SUBSCRIPTION_PLANS = [
     label: 'Pro',
     price: 1900,
     credits: 250,
-    stripePriceId: process.env.STRIPE_CREATOR_PRICE_ID!,
+    stripePriceId: process.env.STRIPE_PRO_PRICE_ID!,
     description: 'For regular users',
     popular: true
   },
@@ -99,7 +99,7 @@ export const SUBSCRIPTION_PLANS = [
     label: 'Max',
     price: 3900,
     credits: 600,
-    stripePriceId: process.env.STRIPE_PRO_PRICE_ID!,
+    stripePriceId: process.env.STRIPE_MAX_PRICE_ID!,
     description: 'For power users'
   }
 ] as const

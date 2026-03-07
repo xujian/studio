@@ -2,7 +2,7 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Add Stripe Billing subscription tiers (Basic $9, Creator $19, Pro $39) alongside the existing one-time credit packs, with monthly credit resets and self-service billing via Stripe Customer Portal.
+**Goal:** Add Stripe Billing subscription tiers (Basic $9, Pro $19, Max $39) alongside the existing one-time credit packs, with monthly credit resets and self-service billing via Stripe Customer Portal.
 
 **Architecture:** Subscriptions are created via Stripe Checkout (`mode: 'subscription'`). The existing webhook handler is extended to process subscription lifecycle events (`invoice.payment_succeeded`, `customer.subscription.deleted`, etc.), which reset or revoke credits each billing cycle. A new `/api/credits/portal` route redirects users to Stripe's hosted Customer Portal for plan changes, cancellations, and invoice history — no custom billing UI needed.
 
@@ -19,8 +19,8 @@ In [Stripe Dashboard → Products](https://dashboard.stripe.com/products), creat
 | Product Name | Price | Interval |
 |---|---|---|
 | Basic Plan | $9.00 | monthly |
-| Creator Plan | $19.00 | monthly |
-| Pro Plan | $39.00 | monthly |
+| Prp Plan | $19.00 | monthly |
+| Max Plan | $39.00 | monthly |
 
 After creating each price, copy the **Price ID** (format: `price_xxxxxxxx`).
 
@@ -28,8 +28,8 @@ After creating each price, copy the **Price ID** (format: `price_xxxxxxxx`).
 
 ```env
 STRIPE_BASIC_PRICE_ID=price_xxxxxxxxxx
-STRIPE_CREATOR_PRICE_ID=price_xxxxxxxxxx
 STRIPE_PRO_PRICE_ID=price_xxxxxxxxxx
+STRIPE_MAX_PRICE_ID=price_xxxxxxxxxx
 ```
 
 ### Step 3: Enable Customer Portal in Stripe
@@ -51,7 +51,7 @@ Add after the `profiles` table definition (around line 12):
 -- Add subscription tracking to profiles
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS stripe_customer_id text UNIQUE;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS subscription_tier text DEFAULT 'free';
--- Values: 'free' | 'basic' | 'creator' | 'pro'
+-- Values: 'free' | 'basic' | 'pro' | 'max'
 ```
 
 Add after the `transactions` table (around line 90):
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   user_id uuid REFERENCES profiles(id) ON DELETE CASCADE UNIQUE,
   stripe_subscription_id text UNIQUE NOT NULL,
   stripe_customer_id text NOT NULL,
-  tier text NOT NULL, -- 'basic' | 'creator' | 'pro'
+  tier text NOT NULL, -- 'basic' | 'pro' | 'max'
   status text NOT NULL, -- 'active' | 'past_due' | 'canceled'
   current_period_end timestamptz NOT NULL,
   created_at timestamptz DEFAULT now(),
@@ -103,8 +103,8 @@ BEGIN
   -- Map tier to credit amount
   credit_amount := CASE tier
     WHEN 'basic'   THEN 100
-    WHEN 'creator' THEN 300
-    WHEN 'pro'     THEN 800
+    WHEN 'pro' THEN 300
+    WHEN 'max'     THEN 800
     ELSE 0
   END;
 
@@ -162,25 +162,25 @@ export const SUBSCRIPTION_PLANS = [
     description: 'For casual creators',
   },
   {
-    id: 'creator' as const,
-    label: 'Creator',
+    id: 'pro' as const,
+    label: 'pro',
     price: 1900,
     credits: 300,
-    stripePriceId: process.env.STRIPE_CREATOR_PRICE_ID!,
+    stripePriceId: process.env.STRIPE_PRO_PRICE_ID!,
     description: 'For regular users',
     popular: true,
   },
   {
-    id: 'pro' as const,
-    label: 'Pro',
+    id: 'max' as const,
+    label: 'Max',
     price: 3900,
     credits: 800,
-    stripePriceId: process.env.STRIPE_PRO_PRICE_ID!,
+    stripePriceId: process.env.STRIPE_MAX_PRICE_ID!,
     description: 'For power users',
   },
 ] as const
 
-export type SubscriptionTier = 'free' | 'basic' | 'creator' | 'pro'
+export type SubscriptionTier = 'free' | 'basic' | 'pro' | 'max'
 export type SubscriptionPlanId = typeof SUBSCRIPTION_PLANS[number]['id']
 ```
 
