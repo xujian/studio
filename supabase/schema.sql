@@ -346,7 +346,7 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW
   EXECUTE FUNCTION create_profile();
 
--- Function to deduct credits on generation
+-- Function to deduct credits on generation (fires on photo insert, covers both create and retry)
 CREATE OR REPLACE FUNCTION deduct_generation_credits()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -355,30 +355,37 @@ SET search_path = ''
 AS $$
 DECLARE
   generation_cost integer := 1; -- TODO: Read from config
+  v_user_id uuid;
+  v_prompt text;
 BEGIN
+  -- Get user_id and prompt from parent moment
+  SELECT m.user_id, m.prompt INTO v_user_id, v_prompt
+  FROM public.moments m WHERE m.id = NEW.moment_id;
+
   -- Deduct credits from user profile
   UPDATE public.profiles
   SET credits = credits - generation_cost
-  WHERE id = NEW.user_id;
+  WHERE id = v_user_id;
 
   -- Log transaction
   INSERT INTO public.transactions (user_id, type, amount, related_id, description)
   VALUES (
-    NEW.user_id,
+    v_user_id,
     'generation_cost',
     -generation_cost,
     NEW.id,
-    'Generation: ' || COALESCE(SUBSTRING(NEW.prompt, 1, 50), 'No prompt')
+    'Generation: ' || COALESCE(SUBSTRING(v_prompt, 1, 50), 'No prompt')
   );
 
   RETURN NEW;
 END;
 $$;
 
--- Trigger to deduct credits when moment is created
+-- Trigger to deduct credits when a photo is created (covers both new moments and retries)
 DROP TRIGGER IF EXISTS on_moment_created ON moments;
-CREATE TRIGGER on_moment_created
-  AFTER INSERT ON moments
+DROP TRIGGER IF EXISTS on_photo_created ON photos;
+CREATE TRIGGER on_photo_created
+  AFTER INSERT ON photos
   FOR EACH ROW
   EXECUTE FUNCTION deduct_generation_credits();
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAxiom, logger } from '@/lib/axiom/server'
 import { engine, type GenerateParams } from '@/lib/engine'
+import { ratelimit } from '@/lib/ratelimit'
 import { createClient } from '@/lib/supabase/server'
 import type { AssetType, Mixins, Moment, MomentWithPhotos, Photo } from '@/lib/types'
 import { engineRequestSchema } from '@/lib/validations'
@@ -40,6 +41,23 @@ export const POST = withAxiom(async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     const userId = session.user.id
+    // Check credits before doing any work
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('credits')
+      .eq('id', userId)
+      .single()
+    if (!profile || profile.credits < 1) {
+      return NextResponse.json({ error: 'Insufficient credits' }, { status: 402 })
+    }
+    // Rate limit: 10 generations per hour per user
+    const { success, remaining } = await ratelimit.limit(userId)
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded. Try again later.' },
+        { status: 429, headers: { 'X-RateLimit-Remaining': '0' } }
+      )
+    }
     let momentId = input.momentId
     const mixins: Mixins = input.mixins as Mixins,
       /**
