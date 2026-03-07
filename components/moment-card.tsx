@@ -36,6 +36,13 @@ export function MomentCard({ moment, onPhotoClick }: MomentCardProps) {
     })
   }, [api])
 
+  // Re-sync carousel when photos are added/removed
+  React.useEffect(() => {
+    if (!api) return
+    api.reInit()
+    setCount(api.scrollSnapList().length)
+  }, [api, moment.photos.length])
+
   // Single photo - no carousel
   if (!hasMultiplePhotos) {
     const photo = moment.photos[0]

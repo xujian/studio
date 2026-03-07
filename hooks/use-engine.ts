@@ -36,9 +36,33 @@ export const useEngine = () => {
       }
       return response.json() as Promise<MomentWithPhotos>
     },
-    onSuccess: () => {
-      // Invalidate moments cache to trigger refetch
-      queryClient.invalidateQueries({ queryKey: ['moments'] })
+    onSuccess: (newMoment: MomentWithPhotos) => {
+      queryClient.setQueryData(['moments'], (oldData: any) => {
+        if (!oldData) return oldData
+
+        // Check if moment already exists (retry mode) — update it in place
+        let found = false
+        const newPages = oldData.pages.map((page: any) => {
+          const idx = page.moments.findIndex((m: MomentWithPhotos) => m.id === newMoment.id)
+          if (idx !== -1) {
+            found = true
+            const moments = [...page.moments]
+            moments[idx] = newMoment
+            return { ...page, moments }
+          }
+          return page
+        })
+
+        if (!found) {
+          // New moment — prepend to first page
+          newPages[0] = {
+            ...newPages[0],
+            moments: [newMoment, ...newPages[0].moments]
+          }
+        }
+
+        return { ...oldData, pages: newPages }
+      })
     },
   })
 }
