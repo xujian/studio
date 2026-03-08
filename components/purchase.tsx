@@ -62,7 +62,7 @@ export function PurchaseModal({
               alt={asset.name || 'Asset'}
               fill
               className="object-cover"
-              unoptimized
+              sizes="(max-width: 768px) 100vw, 480px"
             />
           ) : (
             <div className="flex h-full items-center justify-center bg-neutral-950 p-10">

@@ -58,11 +58,10 @@ export function MomentCard({ moment, onPhotoClick }: MomentCardProps) {
           <Image
             className="object-cover"
             src={photoUrl(moment.user_id, moment.id, photo.id)}
-            alt={moment.prompt}
+            alt={moment.title || 'Moment'}
             fill
             sizes="(min-width: 1280px) 16vw, (min-width: 768px) 25vw, 50vw"
             loading="lazy"
-            unoptimized
           />
         </motion.div>
       </div>
@@ -89,11 +88,10 @@ export function MomentCard({ moment, onPhotoClick }: MomentCardProps) {
                   <Image
                     className="object-cover"
                     src={photoUrl(moment.user_id, moment.id, photo.id)}
-                    alt={moment.prompt}
+                    alt={moment.title || 'Photo'}
                     fill
                     sizes="(min-width: 1280px) 16vw, (min-width: 768px) 25vw, 50vw"
                     loading="lazy"
-                    unoptimized
                   />
                 </motion.div>
               </div>

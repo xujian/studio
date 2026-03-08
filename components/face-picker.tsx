@@ -74,9 +74,13 @@ export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
                       selected === face.id ? 'on' : ''
                     )}>
                     {face.path ? (
-                      <img
+                      <Image
                         src={assetUrl(face.path!)}
-                        alt={face.name}
+                        alt={face.name || ''}
+                        width={72}
+                        height={72}
+                        className="h-full w-full object-cover rounded"
+                        sizes="72px"
                       />
                     ) : (
                       face.name

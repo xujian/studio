@@ -41,7 +41,6 @@ export function StoreCard({ asset }: StoreCardProps) {
               fill
               className="object-cover"
               sizes="(max-width: 768px) 50vw, 25vw"
-              unoptimized
             />
           ) : (
             <div className="flex h-full items-center justify-center p-3">

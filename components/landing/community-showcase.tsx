@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { CtaButton } from './cta-button'
 
 const SHOWCASE_PORTRAITS = [
@@ -22,13 +23,13 @@ export const CommunityShowcase = () => {
             key={seed}
             className="relative aspect-[9/16] rounded-xl overflow-hidden group"
           >
-            <img
+            <Image
               src={`https://picsum.photos/seed/${seed}/400/711`}
               alt=""
-              width={400}
-              height={711}
+              fill
               loading="lazy"
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              sizes="(max-width: 768px) 33vw, 25vw"
             />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
           </div>

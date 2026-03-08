@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { useRef, useState } from 'react'
+import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Textarea, Toggle, Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui'
 import { Button } from '@/components/button'
@@ -218,12 +219,12 @@ const filterAssets = (type?: AssetType) => {
             {reference
               ? (
                   <>
-                    <img
+                    <Image
                       className="h-full w-full object-cover"
                       alt="reference"
                       src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${userId}/${reference}`}
-                      width={100}
-                      height={100}
+                      fill
+                      sizes="100px"
                     />
                     <Button
                       type="button"
@@ -254,7 +255,7 @@ const filterAssets = (type?: AssetType) => {
               data-lenis-prevent-wheel
               placeholder="Describe the portrait you want to create..."
               className={cn([
-                'min-h-32 h-full text-xs resize-none rounded-none border-none bg-transparent!',
+                'min-h-32 max-h-40 h-full text-xs resize-none rounded-none border-none bg-transparent!',
                 'p-0 focus-visible:ring-0 focus-visible:ring-offset-0',
                 '[&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-track]:bg-transparent'].join(' '))}
               value={prompt}

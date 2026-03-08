@@ -24,6 +24,7 @@ import { useSharePost, useUnsharePost } from '@/hooks/use-posts'
 import { DeleteConfirm } from './delete-confirm'
 import { MomentInfo } from './moment-info'
 import {
+  Download,
   GalleryHorizontal,
   Globe,
   GlobeLock,
@@ -106,6 +107,18 @@ export function MomentView({
     }
   }, [api, initialIndex])
 
+  const download = async () => {
+    const url = photoUrl(moment.user_id, moment.id, currentPhoto.id)
+    const res = await fetch(url)
+    const blob = await res.blob()
+    const objectUrl = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = objectUrl
+    a.download = `${currentPhoto.id}.jpg`
+    a.click()
+    URL.revokeObjectURL(objectUrl)
+  }
+
   const redo = () => {
     $bus.emit('moment:resume', {
       momentId: moment.id,
@@ -186,11 +199,11 @@ export function MomentView({
                   <motion.div layoutId={photo.id} {...dragProps}>
                     <Image
                       src={photoUrl(moment.user_id, moment.id, photo.id)}
-                      alt={moment.prompt}
+                      alt={moment.title || 'Photo'}
                       fill
                       className="h-full w-full object-cover"
                       priority
-                      unoptimized
+                      sizes="(min-width: 1024px) 33vw, 100vw"
                     />
                   </motion.div>
                 </CarouselItem>
@@ -217,11 +230,11 @@ export function MomentView({
           <motion.div layoutId={moment.photos[0].id} {...dragProps}>
             <Image
               src={photoUrl(moment.user_id, moment.id, moment.photos[0].id)}
-              alt={moment.prompt}
+              alt={moment.title || 'Photo'}
               fill
               className="h-full w-full object-cover"
               priority
-              unoptimized
+              sizes="(min-width: 1024px) 33vw, 100vw"
             />
           </motion.div>
         )}
@@ -233,7 +246,7 @@ export function MomentView({
               <Badge className="absolute top-1 left-1 bg-black/80 text-foreground">
                 Face
               </Badge>
-              <img
+              <Image
                 alt="face"
                 src={
                   merged?.face
@@ -241,7 +254,9 @@ export function MomentView({
                       '/face.png'
                     : '/face.png'
                 }
-                className="h-full w-full object-cover"
+                fill
+                className="object-cover"
+                sizes="120px"
               />
             </div>
             {moment.reference && (
@@ -249,10 +264,13 @@ export function MomentView({
                 <Badge className="absolute top-1 left-1 bg-black/80 text-foreground">
                   Reference image
                 </Badge>
-                <img
+                <Image
                   alt="reference"
                   src={uploadUrl(moment.user_id, moment.reference)}
+                  width={200}
+                  height={200}
                   className="max-h-50 max-w-50 object-cover"
+                  sizes="200px"
                 />
               </div>
             )}
@@ -272,10 +290,12 @@ export function MomentView({
                       {displayName}
                     </Badge>
                     {asset?.path ? (
-                      <img
+                      <Image
                         alt={asset.name || displayName}
-                        src={asset.path}
-                        className="h-full w-full object-cover"
+                        src={assetUrl(asset.path)}
+                        fill
+                        className="object-cover"
+                        sizes="120px"
                       />
                     ) : (
                       <Badge className="bg-black/50 text-white">
@@ -317,6 +337,14 @@ export function MomentView({
                   variant="ghost"
                   onClick={redo}>
                   <RotateCcw />
+                </Button>
+                <Button
+                  size="icon"
+                  tooltip="download original image"
+                  className="cursor-pointer bg-primary text-primary-foreground"
+                  variant="ghost"
+                  onClick={download}>
+                  <Download />
                 </Button>
                 <Button
                   size="icon"

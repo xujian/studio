@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { storageUrl } from '@/lib/utils'
 import { CtaButton } from './cta-button'
 
@@ -16,12 +17,13 @@ export const Hero = () => {
           <div
             key={name}
             className="relative overflow-hidden rounded-xl">
-            <img
+            <Image
               src={storageUrl(`landing/${name}.jpg`)}
               alt={`AI-generated portrait photo ${index + 1}`}
-              width={400}
-              height={711}
-              className="h-full w-full object-cover"
+              fill
+              className="object-cover"
+              sizes="20vw"
+              priority={index < 2}
             />
           </div>
         ))}

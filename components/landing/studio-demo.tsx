@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { storageUrl } from '@/lib/utils'
 import { CtaButton } from './cta-button'
 
@@ -20,12 +21,14 @@ export const StudioDemo = () => {
 
       {/* Screenshot frame */}
       <div className="w-full max-w-5xl rounded-2xl overflow-hidden">
-        <img
+        <Image
           src={SCREENSHOT_URL}
           alt="Kanojo Studio interface showing the Producer with face picker, mixin tabs, and prompt input"
           width={1307}
           height={900}
           className="w-full object-cover object-top"
+          sizes="(max-width: 1024px) 100vw, 1024px"
+          priority
         />
       </div>
 
