@@ -49,6 +49,7 @@ export function getAllSlugs(): string[] {
 }
 
 export function getPostBySlug(slug: string): Post | null {
+  if (slug.includes('/') || slug.includes('..') || slug.includes('\0')) return null
   const filePath = path.join(MAGAZINE_DIR, `${slug}.mdx`)
   if (!fs.existsSync(filePath)) return null
 

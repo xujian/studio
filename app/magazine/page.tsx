@@ -31,7 +31,7 @@ export default function MagazinePage() {
                     className="w-full h-56 object-cover rounded-xl mb-4"
                   />
                 )}
-                <time className="text-sm text-muted-foreground">
+                <time dateTime={post.date} className="text-sm text-muted-foreground">
                   {new Date(post.date).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',

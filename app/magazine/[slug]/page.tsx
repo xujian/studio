@@ -43,7 +43,7 @@ export default async function MagazinePostPage({ params }: Props) {
           className="w-full h-72 object-cover rounded-xl mb-8"
         />
       )}
-      <time className="text-sm text-muted-foreground">
+      <time dateTime={post.date} className="text-sm text-muted-foreground">
         {new Date(post.date).toLocaleDateString('en-US', {
           year: 'numeric',
           month: 'long',
