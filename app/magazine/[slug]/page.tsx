@@ -35,7 +35,7 @@ export default async function MagazinePostPage({ params }: Props) {
   if (!post) notFound()
 
   return (
-    <article className="max-w-2xl mx-auto py-16 px-4">
+    <article className="page mx-auto py-16">
       {post.coverImage && (
         <img
           src={post.coverImage}

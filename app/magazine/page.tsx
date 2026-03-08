@@ -11,8 +11,8 @@ export default function MagazinePage() {
   const posts = getAllPosts()
 
   return (
-    <div className="max-w-3xl mx-auto py-16 px-4">
-      <h1 className="font-playfair text-4xl font-bold mb-2">Kanojo Magazine</h1>
+    <div className="page mx-auto py-16">
+      <h1 className="font-playfair text-6xl font-bold mb-4">Kanojo Magazine</h1>
       <p className="text-muted-foreground mb-12">
         Tips, inspiration, and stories about AI portrait photography.
       </p>
