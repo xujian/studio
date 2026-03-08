@@ -115,7 +115,7 @@ br::selection {
 }
 
 /* Magazine article prose — constrain raw elements, let custom blocks break out */
-.prose-article > p,
+.prose-article > .mdx-p,
 .prose-article > h1,
 .prose-article > h2,
 .prose-article > h3,
@@ -130,7 +130,7 @@ br::selection {
   padding-right: 1.5rem;
 }
 
-.prose-article > p:first-of-type::first-letter {
+.prose-article > .mdx-p:first-child::first-letter {
   font-family: var(--font-playfair), Georgia, serif;
   float: left;
   font-size: 4.5rem;

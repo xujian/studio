@@ -3,48 +3,108 @@ import Link from 'next/link'
 import { getAllPosts } from '@/lib/magazine'
 
 export const metadata: Metadata = {
-  title: 'Magazine',
-  description: 'Tips, inspiration, and stories from the world of AI portrait photography.',
+  title: 'Magazine — Kanojo Studio',
+  description: 'Essays on light, beauty, and the art of the portrait.',
 }
 
 export default function MagazinePage() {
   const posts = getAllPosts()
+  const [hero, ...rest] = posts
 
   return (
-    <div className="page mx-auto py-16">
-      <h1 className="font-playfair text-6xl font-bold mb-4">Kanojo Magazine</h1>
-      <p className="text-muted-foreground mb-12">
-        Tips, inspiration, and stories about AI portrait photography.
-      </p>
+    <div className="page-body">
+      {/* Masthead */}
+      <div className="mx-auto max-w-5xl px-6 pt-20 pb-12 text-center">
+        <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">
+          Kanojo Studio
+        </p>
+        <h1 className="font-playfair text-6xl sm:text-7xl font-bold">Magazine</h1>
+        <p className="mt-5 text-muted-foreground italic text-lg max-w-md mx-auto">
+          Essays on light, beauty, and the art of the portrait.
+        </p>
+        <div className="mt-12 border-t border-border" />
+      </div>
 
       {posts.length === 0 ? (
-        <p className="text-muted-foreground">No posts yet. Check back soon.</p>
+        <p className="text-center text-muted-foreground py-24">
+          No posts yet. Check back soon.
+        </p>
       ) : (
-        <div className="flex flex-col gap-10">
-          {posts.map(post => (
-            <article key={post.slug}>
-              <Link href={`/magazine/${post.slug}`} className="group block">
-                {post.coverImage && (
+        <div className="mx-auto max-w-5xl px-6 pb-24">
+          {/* Hero post */}
+          {hero && (
+            <Link href={`/magazine/${hero.slug}`} className="group block mb-20">
+              {hero.coverImage && (
+                <div className="w-full h-[55vh] overflow-hidden mb-8">
                   <img
-                    src={post.coverImage}
-                    alt={post.title}
-                    className="w-full h-56 object-cover rounded-xl mb-4"
+                    src={hero.coverImage}
+                    alt={hero.title}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
                   />
-                )}
-                <time dateTime={post.date} className="text-sm text-muted-foreground">
-                  {new Date(post.date).toLocaleDateString('en-US', {
+                </div>
+              )}
+              <div className="max-w-2xl mx-auto text-center">
+                <time
+                  dateTime={hero.date}
+                  className="text-xs tracking-[0.2em] uppercase text-muted-foreground"
+                >
+                  {new Date(hero.date).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
                   })}
                 </time>
-                <h2 className="font-playfair text-2xl font-semibold mt-1 mb-2 group-hover:underline">
-                  {post.title}
+                <h2 className="font-playfair text-4xl sm:text-5xl font-bold mt-3 mb-4 leading-tight group-hover:opacity-70 transition-opacity">
+                  {hero.title}
                 </h2>
-                <p className="text-muted-foreground">{post.excerpt}</p>
-              </Link>
-            </article>
-          ))}
+                <p className="text-muted-foreground italic text-lg leading-relaxed">
+                  {hero.excerpt}
+                </p>
+              </div>
+            </Link>
+          )}
+
+          {/* Remaining posts */}
+          {rest.length > 0 && (
+            <>
+              <div className="border-t border-border mb-14" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-14">
+                {rest.map(post => (
+                  <Link
+                    key={post.slug}
+                    href={`/magazine/${post.slug}`}
+                    className="group block"
+                  >
+                    {post.coverImage && (
+                      <div className="w-full aspect-[4/3] overflow-hidden mb-5">
+                        <img
+                          src={post.coverImage}
+                          alt={post.title}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                        />
+                      </div>
+                    )}
+                    <time
+                      dateTime={post.date}
+                      className="text-xs tracking-[0.2em] uppercase text-muted-foreground"
+                    >
+                      {new Date(post.date).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                    </time>
+                    <h2 className="font-playfair text-2xl font-bold mt-2 mb-3 leading-snug group-hover:opacity-70 transition-opacity">
+                      {post.title}
+                    </h2>
+                    <p className="text-muted-foreground italic text-sm leading-relaxed">
+                      {post.excerpt}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>

@@ -1,0 +1,7 @@
+.magazine-article {
+  @apply max-w-7xl mx-auto;
+}
+
+.magazine-article p {
+  @apply my-4;
+}

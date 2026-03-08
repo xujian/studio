@@ -45,7 +45,7 @@ export default async function CreditsPage() {
   const hasSubscription = !!subscription
 
   return (
-    <section className="flex w-full flex-col items-center px-8 pt-2 pb-16">
+    <div className="page-body flex w-full flex-col items-center px-8 pt-2 pb-16">
       <div className="w-full max-w-3xl space-y-12">
         <div>
           <h1 className="text-2xl font-semibold">Buy Plans & Credits</h1>
@@ -200,6 +200,6 @@ export default async function CreditsPage() {
           </div>
         </div>
       </div>
-    </section>
+    </div>
   )
 }

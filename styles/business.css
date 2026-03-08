@@ -4,11 +4,11 @@
   --pulse-glow: 50 90% 60%;
 }
 
-.page {
+.page-body {
   @apply px-4 min-h-[calc(100vh-8rem)] mx-auto w-full flex flex-col;
 }
 
-.page section {
+.page-body section {
   @apply mb-16;
 }
 

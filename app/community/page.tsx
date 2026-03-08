@@ -46,7 +46,7 @@ export default async function CommunityPage() {
     : [{ title: 'Recent', posts: recent }]
 
   return (
-    <section className="flex w-full flex-col px-16 pb-16 pt-2">
+    <div className="page-body flex w-full flex-col px-16 pb-16 pt-2">
       <h1 className="mb-8 text-2xl font-semibold">Community</h1>
       {allPosts.length === 0 ? (
         <div className="py-20 text-center text-muted-foreground">
@@ -71,6 +71,6 @@ export default async function CommunityPage() {
           ))}
         </div>
       )}
-    </section>
+    </div>
   )
 }
