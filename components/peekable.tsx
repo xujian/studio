@@ -68,7 +68,7 @@ export function Peekable({
         <p className="text-xs text-neutral-500 max-h-40 overflow-hidden">{content}</p>
       </div>
     )
-  }, [content])
+  }, [content, title, description, size])
 
   return (
     <Tooltip delayDuration={800}>

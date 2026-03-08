@@ -39,7 +39,7 @@ export const Hero = () => {
           Your Personal<br />Photo Studio
         </h1>
         <p className="max-w-md text-lg text-white/70">
-          She was a feeling. Now she's a photograph.
+          She was a feeling. Now she&apos;s a photograph.
         </p>
         <CtaButton size="lg" />
       </div>

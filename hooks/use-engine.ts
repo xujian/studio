@@ -37,12 +37,14 @@ export const useEngine = () => {
       return response.json() as Promise<MomentWithPhotos>
     },
     onSuccess: (newMoment: MomentWithPhotos) => {
-      queryClient.setQueryData(['moments'], (oldData: any) => {
+      type MomentsPage = { moments: MomentWithPhotos[]; [key: string]: unknown }
+      type MomentsData = { pages: MomentsPage[]; [key: string]: unknown }
+      queryClient.setQueryData(['moments'], (oldData: MomentsData | undefined) => {
         if (!oldData) return oldData
 
         // Check if moment already exists (retry mode) — update it in place
         let found = false
-        const newPages = oldData.pages.map((page: any) => {
+        const newPages = oldData.pages.map((page: MomentsPage) => {
           const idx = page.moments.findIndex((m: MomentWithPhotos) => m.id === newMoment.id)
           if (idx !== -1) {
             found = true

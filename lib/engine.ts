@@ -125,6 +125,7 @@ export const engine = {
 /**
  * Extract base64 image data from Gemini response
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function extractGenerationResult (response: any, requestId: string): GenerateResult {
   const parts = response.candidates?.[0]?.content?.parts || []
   let image = '', mime = '', title = ''

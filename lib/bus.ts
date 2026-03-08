@@ -18,15 +18,18 @@ type Events = {
 const emitter = mitt<Events>()
 
 export function useBus() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  type AnyHandler = Handler<any>
   const subs = useRef(
-    new Map<keyof Events, { wrapper: Handler<any>; current: Handler<any> }>()
+    new Map<keyof Events, { wrapper: AnyHandler; current: AnyHandler }>()
   )
 
   // Cleanup all listeners on unmount
   useEffect(() => {
+    const subsSnapshot = subs.current
     return () => {
-      subs.current.forEach(({ wrapper }, event) => emitter.off(event, wrapper))
-      subs.current.clear()
+      subsSnapshot.forEach(({ wrapper }, event) => emitter.off(event, wrapper))
+      subsSnapshot.clear()
     }
   }, [])
 
@@ -34,11 +37,11 @@ export function useBus() {
     <K extends keyof Events>(event: K, handler: Handler<Events[K]>) => {
       const existing = subs.current.get(event)
       if (existing) {
-        existing.current = handler
+        existing.current = handler as AnyHandler
       } else {
         const sub = {
-          wrapper: ((data: any) => sub.current(data)) as Handler<any>,
-          current: handler as Handler<any>
+          wrapper: ((data: Events[K]) => sub.current(data)) as AnyHandler,
+          current: handler as AnyHandler
         }
         emitter.on(event, sub.wrapper)
         subs.current.set(event, sub)

@@ -86,6 +86,7 @@ export class ImageAnalyzer {
     }
     jsonText = jsonMatch[0]
     // Parse JSON
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let parsed: any
     try {
       parsed = JSON.parse(jsonText)

@@ -41,7 +41,7 @@ export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
                   className={cn('p-0 m-0 w-18 h-18 border bg-image rounded-xl cursor-pointer')}
                   style={{
                     backgroundImage: selected
-                      ? `url(${assetUrl(selectedFace?.path!)})`
+                      ? `url(${assetUrl(selectedFace?.path ?? '')})`
                       : `url(${systemFace})`,
                   }} />
               </PopoverTrigger>

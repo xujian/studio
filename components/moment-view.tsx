@@ -251,7 +251,7 @@ export function MomentView({
                 alt="face"
                 src={
                   merged?.face
-                    ? assetUrl(assetsMap?.get(merged.face)?.path!) ||
+                    ? assetUrl(assetsMap?.get(merged.face)?.path ?? '') ||
                       '/face.png'
                     : '/face.png'
                 }
