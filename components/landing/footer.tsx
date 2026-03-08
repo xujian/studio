@@ -4,6 +4,7 @@ const LINKS = [
   { href: '/studio', label: 'Studio' },
   { href: '/store', label: 'Store' },
   { href: '/community', label: 'Community' },
+  { href: '/magazine', label: 'Magazine' },
 ]
 
 export const Footer = () => {
