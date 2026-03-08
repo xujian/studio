@@ -18,6 +18,9 @@ export default function supabaseLoader({
   // Non-Supabase URLs — return as-is
   if (!src.includes('/storage/v1/object/public/')) return src
 
+  // uploads bucket doesn't support image transforms — return as-is
+  if (src.includes('/storage/v1/object/public/uploads/')) return src
+
   const url = new URL(src)
   url.pathname = url.pathname.replace(
     '/storage/v1/object/public/',

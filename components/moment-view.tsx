@@ -93,6 +93,7 @@ export function MomentView({
   // Set up carousel API and re-sync when photos change
   React.useEffect(() => {
     if (!api) return
+    api.reInit()
     setCurrent(api.selectedScrollSnap())
     const onSelect = () => setCurrent(api.selectedScrollSnap())
     api.on('select', onSelect)
@@ -241,7 +242,7 @@ export function MomentView({
       </div>
       <div className="attributes flex-1">
         <div className="@container flex h-full flex-col gap-4 pt-16 pr-4 pb-4">
-          <div className="gap flex items-start justify-start">
+          <div className="min-h-20 gap flex items-start justify-start">
             <div className="face relative">
               <Badge className="absolute top-1 left-1 bg-black/80 text-foreground">
                 Face
@@ -254,21 +255,21 @@ export function MomentView({
                       '/face.png'
                     : '/face.png'
                 }
-                fill
-                className="object-cover"
-                sizes="120px"
+                width={80}
+                height={80}
+                className="w-full h-full object-cover object-top"
               />
             </div>
             {moment.reference && (
-              <div className="reference relative overflow-hidden rounded-lg border">
+              <div className="reference relative overflow-hidden rounded-lg border border-white!">
                 <Badge className="absolute top-1 left-1 bg-black/80 text-foreground">
                   Reference image
                 </Badge>
                 <Image
                   alt="reference"
                   src={uploadUrl(moment.user_id, moment.reference)}
-                  width={200}
-                  height={200}
+                  width={180}
+                  height={320}
                   className="max-h-50 max-w-50 object-cover"
                   sizes="200px"
                 />
