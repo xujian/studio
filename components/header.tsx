@@ -6,7 +6,7 @@ import { Profile } from '@/components/profile'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/context/auth-provider'
 import { cn } from '@/lib/utils'
-import { Aperture, ShoppingBag, Earth } from 'lucide-react'
+import { Aperture, ShoppingBag, Earth, BookOpen } from 'lucide-react'
 
 export const Header = () => {
   const pathname = usePathname()
@@ -15,6 +15,7 @@ export const Header = () => {
     { href: '/studio', label: 'Studio', icon: Aperture },
     { href: '/store', label: 'Store', icon: ShoppingBag },
     { href: '/community', label: 'Community', icon: Earth },
+    { href: '/magazine', label: 'Magazine', icon: BookOpen },
   ]
 
   return (
