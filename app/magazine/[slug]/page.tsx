@@ -34,25 +34,49 @@ export default async function MagazinePostPage({ params }: Props) {
 
   if (!post) notFound()
 
+  const formattedDate = new Date(post.date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+
   return (
-    <article className="page mx-auto py-16">
+    <article>
+      {/* Full-bleed hero */}
       {post.coverImage && (
-        <img
-          src={post.coverImage}
-          alt={post.title}
-          className="w-full h-72 object-cover rounded-xl mb-8"
-        />
+        <div className="w-full h-[75vh] overflow-hidden">
+          <img
+            src={post.coverImage}
+            alt={post.title}
+            className="w-full h-full object-cover"
+          />
+        </div>
       )}
-      <time dateTime={post.date} className="text-sm text-muted-foreground">
-        {new Date(post.date).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        })}
-      </time>
-      <h1 className="font-playfair text-4xl font-bold mt-2 mb-8">{post.title}</h1>
-      <div className="prose prose-neutral dark:prose-invert max-w-none">
-        <MDXRemote source={post.content} components={mdxComponents} />
+
+      {/* Header */}
+      <div className="mx-auto max-w-2xl px-6 pt-14 pb-10 text-center">
+        <time
+          dateTime={post.date}
+          className="text-xs tracking-[0.2em] uppercase text-muted-foreground"
+        >
+          {formattedDate}
+        </time>
+        <h1 className="font-playfair text-4xl sm:text-5xl font-bold mt-4 mb-6 leading-tight">
+          {post.title}
+        </h1>
+        {post.excerpt && (
+          <p className="text-lg text-muted-foreground italic leading-relaxed">
+            {post.excerpt}
+          </p>
+        )}
+        <div className="mt-10 border-t border-border" />
+      </div>
+
+      {/* Body */}
+      <div className="mx-auto max-w-5xl px-6 pb-24">
+        <div className="prose-article">
+          <MDXRemote source={post.content} components={mdxComponents} />
+        </div>
       </div>
     </article>
   )

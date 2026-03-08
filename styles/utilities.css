@@ -113,3 +113,29 @@ br::selection {
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
+
+/* Magazine article prose — constrain raw elements, let custom blocks break out */
+.prose-article > p,
+.prose-article > h1,
+.prose-article > h2,
+.prose-article > h3,
+.prose-article > ul,
+.prose-article > ol,
+.prose-article > blockquote,
+.prose-article > hr {
+  max-width: 42rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.prose-article > p:first-of-type::first-letter {
+  font-family: var(--font-playfair), Georgia, serif;
+  float: left;
+  font-size: 4.5rem;
+  line-height: 0.8;
+  padding-right: 0.12em;
+  padding-top: 0.06em;
+  font-weight: 700;
+}
