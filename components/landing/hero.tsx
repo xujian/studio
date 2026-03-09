@@ -8,11 +8,11 @@ export const Hero = () => {
   return (
     <section
       aria-label="Hero"
-      className="relative left-1/2 h-[60vh] w-screen -translate-x-1/2 overflow-hidden">
+      className="hero relative left-1/2 h-[60vh] w-screen max-w-480 -translate-x-1/2 overflow-hidden">
       {/* <div className="absolute w-full inset-0 h-full bg-cover bg-center" style={{
         backgroundImage: `url(${storageUrl('landing/hero.jpg')})`
       }}/> */}
-      <div className="absolute inset-0 grid grid-cols-5 gap-2 p-2">
+      <div className="absolute inset-0 grid grid-cols-5 gap-2 px-2">
         {PORTRAITS.map((name, index) => (
           <div
             key={name}
