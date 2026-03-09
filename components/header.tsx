@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { useAuth } from '@/context/auth-provider'
 import { cn } from '@/lib/utils'
 import { Aperture, ShoppingBag, Earth, BookOpen } from 'lucide-react'
+import path from 'path/win32'
 
 export const Header = () => {
   const pathname = usePathname()
@@ -17,6 +18,10 @@ export const Header = () => {
     { href: '/community', label: 'Community', icon: Earth },
     { href: '/magazine', label: 'Magazine', icon: BookOpen },
   ]
+
+  const testSelected = (href: string) => {
+    return pathname.startsWith(href)
+  }
 
   return (
     <header className="fixed top-4 z-50 h-16 flex w-full items-center justify-between px-8">
@@ -34,9 +39,9 @@ export const Header = () => {
         {routes.map(route => (
           <Link key={route.href} href={route.href}>
             <Button
-              variant={pathname === route.href ? 'default' : 'ghost'}
+              variant={testSelected(route.href) ? 'default' : 'ghost'}
               className={cn('h-8 rounded-full min-w-30 justify-start gap-1 pl-1 pr-6 cursor-pointer',
-                pathname === route.href ? 'bg-white/90': ''
+                testSelected(route.href) ? 'bg-white/90': ''
               )}>
               <div className="icon">
                 <route.icon className="h-5! w-5!" />
