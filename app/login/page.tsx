@@ -21,7 +21,7 @@ export default function LoginPage() {
       },
     })
     if (error) {
-      console.error('❌ OAuth sign-in error:', error)
+      // sign-in errors are handled by the OAuth redirect
     }
   }
 

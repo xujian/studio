@@ -52,7 +52,7 @@ export const Features = () => {
             'bg-cover bg-center',
             s.flip ? 'md:flex-row-reverse' : ''
           )}
-          style={{ backgroundImage: `url(${storageUrl(`landing/${s.image}`)})` }}>
+          style={s.image ? { backgroundImage: `url(${storageUrl(`landing/${s.image}`)})` } : undefined}>
           {/* Text */}
           <div className="flex flex-1 flex-col gap-6">
             <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">

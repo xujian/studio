@@ -12,7 +12,7 @@ export const Footer = () => {
     <footer className="mt-8 py-12 px-4">
       <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex flex-col items-center md:items-start gap-1">
-          <img src="/kanojo.svg" alt="Kanojo Studio Logo" className="w-40 h-20" />
+          <img src="/kanojo.svg" alt="Kanojo Studio Logo" className="h-10 w-auto" />
           <p className="text-sm text-muted-foreground">Your personal portrait studio</p>
         </div>
 

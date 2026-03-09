@@ -36,8 +36,8 @@ export const HowItWorks = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
         {STEPS.map((step) => (
-          <Card key={step.number} className="flex flex-col gap-4 p-6 glass elevation-2">
-            <CardContent className="p-0 flex flex-col gap-4">
+          <Card key={step.number} className="glass elevation-2">
+            <CardContent className="flex flex-col gap-4 p-6">
               <div className="flex items-center gap-3">
                 <span className="text-4xl font-black text-muted-foreground/30">{step.number}</span>
                 <div className="icon bg-primary/10 text-primary">
