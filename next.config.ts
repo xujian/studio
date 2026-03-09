@@ -3,8 +3,20 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   output: 'standalone',
   images: {
-    loader: 'custom',
-    loaderFile: './lib/supabase-image-loader.ts',
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'rhxlulctluazrpqzooya.supabase.co',
+      },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+      },
+    ],
   },
 };
 
