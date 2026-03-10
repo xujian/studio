@@ -58,7 +58,7 @@ export const POST = withAxiom(async function POST(request: NextRequest) {
         { status: 429, headers: { 'X-RateLimit-Remaining': '0' } }
       )
     }
-    let momentId = input.momentId
+    let momentId = input.momentId || crypto.randomUUID()
     const mixins: Mixins = input.mixins as Mixins,
       /**
        * params to generate image
@@ -76,26 +76,8 @@ export const POST = withAxiom(async function POST(request: NextRequest) {
         prompt: null,
         mixins: null
       }
-    // 3. If moment provided, verify ownership and fetch baseline prompt/mixins
-    if (mode === 'create') {
-      // Create new moment with baseline prompt and mixins
-      const { data, error: momentError } = await supabase
-        .from('moments')
-        .insert({
-          user_id: userId,
-          prompt: input.prompt,
-          reference: input.reference,
-          mixins: mixins || null,
-          status: 'completed'
-        })
-        .select()
-        .single()
-      if (momentError) {
-        logger.error('moment.create.failed', { request_id: requestId, error: momentError.message })
-        return halt(new Error(`Failed to create moment: ${momentError.message}`))
-      }
-      momentId = data.id
-    } else {
+    // 3. If retry, verify ownership and fetch baseline prompt/mixins
+    if (mode === 'retry') {
       // it's a retry generation
       // load moment data to compare
       const { data: moment, error: momentError } = await supabase
@@ -165,7 +147,25 @@ export const POST = withAxiom(async function POST(request: NextRequest) {
       logger.error('storage.upload.failed', { request_id: requestId, error: uploadError.message })
       return halt(new Error(`Storage upload failed: ${uploadError.message}`))
     }
-    // 8. Insert photo record (url derived from userId/momentId/photoId)
+    // 8. On create: insert moment now (after generation succeeds — no empty moments)
+    if (mode === 'create') {
+      const { error: momentError } = await supabase
+        .from('moments')
+        .insert({
+          id: momentId,
+          user_id: userId,
+          prompt: input.prompt,
+          reference: input.reference,
+          mixins: mixins || null,
+          title: title || null,
+          status: 'completed'
+        })
+      if (momentError) {
+        logger.error('moment.create.failed', { request_id: requestId, error: momentError.message })
+        return halt(new Error(`Failed to create moment: ${momentError.message}`))
+      }
+    }
+    // 9. Insert photo record
     const { error: photoError } = await supabase.from('photos').insert({
       id: photoId,
       moment_id: momentId,
@@ -175,13 +175,6 @@ export const POST = withAxiom(async function POST(request: NextRequest) {
     if (photoError) {
       logger.error('photo.insert.failed', { request_id: requestId, error: photoError.message })
       return halt(new Error(`Failed to insert photo: ${photoError.message}`))
-    }
-    // 9. Save title to moment (only on create, retries keep original)
-    if (mode === 'create' && title) {
-      await supabase
-        .from('moments')
-        .update({ title })
-        .eq('id', momentId)
     }
     // 10. Fetch complete moment with photos
     const { data: completeMoment, error: fetchError } = await supabase
