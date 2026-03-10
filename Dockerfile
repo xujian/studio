@@ -45,9 +45,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # sharp is required for Next.js built-in image optimization.
-# standalone output doesn't bundle it automatically, so copy from deps.
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules/sharp ./node_modules/sharp
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules/@img ./node_modules/@img
+# Install directly for the target platform (linux-musl) instead of copying
+# from deps, which may have macOS binaries from a lockfile generated on macOS.
+RUN npm install --no-save sharp
 
 USER nextjs
 EXPOSE 4242
