@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react'
 import mitt, { type Handler } from 'mitt'
-import type { Mixins, MomentWithPhotos } from './types'
+import type { AssetType, Mixins, MomentWithPhotos } from './types'
 
 export type MomentResumePayload = {
   momentId: string
@@ -9,10 +9,16 @@ export type MomentResumePayload = {
   reference?: string
 }
 
+export type MixinSelectPayload = {
+  type: AssetType
+  assetId: string
+}
+
 type Events = {
   'generation:complete': MomentWithPhotos
   'generation:error': Error
   'moment:resume': MomentResumePayload
+  'mixin:select': MixinSelectPayload
 }
 
 const emitter = mitt<Events>()
