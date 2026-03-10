@@ -22,7 +22,7 @@ export type FacePickerProps = {
   onSelect?: (faceId: string) => void
 }
 
-const systemFace = '/face.png'
+const systemFace = '/icons/face.png'
 
 export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
   const [popoverOpen, setPopoverOpen] = useState(false)
@@ -38,11 +38,16 @@ export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
               <PopoverTrigger asChild>
                 <Button
                   variant={selected ? "ghost" :  "outline"}
-                  className={cn('p-0 m-0 w-18 h-18 border bg-image rounded-xl cursor-pointer')}
+                  className={cn(
+                    'p-0 m-0 w-18 h-18 border bg-image rounded-xl cursor-pointer'
+                  )}
                   style={{
                     backgroundImage: selected
                       ? `url(${assetUrl(selectedFace?.path ?? '')})`
                       : `url(${systemFace})`,
+                    backgroundSize: selected
+                      ? 'cover'
+                      : '48px'
                   }} />
               </PopoverTrigger>
             </TooltipTrigger>
@@ -60,32 +65,27 @@ export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-4 gap-1">
+            <div className="flex gap-1">
               {faces.map(face => (
                 <Peekable key={face.id}
                   content={assetUrl(face.path!)}
                   title={face.title}
                   description={face.description}>
-                  <Button
-                    variant="outline"
-                    onClick={() => onSelect?.(face.id!)}
-                    className={cn(
-                      'face rounded w-18 h-18 p-0 text-xs transition border cursor-pointer',
-                      selected === face.id ? 'on' : ''
-                    )}>
-                    {face.path ? (
-                      <Image
-                        src={assetUrl(face.path!)}
-                        alt={face.name || ''}
-                        width={72}
-                        height={72}
-                        className="h-full w-full object-cover rounded"
-                        sizes="72px"
-                      />
-                    ) : (
-                      face.name
-                    )}
-                  </Button>
+                  {face.path ? (
+                  <div className='face w-18 h-18 '>
+                    <Image
+                      src={assetUrl(face.path!)}
+                      alt={face.name || ''}
+                      width={72}
+                      height={72}
+                      className="object-cover rounded-xl"
+                      sizes="72px"
+                      onClick={() => onSelect?.(face.id!)}
+                    />
+                  </div>
+                  ) : (
+                    face.name
+                  )}
                 </Peekable>
               ))}
             </div>
