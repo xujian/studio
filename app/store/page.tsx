@@ -1,16 +1,16 @@
-import { createClient } from '@/lib/supabase/server'
-import { AssetCard } from '@/components/asset-card'
-import type { AssetWithPurchaseInfo } from '@/lib/types'
-import { assetTypes } from '@/lib/constants'
 import type { Metadata } from 'next'
+import { AssetCard } from '@/components/asset-card'
+import { assetTypes } from '@/lib/constants'
+import { createClient } from '@/lib/supabase/server'
+import type { AssetWithPurchaseInfo } from '@/lib/types'
 
 export const metadata: Metadata = {
   title: 'Asset Store — Styles, Scenes & Looks',
   description:
     'Browse portrait styles, lighting presets, scenes, and outfits for your AI portrait studio. Expand your creative toolkit.',
   alternates: {
-    canonical: 'https://kanojostudio.com/store',
-  },
+    canonical: 'https://kanojostudio.com/store'
+  }
 }
 
 export default async function StorePage() {
@@ -37,7 +37,7 @@ export default async function StorePage() {
     .filter(s => s.assets.length > 0)
 
   return (
-    <section className="flex w-full flex-col px-16 pb-16 pt-2">
+    <section className="flex w-full flex-col px-16 pt-2 pb-16">
       <h1 className="mb-8 text-2xl font-semibold">Store</h1>
       {sections.length === 0 ? (
         <div className="py-20 text-center text-muted-foreground">
@@ -50,7 +50,12 @@ export default async function StorePage() {
               <h2 className="mb-3 text-lg font-semibold">{section.name}</h2>
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
                 {section.assets.map(asset => (
-                  <AssetCard key={asset.id} data={asset} owned={asset.is_purchased} hasPrice={asset.price != null} />
+                  <AssetCard
+                    key={asset.id}
+                    data={asset}
+                    owned={asset.is_purchased}
+                    hasPrice
+                  />
                 ))}
               </div>
             </div>

@@ -29,54 +29,47 @@ export function AssetCard({ data, owned, hasPrice, onBuy, onUse, onDelete }: Ass
   return (
     <>
       <Card className={cn(
-        'group gap-0 overflow-hidden p-0 transition-all',
+        'group gap-0 overflow-hidden p-0 transition-all cursor-pointer rounded-xl',
         owned && 'border-primary/30'
       )}>
-        <CardContent className="relative aspect-square w-full overflow-hidden bg-black p-0">
-          {data.path ? (
-            <Image
-              src={assetUrl(data.path)}
-              alt={data.name || 'Asset'}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 50vw, 25vw"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center p-3">
-              <p className="line-clamp-6 text-xs text-neutral-400">{data.content}</p>
-            </div>
-          )}
-
-          {/* Badge */}
+        <CardContent className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted p-0">
+          {data.path
+            ? (<Image
+                src={assetUrl(data.path)}
+                alt={data.name || 'Asset'}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 50vw, 25vw"
+              />)
+            : (<div className="flex h-full items-center justify-center p-3">
+                <p className="line-clamp-6 text-xs text-neutral-400">{data.content}</p>
+              </div>)
+          }
           <div className="absolute top-2 right-2">
-            {owned ? (
-              <Badge variant="default" className="gap-1 bg-primary/90 text-xs">
+            {owned
+            ? (<Badge variant="default" className="gap-1 bg-primary/90 text-xs">
                 <Check className="size-3" />
                 Owned
-              </Badge>
-            ) : hasPrice && data.price != null ? (
-              <Price value={data.price} />
-            ) : null}
+              </Badge>)
+            : hasPrice && data.price != null
+              ? (<Price value={data.price} />)
+              : null
+            }
           </div>
-
-          {/* Overlay — always on hover, buttons at bottom */}
-          <div className="absolute inset-0 flex flex-col justify-end gap-1.5 bg-linear-to-t from-black/70 to-transparent p-2 opacity-0 transition-opacity group-hover:opacity-100">
+          <div className="absolute left-0 bottom-0 w-full flex flex-row-reverse gap-1 p-1 opacity-0 transition-opacity group-hover:opacity-100">
             {!owned && hasPrice && (
-              <Button size="sm" className="h-7 w-full gap-1 rounded-full text-xs" onClick={handleBuy}>
-                <ShoppingCart className="size-3" />
-                Buy
+              <Button size="sm" className="h-7 bg-black text-white flex-1 rounded-full text-xs" onClick={handleBuy}>
+                BUY
               </Button>
             )}
-            {owned && onUse && (
-              <Button size="sm" className="h-7 w-full gap-1 rounded-full text-xs" onClick={onUse}>
-                <Check className="size-3" />
-                Use
+            {owned && (
+              <Button size="sm" className="h-7 bg-black text-white gap-1 flex-1 rounded-full text-xs" onClick={onUse}>
+                USE
               </Button>
             )}
-            {owned && onDelete && (
-              <Button size="sm" variant="destructive" className="h-7 w-full gap-1 rounded-full text-xs" onClick={onDelete}>
-                <Trash2 className="size-3" />
-                Delete
+            {owned && (
+              <Button size="sm" variant="destructive" className="h-7 bg-destructive text-white flex-0 w-20 gap-1 rounded-full text-xs" onClick={onDelete}>
+                DELETE
               </Button>
             )}
           </div>
