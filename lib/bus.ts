@@ -20,6 +20,7 @@ type Events = {
   'moment:resume': MomentResumePayload
   'mixin:select': MixinSelectPayload
   'assets:open': { type: AssetType }
+  'assets:close': void
 }
 
 const emitter = mitt<Events>()

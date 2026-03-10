@@ -15,10 +15,10 @@ import { useBus } from '@/lib/bus'
 
 export default function StudioPage() {
   const router = useRouter()
-  const [activeTool, setActiveTool] = useState<AssetType | null>(null)
+  const [activeAssets, setActiveAssets] = useState<AssetType | null>(null)
   const $bus = useBus()
 
-  $bus.on('assets:open', ({ type }) => setActiveTool(type))
+  $bus.on('assets:open', ({ type }) => setActiveAssets(type))
 
   const {
     data,
@@ -41,7 +41,7 @@ export default function StudioPage() {
 
   return (
     <>
-      <section className={activeTool ? 'hidden' : 'moments flex w-full flex-col items-start justify-center px-16 pb-52'}>
+      <section className={activeAssets ? 'hidden' : 'moments flex w-full flex-col items-start justify-center px-16 pb-52'}>
         <h1 className="mb-6 text-2xl font-semibold">Moments</h1>
         {isLoading && (
           <StaggerGrid className="w-full grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-5">
@@ -85,9 +85,12 @@ export default function StudioPage() {
           </StaggerGrid>
         </LayoutGroup>
       </section>
-      {activeTool && (
+      {activeAssets && (
         <section className="flex w-full flex-col items-start justify-center px-16 pb-52">
-          <AssetsManager type={activeTool} onClose={() => setActiveTool(null)} />
+          <AssetsManager type={activeAssets} onClose={() => {
+            setActiveAssets(null)
+            $bus.emit('assets:close', undefined)
+          }} />
         </section>
       )}
       <Suspense>

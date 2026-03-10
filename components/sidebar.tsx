@@ -1,9 +1,10 @@
 'use client'
 
-import { useBus } from '@/lib/bus'
+import { useState } from 'react'
 import { Button } from '@/components/button'
-import { cn } from '@/lib/utils'
+import { useBus } from '@/lib/bus'
 import type { AssetType } from '@/lib/types'
+import { cn } from '@/lib/utils'
 
 const tools = [
   { id: 'face' as AssetType, label: 'Face', icon: '/icons/face.png' },
@@ -11,11 +12,15 @@ const tools = [
   { id: 'outfit' as AssetType, label: 'Outfit', icon: '/icons/outfit.png' },
   { id: 'scene' as AssetType, label: 'Scene', icon: '/icons/scene.png' },
   { id: 'camera' as AssetType, label: 'Camera', icon: '/icons/camera.png' },
-  { id: 'mood' as AssetType, label: 'Mood', icon: '/icons/mood.png' },
+  { id: 'mood' as AssetType, label: 'Mood', icon: '/icons/mood.png' }
 ]
 
 export default function Sidebar() {
   const $bus = useBus()
+  const [activeTool, setActiveTool] = useState<AssetType | null>(null)
+
+  $bus.on('assets:open', ({ type }) => setActiveTool(type))
+  $bus.on('assets:close', () => setActiveTool(null))
 
   return (
     <div className="fixed top-1/2 left-8 z-40 -translate-y-1/2">
@@ -29,7 +34,9 @@ export default function Sidebar() {
             tooltip={tool.label}
             className={cn(
               'cursor-pointer rounded-full transition-all duration-300',
-              'text-white/50 hover:bg-white/10 hover:text-white'
+              activeTool === tool.id
+                ? 'bg-white text-black shadow-[0_4px_16px_rgba(255,255,255,0.15)]'
+                : 'text-white/50 hover:bg-white/10 hover:text-white'
             )}>
             <div
               className="aspect-square size-6 bg-cover bg-center bg-no-repeat"
