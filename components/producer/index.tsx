@@ -9,7 +9,7 @@ import { Button } from '@/components/button'
 import { createClient } from '@/lib/supabase/client'
 import type { AssetType, MomentWithPhotos } from '@/lib/types'
 import type { Mixins as MixinsType } from '@/lib/types'
-import { useBus } from '@/lib/bus'
+import { useBus, type MixinSelectPayload } from '@/lib/bus'
 import { cn } from '@/lib/utils'
 import { useAssets } from '@/hooks/use-assets'
 import { useEngine } from '@/hooks/use-engine'
@@ -80,6 +80,10 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
     setReference(payload.reference || '')
     setMode('retry')
     setDirty(false)
+  })
+
+  $bus.on('mixin:select', (payload: MixinSelectPayload) => {
+    setMixins(prev => ({ ...prev, [payload.type]: payload.assetId }))
   })
 
   const fileInputRef = useRef<HTMLInputElement>(null)
