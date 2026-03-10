@@ -9,29 +9,56 @@ import {
   CardFooter,
   CardTitle,
 } from '@/components/ui/card'
-import type { AssetWithPurchaseInfo } from '@/lib/types'
+import { Button } from '@/components/button'
+import type { Asset, AssetWithPurchaseInfo } from '@/lib/types'
 import { assetUrl, cn } from '@/lib/utils'
-import { Check } from 'lucide-react'
+import { Check, Trash2 } from 'lucide-react'
 import { Price } from '@/components/price'
 import { PurchaseModal } from '@/components/purchase'
 
 interface AssetCardProps {
-  data: AssetWithPurchaseInfo
+  data: Asset
+  // Hover overlay actions
+  onUse?: () => void
+  onDelete?: () => void
+  // Override click (when omitted, falls back to internal PurchaseModal if purchasable)
+  onClick?: () => void
+  // Badge override (when omitted, derives from is_purchased / price)
+  badge?: React.ReactNode
 }
 
-export function AssetCard({ data }: AssetCardProps) {
+export function AssetCard({ data, onUse, onDelete, onClick, badge }: AssetCardProps) {
   const [open, setOpen] = useState(false)
-  const isOwned = data.is_purchased
+
+  const purchasable = 'is_purchased' in data
+  const isOwned = purchasable ? (data as AssetWithPurchaseInfo).is_purchased : false
   const hasImage = !!data.path
+  const hasOverlay = onUse || onDelete
+
+  const handleClick = onClick ?? (purchasable ? () => setOpen(true) : undefined)
+
+  const derivedBadge = purchasable
+    ? isOwned
+      ? (
+        <Badge variant="default" className="gap-1 bg-primary/90 text-xs">
+          <Check className="size-3" />
+          Owned
+        </Badge>
+      )
+      : data.price != null
+        ? <Price value={data.price} />
+        : null
+    : null
 
   return (
     <>
       <Card
         className={cn(
-          'group cursor-pointer hover:elevation-2 gap-0 overflow-hidden p-0 transition-all',
+          'group gap-0 overflow-hidden p-0 transition-all',
+          handleClick && 'cursor-pointer hover:elevation-2',
           isOwned && 'border-primary/30'
         )}
-        onClick={() => setOpen(true)}
+        onClick={handleClick}
       >
         <CardContent className="relative aspect-square w-full overflow-hidden bg-black p-0">
           {hasImage ? (
@@ -50,17 +77,36 @@ export function AssetCard({ data }: AssetCardProps) {
             </div>
           )}
 
-          {/* Top-right corner tag */}
           <div className="absolute top-2 right-2">
-            {isOwned ? (
-              <Badge variant="default" className="gap-1 bg-primary/90 text-xs">
-                <Check className="size-3" />
-                Owned
-              </Badge>
-            ) : data.price != null ? (
-              <Price value={data.price} />
-            ) : null}
+            {badge ?? derivedBadge}
           </div>
+
+          {hasOverlay && (
+            <div className={cn(
+              'absolute inset-0 flex flex-col items-center justify-center gap-1.5',
+              'bg-black/60 opacity-0 transition-opacity group-hover:opacity-100'
+            )}>
+              {onUse && (
+                <Button
+                  size="sm"
+                  className="h-7 gap-1 rounded-full px-3 text-xs"
+                  onClick={e => { e.stopPropagation(); onUse() }}>
+                  <Check className="size-3" />
+                  Use
+                </Button>
+              )}
+              {onDelete && (
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="h-7 gap-1 rounded-full px-3 text-xs"
+                  onClick={e => { e.stopPropagation(); onDelete() }}>
+                  <Trash2 className="size-3" />
+                  Delete
+                </Button>
+              )}
+            </div>
+          )}
         </CardContent>
 
         <CardFooter className="p-2">
@@ -70,7 +116,9 @@ export function AssetCard({ data }: AssetCardProps) {
         </CardFooter>
       </Card>
 
-      <PurchaseModal asset={data} open={open} onOpenChange={setOpen} />
+      {purchasable && (
+        <PurchaseModal asset={data as AssetWithPurchaseInfo} open={open} onOpenChange={setOpen} />
+      )}
     </>
   )
 }

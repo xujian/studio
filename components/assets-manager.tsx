@@ -1,16 +1,15 @@
 'use client'
 
 import { useRef, useState, useEffect } from 'react'
-import Image from 'next/image'
 import { Button } from '@/components/button'
+import { AssetCard } from '@/components/asset-card'
 import { useAssets } from '@/hooks/use-assets'
 import { useUploadAsset } from '@/hooks/use-upload-asset'
 import { useDeleteAsset } from '@/hooks/use-delete-asset'
 import { useBus } from '@/lib/bus'
 import { createClient } from '@/lib/supabase/client'
-import { assetUrl, cn } from '@/lib/utils'
 import type { Asset, AssetType } from '@/lib/types'
-import { Loader2, Plus, Trash2, Check, X } from 'lucide-react'
+import { Loader2, Plus, X } from 'lucide-react'
 
 interface AssetsManagerProps {
   type: AssetType
@@ -93,49 +92,14 @@ export function AssetsManager({ type, onClose }: AssetsManagerProps) {
         {filtered.map(asset => {
           const isOwned = asset.user_id === userId
           return (
-            <div key={asset.id} className="group relative overflow-hidden rounded-xl border bg-muted">
-              <div className="relative aspect-square w-full overflow-hidden">
-                {asset.path ? (
-                  <Image
-                    src={assetUrl(asset.path)}
-                    alt={asset.name || ''}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 33vw, 20vw"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center p-2">
-                    <p className="line-clamp-4 text-xs text-muted-foreground">{asset.content}</p>
-                  </div>
-                )}
-              </div>
-
-              <p className="truncate px-2 py-1.5 text-xs">{asset.name}</p>
-
-              <div className={cn(
-                'absolute inset-0 flex flex-col items-center justify-center gap-1.5',
-                'bg-black/60 opacity-0 transition-opacity group-hover:opacity-100'
-              )}>
-                <Button
-                  size="sm"
-                  className="h-7 gap-1 rounded-full px-3 text-xs"
-                  onClick={() => handleUse(asset)}>
-                  <Check className="size-3" />
-                  Use
-                </Button>
-                {isOwned && (
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    className="h-7 gap-1 rounded-full px-3 text-xs"
-                    onClick={() => asset.id && deleteAsset.mutate({ id: asset.id, path: asset.path })}
-                    disabled={deleteAsset.isPending}>
-                    <Trash2 className="size-3" />
-                    Delete
-                  </Button>
-                )}
-              </div>
-            </div>
+            <AssetCard
+              key={asset.id}
+              data={asset}
+              onUse={() => handleUse(asset)}
+              onDelete={isOwned && asset.id
+                ? () => deleteAsset.mutate({ id: asset.id!, path: asset.path })
+                : undefined}
+            />
           )
         })}
       </div>
