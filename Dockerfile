@@ -10,8 +10,6 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile
-# Install sharp here so npm resolves the correct linux-musl binary for this platform
-RUN npm install --no-save sharp
 
 # ── builder stage ────────────────────────────────────────────
 FROM base AS builder
@@ -46,10 +44,6 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# sharp is required for Next.js built-in image optimization.
-# Copy from deps where it was installed for linux-musl (the correct platform).
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules/sharp ./node_modules/sharp
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules/@img ./node_modules/@img
 
 USER nextjs
 EXPOSE 4242
