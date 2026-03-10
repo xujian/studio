@@ -68,7 +68,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
         }
       }
     })
-  })
+  }, [])
 
   const $bus = useBus()
 

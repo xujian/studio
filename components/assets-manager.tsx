@@ -129,7 +129,7 @@ export function AssetsManager({ type, open, onOpenChange }: AssetsManagerProps) 
                       size="sm"
                       variant="destructive"
                       className="h-7 gap-1 rounded-full px-3 text-xs"
-                      onClick={() => asset.id && deleteAsset.mutate(asset.id)}
+                      onClick={() => asset.id && deleteAsset.mutate({ id: asset.id, path: asset.path })}
                       disabled={deleteAsset.isPending}>
                       <Trash2 className="size-3" />
                       Delete
