@@ -18,11 +18,12 @@ export default function Sidebar() {
   const [activeTool, setActiveTool] = useState('enhance')
 
   const tools = [
-    { id: 'layers', label: 'Layers', icon: Layers },
-    { id: 'colors', label: 'Colors', icon: Palette },
-    { id: 'grid', label: 'Grid View', icon: Grid3X3 },
-    { id: 'move', label: 'Move', icon: Move },
-    { id: 'zoom', label: 'Zoom', icon: ZoomIn }
+    { id: 'face', label: 'Face', icon: '/icons/face.png' },
+    { id: 'hair', label: 'Hair', icon: '/icons/hair.png' },
+    { id: 'outfit', label: 'Outfit', icon: '/icons/outfit.png' },
+    { id: 'scene', label: 'Scene', icon: '/icons/scene.png' },
+    { id: 'camera', label: 'Camera', icon: '/icons/camera.png' },
+    { id: 'mood', label: 'Mood', icon: '/icons/mood.png' }
   ]
 
   const actions = [
@@ -35,7 +36,6 @@ export default function Sidebar() {
     <div className="fixed top-1/2 left-8 z-40 -translate-y-1/2">
       <div className="relative flex flex-col p-1 gap-1 glass rounded-full">
         {tools.map(tool => {
-          const Icon = tool.icon
           return (
             <Button
               key={tool.id}
@@ -49,23 +49,9 @@ export default function Sidebar() {
                   ? 'bg-white text-black shadow-[0_4px_16px_rgba(255,255,255,0.15)]'
                   : 'text-white/50 hover:bg-white/10 hover:text-white'
               )}>
-              <Icon className="size-6" />
-            </Button>
-          )
-        })}
-        {actions.map(action => {
-          const Icon = action.icon
-          return (
-            <Button
-              key={action.id}
-              variant="ghost"
-              size="icon-lg"
-              tooltip={action.label}
-              className={cn(
-                'rounded-full transition-all duration-300 cursor-pointer',
-                'text-white/50 hover:bg-white/10 hover:text-white',
-              )}>
-              <Icon className="size-6" />
+              <div className="aspect-square bg-cover bg-center bg-no-repeat size-6" style={{
+                backgroundImage:`url(${tool.icon})`
+              }}></div>
             </Button>
           )
         })}
