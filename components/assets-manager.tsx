@@ -89,19 +89,17 @@ export function AssetsManager({ type, onClose }: AssetsManagerProps) {
       )}
 
       <div className="grid grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-5">
-        {filtered.map(asset => {
-          const isOwned = asset.user_id === userId
-          return (
-            <AssetCard
-              key={asset.id}
-              data={asset}
-              onUse={() => handleUse(asset)}
-              onDelete={isOwned && asset.id
-                ? () => deleteAsset.mutate({ id: asset.id!, path: asset.path })
-                : undefined}
-            />
-          )
-        })}
+        {filtered.map(asset => (
+          <AssetCard
+            key={asset.id}
+            data={asset}
+            owned
+            onUse={() => handleUse(asset)}
+            onDelete={asset.user_id === userId && asset.id
+              ? () => deleteAsset.mutate({ id: asset.id!, path: asset.path })
+              : undefined}
+          />
+        ))}
       </div>
     </div>
   )

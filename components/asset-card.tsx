@@ -3,67 +3,39 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { Badge } from '@/components/ui/badge'
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/button'
 import type { Asset, AssetWithPurchaseInfo } from '@/lib/types'
 import { assetUrl, cn } from '@/lib/utils'
-import { Check, Trash2 } from 'lucide-react'
+import { Check, ShoppingCart, Trash2 } from 'lucide-react'
 import { Price } from '@/components/price'
 import { PurchaseModal } from '@/components/purchase'
 
 interface AssetCardProps {
   data: Asset
-  // Hover overlay actions
+  owned?: boolean
+  hasPrice?: boolean
+  /** Override BUY click — falls back to internal PurchaseModal when omitted */
+  onBuy?: () => void
   onUse?: () => void
   onDelete?: () => void
-  // Override click (when omitted, falls back to internal PurchaseModal if purchasable)
-  onClick?: () => void
-  // Badge override (when omitted, derives from is_purchased / price)
-  badge?: React.ReactNode
 }
 
-export function AssetCard({ data, onUse, onDelete, onClick, badge }: AssetCardProps) {
-  const [open, setOpen] = useState(false)
-
-  const purchasable = 'is_purchased' in data
-  const isOwned = purchasable ? (data as AssetWithPurchaseInfo).is_purchased : false
-  const hasImage = !!data.path
-  const hasOverlay = onUse || onDelete
-
-  const handleClick = onClick ?? (purchasable ? () => setOpen(true) : undefined)
-
-  const derivedBadge = purchasable
-    ? isOwned
-      ? (
-        <Badge variant="default" className="gap-1 bg-primary/90 text-xs">
-          <Check className="size-3" />
-          Owned
-        </Badge>
-      )
-      : data.price != null
-        ? <Price value={data.price} />
-        : null
-    : null
+export function AssetCard({ data, owned, hasPrice, onBuy, onUse, onDelete }: AssetCardProps) {
+  const [modalOpen, setModalOpen] = useState(false)
+  const isPurchasable = 'is_purchased' in data
+  const handleBuy = onBuy ?? (() => setModalOpen(true))
 
   return (
     <>
-      <Card
-        className={cn(
-          'group gap-0 overflow-hidden p-0 transition-all',
-          handleClick && 'cursor-pointer hover:elevation-2',
-          isOwned && 'border-primary/30'
-        )}
-        onClick={handleClick}
-      >
+      <Card className={cn(
+        'group gap-0 overflow-hidden p-0 transition-all',
+        owned && 'border-primary/30'
+      )}>
         <CardContent className="relative aspect-square w-full overflow-hidden bg-black p-0">
-          {hasImage ? (
+          {data.path ? (
             <Image
-              src={assetUrl(data.path!)}
+              src={assetUrl(data.path)}
               alt={data.name || 'Asset'}
               fill
               className="object-cover"
@@ -71,42 +43,43 @@ export function AssetCard({ data, onUse, onDelete, onClick, badge }: AssetCardPr
             />
           ) : (
             <div className="flex h-full items-center justify-center p-3">
-              <p className="line-clamp-6 text-xs text-neutral-400">
-                {data.content}
-              </p>
+              <p className="line-clamp-6 text-xs text-neutral-400">{data.content}</p>
             </div>
           )}
 
+          {/* Badge */}
           <div className="absolute top-2 right-2">
-            {badge ?? derivedBadge}
+            {owned ? (
+              <Badge variant="default" className="gap-1 bg-primary/90 text-xs">
+                <Check className="size-3" />
+                Owned
+              </Badge>
+            ) : hasPrice && data.price != null ? (
+              <Price value={data.price} />
+            ) : null}
           </div>
 
-          {hasOverlay && (
-            <div className={cn(
-              'absolute inset-0 flex flex-col items-center justify-center gap-1.5',
-              'bg-black/60 opacity-0 transition-opacity group-hover:opacity-100'
-            )}>
-              {onUse && (
-                <Button
-                  size="sm"
-                  className="h-7 gap-1 rounded-full px-3 text-xs"
-                  onClick={e => { e.stopPropagation(); onUse() }}>
-                  <Check className="size-3" />
-                  Use
-                </Button>
-              )}
-              {onDelete && (
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  className="h-7 gap-1 rounded-full px-3 text-xs"
-                  onClick={e => { e.stopPropagation(); onDelete() }}>
-                  <Trash2 className="size-3" />
-                  Delete
-                </Button>
-              )}
-            </div>
-          )}
+          {/* Overlay — always on hover, buttons at bottom */}
+          <div className="absolute inset-0 flex flex-col justify-end gap-1.5 bg-linear-to-t from-black/70 to-transparent p-2 opacity-0 transition-opacity group-hover:opacity-100">
+            {!owned && hasPrice && (
+              <Button size="sm" className="h-7 w-full gap-1 rounded-full text-xs" onClick={handleBuy}>
+                <ShoppingCart className="size-3" />
+                Buy
+              </Button>
+            )}
+            {owned && onUse && (
+              <Button size="sm" className="h-7 w-full gap-1 rounded-full text-xs" onClick={onUse}>
+                <Check className="size-3" />
+                Use
+              </Button>
+            )}
+            {owned && onDelete && (
+              <Button size="sm" variant="destructive" className="h-7 w-full gap-1 rounded-full text-xs" onClick={onDelete}>
+                <Trash2 className="size-3" />
+                Delete
+              </Button>
+            )}
+          </div>
         </CardContent>
 
         <CardFooter className="p-2">
@@ -116,8 +89,8 @@ export function AssetCard({ data, onUse, onDelete, onClick, badge }: AssetCardPr
         </CardFooter>
       </Card>
 
-      {purchasable && (
-        <PurchaseModal asset={data as AssetWithPurchaseInfo} open={open} onOpenChange={setOpen} />
+      {isPurchasable && (
+        <PurchaseModal asset={data as AssetWithPurchaseInfo} open={modalOpen} onOpenChange={setModalOpen} />
       )}
     </>
   )

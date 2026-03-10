@@ -50,7 +50,7 @@ export default async function StorePage() {
               <h2 className="mb-3 text-lg font-semibold">{section.name}</h2>
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
                 {section.assets.map(asset => (
-                  <AssetCard key={asset.id} data={asset} />
+                  <AssetCard key={asset.id} data={asset} owned={asset.is_purchased} hasPrice={asset.price != null} />
                 ))}
               </div>
             </div>
