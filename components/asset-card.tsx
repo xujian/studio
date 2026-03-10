@@ -15,14 +15,14 @@ import { Check } from 'lucide-react'
 import { Price } from '@/components/price'
 import { PurchaseModal } from '@/components/purchase'
 
-interface StoreCardProps {
-  asset: AssetWithPurchaseInfo
+interface AssetCardProps {
+  data: AssetWithPurchaseInfo
 }
 
-export function StoreCard({ asset }: StoreCardProps) {
+export function AssetCard({ data }: AssetCardProps) {
   const [open, setOpen] = useState(false)
-  const isOwned = asset.is_purchased
-  const hasImage = !!asset.path
+  const isOwned = data.is_purchased
+  const hasImage = !!data.path
 
   return (
     <>
@@ -36,8 +36,8 @@ export function StoreCard({ asset }: StoreCardProps) {
         <CardContent className="relative aspect-square w-full overflow-hidden bg-black p-0">
           {hasImage ? (
             <Image
-              src={assetUrl(asset.path!)}
-              alt={asset.name || 'Asset'}
+              src={assetUrl(data.path!)}
+              alt={data.name || 'Asset'}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 50vw, 25vw"
@@ -45,7 +45,7 @@ export function StoreCard({ asset }: StoreCardProps) {
           ) : (
             <div className="flex h-full items-center justify-center p-3">
               <p className="line-clamp-6 text-xs text-neutral-400">
-                {asset.content}
+                {data.content}
               </p>
             </div>
           )}
@@ -57,20 +57,20 @@ export function StoreCard({ asset }: StoreCardProps) {
                 <Check className="size-3" />
                 Owned
               </Badge>
-            ) : asset.price != null ? (
-              <Price value={asset.price} />
+            ) : data.price != null ? (
+              <Price value={data.price} />
             ) : null}
           </div>
         </CardContent>
 
         <CardFooter className="p-2">
           <CardTitle className="truncate text-sm">
-            {asset.title || asset.name}
+            {data.title || data.name}
           </CardTitle>
         </CardFooter>
       </Card>
 
-      <PurchaseModal asset={asset} open={open} onOpenChange={setOpen} />
+      <PurchaseModal asset={data} open={open} onOpenChange={setOpen} />
     </>
   )
 }

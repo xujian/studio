@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { StoreCard } from '@/components/store-card'
+import { AssetCard } from '@/components/asset-card'
 import type { AssetWithPurchaseInfo } from '@/lib/types'
 import { assetTypes } from '@/lib/constants'
 import type { Metadata } from 'next'
@@ -50,7 +50,7 @@ export default async function StorePage() {
               <h2 className="mb-3 text-lg font-semibold">{section.name}</h2>
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
                 {section.assets.map(asset => (
-                  <StoreCard key={asset.id} asset={asset} />
+                  <AssetCard key={asset.id} data={asset} />
                 ))}
               </div>
             </div>
