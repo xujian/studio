@@ -8,7 +8,7 @@ import {
 import { createClient } from '@/lib/supabase/client'
 import type { MomentWithPhotos } from '@/lib/types'
 
-const PAGE_SIZE = 12
+const PAGE_SIZE = 10
 
 export const useMoments = () => {
   const supabase = createClient()

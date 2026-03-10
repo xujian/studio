@@ -45,7 +45,7 @@ export default function StudioPage() {
         <h1 className="mb-6 text-2xl font-semibold">Moments</h1>
         {isLoading && (
           <StaggerGrid className="w-full grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-5">
-            {Array.from({ length: 12 }).map((_, i) => (
+            {Array.from({ length: 10 }).map((_, i) => (
               <MomentSkeleton key={i} />
             ))}
           </StaggerGrid>
