@@ -22,6 +22,10 @@ export const useUploadAsset = () => {
 
   return useMutation({
     mutationFn: async ({ file, name, type }: UploadAssetArgs) => {
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Only image files are supported')
+      }
+
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) throw new Error('Not authenticated')
 
@@ -38,7 +42,10 @@ export const useUploadAsset = () => {
         .from('assets')
         .insert({ user_id: session.user.id, name, type, path: filename, is_public: false })
 
-      if (insertError) throw insertError
+      if (insertError) {
+        await supabase.storage.from('assets').remove([filename])
+        throw insertError
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assets'] })
