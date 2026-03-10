@@ -1,8 +1,6 @@
 'use client'
 
-import Image from 'next/image'
 import * as React from 'react'
-import { motion } from 'motion/react'
 import {
   Carousel,
   CarouselContent,
@@ -11,15 +9,15 @@ import {
   CarouselPrevious,
   type CarouselApi
 } from '@/components/ui'
-import type { Photo, MomentWithPhotos } from '@/lib/types'
-import { cn, photoUrl } from '@/lib/utils'
+import { Photo } from '@/components/photo'
+import type { MomentWithPhotos } from '@/lib/types'
+import { cn } from '@/lib/utils'
 
 interface MomentCardProps {
   moment: MomentWithPhotos
-  onPhotoClick: (photo: Photo, moment: MomentWithPhotos) => void
 }
 
-export function MomentCard({ moment, onPhotoClick }: MomentCardProps) {
+export function MomentCard({ moment }: MomentCardProps) {
   const [isHovered, setIsHovered] = React.useState(false)
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
@@ -36,7 +34,6 @@ export function MomentCard({ moment, onPhotoClick }: MomentCardProps) {
     })
   }, [api])
 
-  // Re-sync carousel when photos are added/removed
   React.useEffect(() => {
     if (!api) return
     api.reInit()
@@ -45,25 +42,9 @@ export function MomentCard({ moment, onPhotoClick }: MomentCardProps) {
 
   // Single photo - no carousel
   if (!hasMultiplePhotos) {
-    const photo = moment.photos[0]
     return (
-      <div className="relative aspect-9/16 w-full cursor-pointer overflow-hidden rounded-2xl bg-muted">
-        <motion.div
-          layoutId={photo.id}
-          className="relative h-full w-full"
-          onClick={() => onPhotoClick(photo, moment)}
-          whileHover={{ scale: 1.1 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Image
-            className="object-cover"
-            src={photoUrl(moment.user_id, moment.id, photo.id)}
-            alt={moment.title || 'Moment'}
-            fill
-            sizes="(min-width: 1280px) 16vw, (min-width: 768px) 25vw, 50vw"
-            loading="lazy"
-          />
-        </motion.div>
+      <div className="relative aspect-9/16 w-full overflow-hidden rounded-2xl bg-muted">
+        <Photo data={moment.photos[0]} />
       </div>
     )
   }
@@ -78,22 +59,8 @@ export function MomentCard({ moment, onPhotoClick }: MomentCardProps) {
         <CarouselContent>
           {moment.photos.map(photo => (
             <CarouselItem key={photo.id}>
-              <div className="relative aspect-9/16 w-full cursor-pointer overflow-hidden rounded bg-muted">
-                <motion.div
-                  layoutId={photo.id}
-                  className="relative h-full w-full"
-                  onClick={() => onPhotoClick(photo, moment)}
-                  whileHover={{ scale: 1.1 }}
-                  transition={{ duration: 0.3 }}>
-                  <Image
-                    className="object-cover"
-                    src={photoUrl(moment.user_id, moment.id, photo.id)}
-                    alt={moment.title || 'Photo'}
-                    fill
-                    sizes="(min-width: 1280px) 16vw, (min-width: 768px) 25vw, 50vw"
-                    loading="lazy"
-                  />
-                </motion.div>
+              <div className="relative aspect-9/16 w-full overflow-hidden rounded bg-muted">
+                <Photo data={photo} />
               </div>
             </CarouselItem>
           ))}
@@ -103,12 +70,11 @@ export function MomentCard({ moment, onPhotoClick }: MomentCardProps) {
             'absolute bottom-6 h-8 w-full transition-opacity duration-200',
             isHovered ? 'opacity-100' : 'opacity-0'
           )}
-          onClick={(e) => { e.preventDefault(); e.stopPropagation()}}>
+          onClick={(e) => { e.preventDefault(); e.stopPropagation() }}>
           <CarouselPrevious className="left-2 bg-black!" />
           <CarouselNext className="right-2 bg-black!" />
         </div>
       </Carousel>
-      {/* Dots indicator */}
       <div className="absolute right-0 bottom-2 left-0 z-10 flex justify-center gap-1.5">
         {Array.from({ length: count }).map((_, index) => (
           <div

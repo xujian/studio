@@ -1,6 +1,5 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
 import { Suspense, useState, useEffect } from 'react'
 import { LayoutGroup } from 'motion/react'
 import { MomentCard } from '@/components/moment-card'
@@ -14,7 +13,6 @@ import { useMoments } from '@/hooks/use-moments'
 import { useBus } from '@/lib/bus'
 
 export default function StudioPage() {
-  const router = useRouter()
   const [activeAssets, setActiveAssets] = useState<AssetType | null>(null)
   const $bus = useBus()
 
@@ -63,13 +61,7 @@ export default function StudioPage() {
         <LayoutGroup>
           <StaggerGrid className="w-full grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-5">
             {allMoments.map(moment => (
-              <MomentCard
-                key={moment.id}
-                moment={moment}
-                onPhotoClick={(photo, moment) =>
-                  router.push(`/moments/${moment.id}?photo=${photo.id}`)
-                }
-              />
+              <MomentCard key={moment.id} moment={moment} />
             ))}
             {hasNextPage && (
               <div

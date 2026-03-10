@@ -33,7 +33,13 @@ export const useMoments = () => {
         .order('created_at', { referencedTable: 'photos', ascending: false })
         .range(pageParam, pageParam + PAGE_SIZE - 1)
       if (error) throw error
-      const moments = (data || []) as MomentWithPhotos[]
+      const moments = (data || []).map(moment => ({
+        ...moment,
+        photos: (moment.photos ?? []).map((photo: Record<string, unknown>) => ({
+          ...photo,
+          user_id: moment.user_id,
+        })),
+      })) as MomentWithPhotos[]
       const hasMore = moments.length === PAGE_SIZE
       return { moments, hasMore }
     },

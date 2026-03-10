@@ -44,6 +44,7 @@ export type Moment = {
 export type Photo = {
   id: string
   moment_id: string
+  user_id: string
   /**
    * Only set if different from moment's prompt.
    * Display logic: photo.prompt || moment.prompt
