@@ -9,7 +9,7 @@ import { useDeleteAsset } from '@/hooks/use-delete-asset'
 import { useBus } from '@/lib/bus'
 import { createClient } from '@/lib/supabase/client'
 import type { Asset, AssetType } from '@/lib/types'
-import { Loader2, Plus, X } from 'lucide-react'
+import { ArrowLeft, Loader2, Plus } from 'lucide-react'
 
 interface AssetsManagerProps {
   type: AssetType
@@ -56,22 +56,14 @@ export function AssetsManager({ type, onClose }: AssetsManagerProps) {
   return (
     <div className="w-full">
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">{label}</h2>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploadAsset.isPending}
-            className="gap-1.5">
-            {uploadAsset.isPending
-              ? <Loader2 className="size-4 animate-spin" />
-              : <Plus className="size-4" />}
-            Upload
+          <Button variant="ghost" size="icon" onClick={onClose} className="size-10 rounded-full">
+            <ArrowLeft className="size-6" strokeWidth={2.5} />
           </Button>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="size-4" />
-          </Button>
+          <div>
+            <h2 className="text-2xl font-semibold leading-none mb-0">{label}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{filtered.length} {filtered.length === 1 ? 'asset' : 'assets'} of type {label} in your library</p>
+          </div>
         </div>
         <input
           ref={fileInputRef}
@@ -81,12 +73,6 @@ export function AssetsManager({ type, onClose }: AssetsManagerProps) {
           onChange={handleUpload}
         />
       </div>
-
-      {filtered.length === 0 && (
-        <p className="py-16 text-center text-sm text-muted-foreground">
-          No {label.toLowerCase()} assets yet. Upload one to get started.
-        </p>
-      )}
 
       <div className="grid grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-5">
         {filtered.map(asset => (
@@ -100,6 +86,15 @@ export function AssetsManager({ type, onClose }: AssetsManagerProps) {
               : undefined}
           />
         ))}
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploadAsset.isPending}
+          className="rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-foreground/30 hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+          {uploadAsset.isPending
+            ? <Loader2 className="size-6 animate-spin" />
+            : <Plus className="size-6" />}
+          <span className="text-xs">Add an {label.toLowerCase()} asset</span>
+        </button>
       </div>
     </div>
   )
