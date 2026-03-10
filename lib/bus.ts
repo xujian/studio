@@ -19,6 +19,7 @@ type Events = {
   'generation:error': Error
   'moment:resume': MomentResumePayload
   'mixin:select': MixinSelectPayload
+  'assets:open': { type: AssetType }
 }
 
 const emitter = mitt<Events>()
