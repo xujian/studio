@@ -173,7 +173,7 @@ export const Hero = () => {
         <p className="text-lg text-white/70 max-w-md">
           Pick a face. Set the vibe. Generate stunning 9:16 portraits in seconds.
         </p>
-        <CtaButton size="lg" />
+        <CtaButton />
       </div>
     </section>
   )
@@ -435,7 +435,7 @@ export const Pricing = () => {
               </ul>
             </CardContent>
             <CardFooter className="p-6 pt-0">
-              <CtaButton size="sm" />
+              <CtaButton />
             </CardFooter>
           </Card>
         ))}
@@ -503,7 +503,7 @@ export const CommunityShowcase = () => {
       {/* Final CTA */}
       <div className="flex flex-col items-center gap-4 pt-8">
         <p className="text-xl font-semibold">Ready to create yours?</p>
-        <CtaButton size="lg" />
+        <CtaButton />
       </div>
     </section>
   )

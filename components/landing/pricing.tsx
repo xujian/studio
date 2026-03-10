@@ -78,7 +78,7 @@ export const Pricing = () => {
               </ul>
             </CardContent>
             <CardFooter className="p-6 pt-0">
-              <CtaButton size="sm" />
+              <CtaButton />
             </CardFooter>
           </Card>
         ))}

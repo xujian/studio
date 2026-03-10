@@ -34,7 +34,7 @@ export const StudioDemo = () => {
 
       <div className="flex flex-col items-center gap-3">
         <p className="text-sm text-muted-foreground">Ready to try it?</p>
-        <CtaButton size="lg" />
+        <CtaButton />
       </div>
     </section>
   )

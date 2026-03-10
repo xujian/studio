@@ -47,27 +47,28 @@ export const Features = () => {
         <div
           key={s.label}
           className={cn(
-            `mx-auto flex w-full max-w-5xl flex-col items-center`,
+            `mx-auto flex h-75 w-full max-w-5xl flex-col items-center`,
             `gap-12 md:flex-row`,
-            'bg-cover bg-center',
-            s.flip ? 'md:flex-row-reverse' : ''
+            'bg-cover',
+            s.flip ? 'md:flex-row-reverse' : '',
+            s.flip ? 'bg-left' : 'bg-right'
           )}
           style={s.image ? { backgroundImage: `url(${storageUrl(`landing/${s.image}`)})` } : undefined}>
           {/* Text */}
-          <div className="flex flex-1 flex-col gap-6">
+          <div className="flex flex-1 flex-col gap-2">
             <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
               {s.label}
             </p>
             <h2
               className="font-playfair leading-tight font-bold"
-              style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)' }}>
+              style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)' }}>
               {s.headline}
             </h2>
-            <p className="max-w-sm text-lg leading-relaxed text-muted-foreground">
+            <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
               {s.sub}
             </p>
             <div>
-              <CtaButton size="sm" />
+              <CtaButton />
             </div>
           </div>
           {/* empty Placeholder */}

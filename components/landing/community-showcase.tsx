@@ -38,7 +38,7 @@ export const CommunityShowcase = () => {
 
       <div className="flex flex-col items-center gap-4 pt-8">
         <p className="text-xl font-semibold">Ready to create yours?</p>
-        <CtaButton size="lg" />
+        <CtaButton />
       </div>
     </section>
   )

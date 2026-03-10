@@ -41,7 +41,7 @@ export const Hero = () => {
         <p className="max-w-md text-lg text-white/70">
           She was a feeling. Now she&apos;s a photograph.
         </p>
-        <CtaButton size="lg" />
+        <CtaButton />
       </div>
     </section>
   )
