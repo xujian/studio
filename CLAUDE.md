@@ -276,6 +276,7 @@ NEXT_PUBLIC_APP_URL=                    # For OAuth redirects
 1. Run `supabase/schema.sql` in SQL Editor
 2. Enable Google OAuth in Authentication → Providers
 3. Create public storage bucket named `photos`
+4. Create public storage bucket named `assets` with upload policy for `{userId}/*`
 4. Add storage policy allowing users to upload to their own folders: `{userId}/{momentId}/*.{jpg|png}`
 
 ## Key Patterns
