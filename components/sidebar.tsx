@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/button'
 import { useBus } from '@/lib/bus'
 import type { AssetType } from '@/lib/types'
@@ -19,8 +19,10 @@ export default function Sidebar() {
   const $bus = useBus()
   const [activeTool, setActiveTool] = useState<AssetType | null>(null)
 
-  $bus.on('assets:open', ({ type }) => setActiveTool(type))
-  $bus.on('assets:close', () => setActiveTool(null))
+  useEffect(() => {
+    $bus.on('assets:open', ({ type }) => setActiveTool(type))
+    $bus.on('assets:close', () => setActiveTool(null))
+  }, [])
 
   return (
     <div className="fixed top-1/2 left-8 z-40 -translate-y-1/2">

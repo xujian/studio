@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { Suspense, useState } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { LayoutGroup } from 'motion/react'
 import { MomentCard } from '@/components/moment-card'
 import { MomentSkeleton } from '@/components/moment-skeleton'
@@ -18,7 +18,9 @@ export default function StudioPage() {
   const [activeAssets, setActiveAssets] = useState<AssetType | null>(null)
   const $bus = useBus()
 
-  $bus.on('assets:open', ({ type }) => setActiveAssets(type))
+  useEffect(() => {
+    $bus.on('assets:open', ({ type }) => setActiveAssets(type))
+  }, [])
 
   const {
     data,
