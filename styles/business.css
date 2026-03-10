@@ -103,7 +103,7 @@
 }
 
 .face {
-  @apply rounded-md max-w-20 max-h-20 overflow-hidden border;
+  @apply rounded-xl max-w-20 max-h-20 overflow-hidden border border-muted/50 cursor-pointer;
 }
 
 .face img {
