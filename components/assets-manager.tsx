@@ -1,15 +1,15 @@
 'use client'
 
-import { useRef, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/button'
 import { AssetCard } from '@/components/asset-card'
+import { AssetCreateDialog } from '@/components/asset-create-dialog'
 import { useAssets } from '@/hooks/use-assets'
-import { useUploadAsset } from '@/hooks/use-upload-asset'
 import { useDeleteAsset } from '@/hooks/use-delete-asset'
 import { useBus } from '@/lib/bus'
 import { createClient } from '@/lib/supabase/client'
 import type { Asset, AssetType } from '@/lib/types'
-import { ArrowLeft, Loader2, Plus } from 'lucide-react'
+import { ArrowLeft, Plus } from 'lucide-react'
 
 interface AssetsManagerProps {
   type: AssetType
@@ -17,8 +17,8 @@ interface AssetsManagerProps {
 }
 
 export function AssetsManager({ type, onClose }: AssetsManagerProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const [userId, setUserId] = useState('')
+  const [dialogOpen, setDialogOpen] = useState(false)
   const $bus = useBus()
 
   useEffect(() => {
@@ -29,7 +29,6 @@ export function AssetsManager({ type, onClose }: AssetsManagerProps) {
   }, [])
 
   const { data: assets = [] } = useAssets()
-  const uploadAsset = useUploadAsset()
   const deleteAsset = useDeleteAsset()
 
   const filtered = assets.filter(a => a.type === type)
@@ -38,17 +37,6 @@ export function AssetsManager({ type, onClose }: AssetsManagerProps) {
     if (!asset.id) return
     $bus.emit('mixin:select', { type, assetId: asset.id })
     onClose()
-  }
-
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const name = file.name.replace(/\.[^.]+$/, '')
-    uploadAsset.mutate({ file, name, type }, {
-      onSettled: () => {
-        if (fileInputRef.current) fileInputRef.current.value = ''
-      }
-    })
   }
 
   const label = type.charAt(0).toUpperCase() + type.slice(1)
@@ -65,13 +53,6 @@ export function AssetsManager({ type, onClose }: AssetsManagerProps) {
             <p className="mt-1 text-sm text-muted-foreground">{filtered.length} {filtered.length === 1 ? 'asset' : 'assets'} of type {label} in your library</p>
           </div>
         </div>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleUpload}
-        />
       </div>
 
       <div className="grid grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-5">
@@ -87,15 +68,14 @@ export function AssetsManager({ type, onClose }: AssetsManagerProps) {
           />
         ))}
         <button
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploadAsset.isPending}
-          className="rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-foreground/30 hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-          {uploadAsset.isPending
-            ? <Loader2 className="size-6 animate-spin" />
-            : <Plus className="size-6" />}
+          onClick={() => setDialogOpen(true)}
+          className="rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-foreground/30 hover:text-foreground transition-colors">
+          <Plus className="size-6" />
           <span className="text-xs">Add an {label.toLowerCase()} asset</span>
         </button>
       </div>
+
+      <AssetCreateDialog type={type} open={dialogOpen} onOpenChange={setDialogOpen} />
     </div>
   )
 }
