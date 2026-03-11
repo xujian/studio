@@ -3,13 +3,24 @@
 import { useMutation } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
 
+type PathOption =
+  | string
+  | ((opts: { userId: string }) => string)
+
 interface UploadOptions {
-  bucket?: string
+  /** Full path including bucket as first segment.
+   *  Static string: `"assets/face"` → bucket=assets, path=face/{filename}
+   *  Function: `({ userId, filename }) => \`uploads/${userId}/${filename}\``
+   *  Default: `({ userId, filename }) => \`uploads/${userId}/${filename}\``
+   */
+  path?: PathOption
 }
 
-interface UploadResult {
+export interface UploadResult {
   filename: string
-  path: string
+  /** Path within the bucket (no bucket prefix). Suitable for DB storage. */
+  storagePath: string
+  bucket: string
 }
 
 function randomHex(bytes = 8) {
@@ -18,7 +29,9 @@ function randomHex(bytes = 8) {
   return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('')
 }
 
-export const useUpload = ({ bucket = 'uploads' }: UploadOptions = {}) => {
+const defaultPath: PathOption = ({ userId }) => `uploads/${userId}`
+
+export const useUpload = ({ path = defaultPath }: UploadOptions = {}) => {
   const supabase = createClient()
 
   const { mutate, isPending } = useMutation({
@@ -28,20 +41,23 @@ export const useUpload = ({ bucket = 'uploads' }: UploadOptions = {}) => {
 
       const ext = file.name.split('.').pop() || 'jpg'
       const filename = `${randomHex()}.${ext}`
-      const path = `${session.user.id}/${filename}`
 
+      const fullPath = typeof path === 'function'
+        ? `${path({ userId: session.user.id })}/${filename}`
+        : `${path}/${filename}`
+      const slashIdx = fullPath.indexOf('/')
+      const bucket = fullPath.slice(0, slashIdx)
+      const storagePath = fullPath.slice(slashIdx + 1)
       const { error } = await supabase.storage
         .from(bucket)
-        .upload(path, file, { contentType: file.type, upsert: false })
-
+        .upload(storagePath, file, { contentType: file.type, upsert: false })
       if (error) throw error
-
-      return { filename, path }
+      return { filename, storagePath, bucket }
     },
   })
 
-  const remove = async (path: string) => {
-    await supabase.storage.from(bucket).remove([path])
+  const remove = async (bucket: string, storagePath: string) => {
+    await supabase.storage.from(bucket).remove([storagePath])
   }
 
   return { upload: mutate, remove, uploading: isPending }

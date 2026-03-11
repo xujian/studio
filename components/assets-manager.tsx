@@ -1,14 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Button } from '@/components/button'
 import { AssetCard } from '@/components/asset-card'
 import { AssetCreateDialog } from '@/components/asset-create-dialog'
-import { useAssets } from '@/hooks/use-assets'
-import { useDeleteAsset } from '@/hooks/use-delete-asset'
+import { Button } from '@/components/button'
 import { useBus } from '@/lib/bus'
 import { createClient } from '@/lib/supabase/client'
 import type { Asset, AssetType } from '@/lib/types'
+import { useAssets } from '@/hooks/use-assets'
+import { useDeleteAsset } from '@/hooks/use-delete-asset'
 import { ArrowLeft, Plus } from 'lucide-react'
 
 interface AssetsManagerProps {
@@ -45,16 +45,24 @@ export function AssetsManager({ type, onClose }: AssetsManagerProps) {
     <div className="w-full">
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={onClose} className="size-10 rounded-full">
-            <ArrowLeft className="size-6" strokeWidth={2.5} />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="size-12 rounded-full">
+            <ArrowLeft className="size-10" strokeWidth={3} />
           </Button>
           <div>
-            <h2 className="text-2xl font-semibold leading-none mb-0">{label}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">{filtered.length} {filtered.length === 1 ? 'asset' : 'assets'} of type {label} in your library</p>
+            <h2 className="my-0 text-2xl leading-none font-semibold">
+              {label}
+            </h2>
+            <p className="my-0 text-sm text-muted-foreground">
+              {filtered.length} {filtered.length === 1 ? 'asset' : 'assets'} of
+              type {label} in your library
+            </p>
           </div>
         </div>
       </div>
-
       <div className="grid grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-5">
         {filtered.map(asset => (
           <AssetCard
@@ -62,20 +70,26 @@ export function AssetsManager({ type, onClose }: AssetsManagerProps) {
             data={asset}
             owned
             onUse={() => handleUse(asset)}
-            onDelete={asset.user_id === userId && asset.id
-              ? () => deleteAsset.mutate({ id: asset.id!, path: asset.path })
-              : undefined}
+            onDelete={
+              asset.user_id === userId && asset.id
+                ? () => deleteAsset.mutate({ id: asset.id!, path: asset.path })
+                : undefined
+            }
           />
         ))}
         <button
           onClick={() => setDialogOpen(true)}
-          className="rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-foreground/30 hover:text-foreground transition-colors">
+          className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground">
           <Plus className="size-6" />
           <span className="text-xs">Add an {label.toLowerCase()} asset</span>
         </button>
       </div>
 
-      <AssetCreateDialog type={type} open={dialogOpen} onOpenChange={setDialogOpen} />
+      <AssetCreateDialog
+        type={type}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+      />
     </div>
   )
 }

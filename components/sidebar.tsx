@@ -37,8 +37,8 @@ export default function Sidebar() {
             className={cn(
               'cursor-pointer rounded-full transition-all duration-300',
               activeTool === tool.id
-                ? 'bg-white text-black shadow-[0_4px_16px_rgba(255,255,255,0.15)]'
-                : 'text-white/50 hover:bg-white/10 hover:text-white'
+                ? 'bg-white/30'
+                : 'bg-black/50'
             )}>
             <div
               className="aspect-square size-6 bg-cover bg-center bg-no-repeat"

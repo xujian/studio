@@ -1,21 +1,20 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import Image from 'next/image'
 import { Button } from '@/components/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
+  DialogFooter
 } from '@/components/ui/dialog'
-import { useUpload } from '@/hooks/use-upload'
-import { useCreateAsset } from '@/hooks/use-create-asset'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Upload, type UploadHandle } from '@/components/upload'
 import type { AssetType } from '@/lib/types'
-import { Loader2, Sparkles, Upload } from 'lucide-react'
+import { useCreateAsset } from '@/hooks/use-create-asset'
+import { Loader2, Sparkles } from 'lucide-react'
 
 interface AssetCreateDialogProps {
   type: AssetType
@@ -23,13 +22,15 @@ interface AssetCreateDialogProps {
   onOpenChange: (open: boolean) => void
 }
 
-export function AssetCreateDialog({ type, open, onOpenChange }: AssetCreateDialogProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const { upload, remove, uploading } = useUpload({ bucket: 'assets' })
+export function AssetCreateDialog({
+  type,
+  open,
+  onOpenChange
+}: AssetCreateDialogProps) {
+  const uploadRef = useRef<UploadHandle>(null)
   const createAsset = useCreateAsset()
 
-  const [preview, setPreview] = useState<string | null>(null)
-  const [uploadedPath, setUploadedPath] = useState<string | null>(null)
+  const [uploadedPath, setUploadedPath] = useState<string>('')
   const [name, setName] = useState('')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -37,16 +38,6 @@ export function AssetCreateDialog({ type, open, onOpenChange }: AssetCreateDialo
   const [suggesting, setSuggesting] = useState(false)
 
   const label = type.charAt(0).toUpperCase() + type.slice(1)
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setPreview(URL.createObjectURL(file))
-    upload(file, {
-      onSuccess: ({ path }) => setUploadedPath(path),
-      onError: () => setPreview(null),
-    })
-  }
 
   const handleSuggest = async () => {
     if (!uploadedPath && !content) return
@@ -58,8 +49,8 @@ export function AssetCreateDialog({ type, open, onOpenChange }: AssetCreateDialo
         body: JSON.stringify({
           type,
           content: content || undefined,
-          storagePath: uploadedPath || undefined,
-        }),
+          storagePath: uploadedPath || undefined
+        })
       })
       if (res.ok) {
         const data = await res.json()
@@ -84,73 +75,54 @@ export function AssetCreateDialog({ type, open, onOpenChange }: AssetCreateDialo
   }
 
   const handleCancel = async () => {
-    if (uploadedPath) await remove(uploadedPath)
+    await uploadRef.current?.clear()
     resetForm()
     onOpenChange(false)
   }
 
   const resetForm = () => {
-    setPreview(null)
-    setUploadedPath(null)
+    setUploadedPath('')
     setName('')
     setTitle('')
     setDescription('')
     setContent('')
   }
 
-  const canSuggest = (!!uploadedPath || !!content) && !suggesting && !uploading
-  const canSave = !!name && !createAsset.isPending && !uploading
+  const canSuggest = (!!uploadedPath || !!content) && !suggesting
+  const canSave = !!name && !createAsset.isPending
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) handleCancel(); else onOpenChange(v) }}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Create {label} Asset</DialogTitle>
+    <Dialog
+      open={open}
+      onOpenChange={v => {
+        if (!v) handleCancel()
+        else onOpenChange(v)
+      }}>
+      <DialogContent className="glass rounded-4xl p-4 w-screen lg:max-w-2xl">
+        <DialogHeader className="">
+          <DialogTitle className="text-sm my-0">Create {label} Asset</DialogTitle>
         </DialogHeader>
-
-        <div className="flex flex-col gap-4">
-          {/* Image upload */}
-          <div
-            className="relative aspect-video w-full cursor-pointer rounded-xl border-2 border-dashed border-border bg-muted flex items-center justify-center overflow-hidden hover:border-foreground/30 transition-colors"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            {preview
-              ? <Image src={preview} alt="preview" fill className="object-cover" />
-              : <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                  <Upload className="size-6" />
-                  <span className="text-xs">Upload image (optional)</span>
-                </div>
-            }
-            {uploading && (
-              <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
-                <Loader2 className="size-6 animate-spin" />
-              </div>
-            )}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileChange}
+        <div className="grid grid-cols-2 gap-4">
+          <Upload ref={uploadRef}
+            path={({ userId }) => `assets/${userId}/${type}`}
+            onComplete={setUploadedPath} />
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="asset-content" className="text-sm font-medium">
+              Content
+            </label>
+            <Textarea
+              id="asset-content"
+              value={content}
+              className='min-h-52 resize-none'
+              onChange={e => setContent(e.target.value)}
+              placeholder="Text fed to the engine (e.g. light linen pants, white crop top)"
+              rows={3}
             />
           </div>
-
-          {/* Suggest button */}
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={!canSuggest}
-            onClick={handleSuggest}
-            className="self-start gap-2"
-          >
-            {suggesting ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
-            Suggest name &amp; title
-          </Button>
-
-          {/* Name */}
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="asset-name" className="text-sm font-medium">Name <span className="text-destructive">*</span></label>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="asset-name" className="text-sm font-medium">
+              Name <span className="text-destructive">*</span>
+            </label>
             <Input
               id="asset-name"
               value={name}
@@ -158,10 +130,10 @@ export function AssetCreateDialog({ type, open, onOpenChange }: AssetCreateDialo
               placeholder="e.g. summer-casual"
             />
           </div>
-
-          {/* Title */}
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="asset-title" className="text-sm font-medium">Title</label>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="asset-title" className="text-sm font-medium">
+              Title
+            </label>
             <Input
               id="asset-title"
               value={title}
@@ -169,10 +141,10 @@ export function AssetCreateDialog({ type, open, onOpenChange }: AssetCreateDialo
               placeholder="e.g. Summer Casual"
             />
           </div>
-
-          {/* Description */}
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="asset-description" className="text-sm font-medium">Description</label>
+          <div className="flex flex-col gap-1 col-span-2">
+            <label htmlFor="asset-description" className="text-sm font-medium">
+              Description
+            </label>
             <Input
               id="asset-description"
               value={description}
@@ -180,26 +152,30 @@ export function AssetCreateDialog({ type, open, onOpenChange }: AssetCreateDialo
               placeholder="A note for yourself"
             />
           </div>
-
-          {/* Content */}
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="asset-content" className="text-sm font-medium">Content</label>
-            <Textarea
-              id="asset-content"
-              value={content}
-              onChange={e => setContent(e.target.value)}
-              placeholder="Text fed to the engine (e.g. light linen pants, white crop top)"
-              rows={3}
-            />
-          </div>
         </div>
-
-        <DialogFooter>
+        <DialogFooter className="flex items-center">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={!canSuggest}
+            onClick={handleSuggest}
+            className="gap-2 self-start">
+            {suggesting ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Sparkles className="size-4" />
+            )}
+            Suggest name &amp; title
+          </Button>
+          <div className="flex-1"></div>
           <Button variant="outline" onClick={handleCancel}>
             Cancel
           </Button>
           <Button onClick={handleSave} disabled={!canSave}>
-            {createAsset.isPending ? <Loader2 className="size-4 animate-spin mr-2" /> : null}
+            {createAsset.isPending ? (
+              <Loader2 className="mr-2 size-4 animate-spin" />
+            ) : null}
             Save
           </Button>
         </DialogFooter>

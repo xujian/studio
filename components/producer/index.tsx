@@ -91,7 +91,9 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
   // Data
   const { data: assets = [] } = useAssets()
   const { mutate: commit, isPending, error, reset: clearError } = useEngine()
-  const { upload, uploading } = useUpload()
+  const { upload, uploading } = useUpload({
+    path: () => `uploads/${userId}`
+  })
 
   // Handlers
   const handleGenerate = () => {
