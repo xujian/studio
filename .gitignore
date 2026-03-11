@@ -47,3 +47,5 @@ yarn-error.log*
 *.swp
 *.swo
 *~
+
+certificates

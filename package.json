@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 80 -H kanojostudio.io",
+    "dev": "next dev -p 443 -H 0.0.0.0 --experimental-https --experimental-https-cert ./kanojostudio.io.pem --experimental-https-key ./kanojostudio.io-key.pem",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
