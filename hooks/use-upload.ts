@@ -40,5 +40,9 @@ export const useUpload = ({ bucket = 'uploads' }: UploadOptions = {}) => {
     },
   })
 
-  return { upload: mutate, uploading: isPending }
+  const remove = async (path: string) => {
+    await supabase.storage.from(bucket).remove([path])
+  }
+
+  return { upload: mutate, remove, uploading: isPending }
 }
