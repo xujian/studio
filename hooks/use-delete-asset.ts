@@ -8,6 +8,7 @@ interface DeleteAssetArgs {
   path?: string | null
 }
 
+/** Delete a user-created (custom) asset — removes from DB and storage */
 export const useDeleteAsset = () => {
   const supabase = createClient()
   const queryClient = useQueryClient()
@@ -21,10 +22,31 @@ export const useDeleteAsset = () => {
 
       if (error) throw error
 
-      // Best-effort storage cleanup — don't throw if this fails
       if (path) {
         await supabase.storage.from('assets').remove([path])
       }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['assets'] })
+    }
+  })
+}
+
+/** Remove a purchased asset from the user's library — deletes the purchase record only */
+export const useRemovePurchase = () => {
+  const supabase = createClient()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (assetId: string) => {
+      const { data: { session } } = await supabase.auth.getSession()
+      const { error } = await supabase
+        .from('purchases')
+        .delete()
+        .eq('asset_id', assetId)
+        .eq('buyer_id', session!.user.id)
+
+      if (error) throw error
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assets'] })

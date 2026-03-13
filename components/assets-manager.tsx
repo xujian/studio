@@ -6,7 +6,7 @@ import { AssetCreateDialog } from '@/components/asset-create-dialog'
 import { Button } from '@/components/button'
 import { useBus } from '@/lib/bus'
 import { createClient } from '@/lib/supabase/client'
-import type { Asset, AssetType } from '@/lib/types'
+import type { AssetWithPurchaseInfo, AssetType } from '@/lib/types'
 import { useAssets } from '@/hooks/use-assets'
 import { useDeleteAsset } from '@/hooks/use-delete-asset'
 import { ArrowLeft, Plus } from 'lucide-react'
@@ -19,7 +19,6 @@ interface AssetsManagerProps {
 export function AssetsManager({ type, onClose }: AssetsManagerProps) {
   const [userId, setUserId] = useState('')
   const [dialogOpen, setDialogOpen] = useState(false)
-  const $bus = useBus()
 
   useEffect(() => {
     const supabase = createClient()
@@ -29,16 +28,8 @@ export function AssetsManager({ type, onClose }: AssetsManagerProps) {
   }, [])
 
   const { data: assets = [] } = useAssets()
-  const deleteAsset = useDeleteAsset()
-
+  console.log('assetsdata-----------------------------///:', assets)
   const filtered = assets.filter(a => a.type === type)
-
-  const handleUse = (asset: Asset) => {
-    if (!asset.id) return
-    $bus.emit('mixin:select', { type, assetId: asset.id })
-    onClose()
-  }
-
   const label = type.charAt(0).toUpperCase() + type.slice(1)
 
   return (
@@ -68,13 +59,6 @@ export function AssetsManager({ type, onClose }: AssetsManagerProps) {
           <AssetCard
             key={asset.id}
             data={asset}
-            owned
-            onUse={() => handleUse(asset)}
-            onDelete={
-              asset.user_id === userId && asset.id
-                ? () => deleteAsset.mutate({ id: asset.id!, path: asset.path })
-                : undefined
-            }
           />
         ))}
         <button

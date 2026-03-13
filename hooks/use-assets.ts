@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
-import type { Asset } from '@/lib/types'
+import type { AssetWithPurchaseInfo } from '@/lib/types'
 
 export const useAssets = () => {
   const supabase = createClient()
@@ -21,7 +21,7 @@ export const useAssets = () => {
       })
 
       if (error) throw error
-      return (data || []) as Asset[]
+      return (data || []) as AssetWithPurchaseInfo[]
     },
     staleTime: 5 * 60 * 1000 // 5 minutes - assets don't change frequently
   })
