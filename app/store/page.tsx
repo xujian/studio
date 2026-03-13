@@ -26,6 +26,8 @@ export default async function StorePage() {
     user_uuid: userId
   })
 
+  console.log('assetsdata-----------------------------:', data)
+
   const assets = (data || []) as AssetWithPurchaseInfo[]
 
   const sections = assetTypes
@@ -34,34 +36,27 @@ export default async function StorePage() {
       name: t.name,
       assets: assets.filter(a => a.type === t.type)
     }))
-    .filter(s => s.assets.length > 0)
 
   return (
     <section className="flex w-full flex-col px-16 pt-2 pb-16">
       <h1 className="mb-8 text-2xl font-semibold">Store</h1>
-      {sections.length === 0 ? (
-        <div className="py-20 text-center text-muted-foreground">
-          No assets available yet
-        </div>
-      ) : (
-        <div className="flex flex-col gap-10">
-          {sections.map(section => (
-            <div key={section.type}>
-              <h2 className="mb-3 text-lg font-semibold">{section.name}</h2>
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
-                {section.assets.map(asset => (
-                  <AssetCard
-                    key={asset.id}
-                    data={asset}
-                    owned={asset.is_purchased}
-                    hasPrice
-                  />
-                ))}
-              </div>
+      <div className="flex flex-col gap-10">
+        {sections.map(section => (
+          <div key={section.type}>
+            <h2 className="mb-3 text-lg font-semibold leading-6">{section.name}</h2>
+            <p className="caption mb-4">{section.assets.length} items total</p>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+              {section.assets.map(asset => (
+                <AssetCard
+                  key={asset.id}
+                  data={asset}
+                  hasPrice
+                />
+              ))}
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        ))}
+      </div>
     </section>
   )
 }

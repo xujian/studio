@@ -10,7 +10,10 @@ export default function StoreLoading() {
             <Skeleton className="mb-3 h-6 w-24" />
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
               {Array.from({ length: 6 }).map((_, j) => (
-                <Skeleton key={j} className="aspect-square w-full rounded-lg" />
+                <div key={j} className="flex flex-col gap-4">
+                  <Skeleton key={j} className="aspect-square w-full rounded-lg" />
+                  <Skeleton className="mb-3 h-6 w-24" />
+                </div>
               ))}
             </div>
           </div>
