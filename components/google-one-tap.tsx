@@ -41,7 +41,6 @@ export function GoogleOneTap() {
     window.google.accounts.id.initialize({
       client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
       nonce: hashedNonce,
-      use_fedcm_for_prompt: true,
       callback: async ({ credential }: { credential: string }) => {
         const { error } = await supabase.auth.signInWithIdToken({
           provider: 'google',
