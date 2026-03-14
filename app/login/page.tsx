@@ -13,8 +13,11 @@ export default function LoginPage() {
       if (buttonEl) {
         window.google.accounts.id.renderButton(buttonEl, {
           type: 'standard',
-          theme: 'outline',
+          theme: 'filled_black',
+          text: 'continue_with',
           size: 'large',
+          shape: 'circle',
+          width: '100%',
         })
       }
     }
@@ -22,26 +25,22 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
-      <Card
-        className={cn(
-          'w-full max-w-md',
-          'elevation-3 animate-float-up'
-        )}
-      >
+      <Card className={cn('w-full max-w-md', 'elevation-3 animate-float-up')}>
         <CardContent className="space-y-8 p-8">
           <div className="text-center">
-            <h1 className={cn(
-              'text-4xl font-bold tracking-tight',
-              'glow-primary-hover vibrancy-text'
-            )}>
+            <h1
+              className={cn(
+                'text-4xl font-bold tracking-tight',
+                'glow-primary-hover vibrancy-text'
+              )}>
               Kanojo Studio
             </h1>
             <p className="mt-2 text-muted-foreground">
               AI-Powered Portrait Photography
             </p>
           </div>
-
-          <div id="google-signin-button" className="w-full" />
+          <div id="google-signin-button"
+            className="w-full flex justify-center bg-black rounded-full border border-gray-300 overflow-hidden transition-all duration-200 hover:shadow-lg" />
         </CardContent>
       </Card>
     </div>

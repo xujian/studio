@@ -60,8 +60,11 @@ export function GoogleOneTap() {
     if (buttonEl) {
       window.google.accounts.id.renderButton(buttonEl, {
         type: 'standard',
-        theme: 'outline',
+        theme: 'filled_black',
+        text: 'continue_with',
         size: 'large',
+        shape: 'circle',
+        width: '382',
       })
     }
   }
