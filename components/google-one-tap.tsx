@@ -51,7 +51,9 @@ export function GoogleOneTap() {
       },
     })
 
-    window.google.accounts.id.prompt()
+    if (process.env.NODE_ENV === 'production') {
+      window.google.accounts.id.prompt()
+    }
 
     // Render button if the login page's target element is in the DOM
     const buttonEl = document.getElementById('google-signin-button')
