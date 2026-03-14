@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter, Playfair_Display } from 'next/font/google'
 import { Providers } from '@/context/providers'
 import { Header } from '@/components/header'
+import { GoogleOneTap } from '@/components/google-one-tap'
 import { cn } from '@/lib/utils'
 import '@/styles/app.css'
 import Sidebar from '@/components/sidebar'
@@ -71,6 +72,7 @@ export default function RootLayout({
       </head>
       <body className={cn(inter.variable, playfair.variable, inter.className, "min-h-screen antialiased")}>
         <Providers>
+          <GoogleOneTap />
           <Header />
           <main className="container min-h-[calc(100vh-6rem)] mx-auto pt-24">
             {children}
