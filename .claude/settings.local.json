@@ -13,7 +13,11 @@
       "Bash(git diff:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(git:*)",
+      "Bash(npx:*)",
+      "Bash(node:*)",
+      "Bash(grep:*)"
     ]
   }
 }
