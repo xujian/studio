@@ -10,8 +10,8 @@ import {
 } from '@/components/ui/sheet'
 import { Price } from '@/components/price'
 import { assetUrl } from '@/lib/utils'
-import type { AssetWithPurchaseInfo } from '@/lib/types'
 import { Check, Loader2 } from 'lucide-react'
+import type { AssetWithPurchaseInfo } from '@/lib/types'
 
 type AssetDetailSheetProps = {
   asset: AssetWithPurchaseInfo
@@ -24,7 +24,7 @@ type AssetDetailSheetProps = {
   onDelete: () => void
 }
 
-export function AssetDetailSheet({
+export const AssetDetailSheet = ({
   asset,
   open,
   onOpenChange,
@@ -33,7 +33,7 @@ export function AssetDetailSheet({
   onBuy,
   onUse,
   onDelete,
-}: AssetDetailSheetProps) {
+}: AssetDetailSheetProps) => {
   const isPublic = !!asset.is_public
   const isPurchased = !!asset.is_purchased
   const isCustom = !isPublic && !isPurchased
