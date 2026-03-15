@@ -207,9 +207,9 @@ All database and domain types are defined in `lib/types.ts`:
 - `Moment` - Generation session schema
 - `Photo` - Generated image schema
 - `MomentWithPhotos` - Moment with related photos array
-- `Asset` - Reusable prompt component schema
+- `Asset` - Reusable prompt component schema (see `docs/ASSET.md`)
 - `AssetType` - Union type for asset categories
-- `Mixins` - Map of asset type to asset ID
+- `Mixins` / `Assets` / `AssetMap` - Asset selection types (see `docs/MIXIN.md`)
 - `JsonPrompt` - Structured prompt format (output from ImageAnalyzer/PromptAnalyzer)
   - Contains: subject, outfit, pose, scene, makeup, lighting, camera sections
   - Used for merging reference image analysis with text prompt analysis
