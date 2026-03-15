@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/button'
 import type { Asset, AssetWithPurchaseInfo } from '@/lib/types'
-import { assetUrl } from '@/lib/utils'
+import { assetUrl, assetStatus } from '@/lib/utils'
 import { Check } from 'lucide-react'
 import { Price } from '@/components/price'
 import { PurchaseModal } from '@/components/purchase'
@@ -26,12 +26,7 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
   const [modalOpen, setModalOpen] = useState(false)
   const [sheetOpen, setSheetOpen] = useState(false)
   const isDeleting = deleteAsset.isPending || removePurchase.isPending
-  const isPublic = !!data.is_public,
-    isPurchased = !!(data as AssetWithPurchaseInfo).is_purchased,
-    isCustom = !isPublic && !isPurchased,
-    canUse = isPublic || isPurchased || isCustom,
-    purchasable = !isPublic && !isPurchased,
-    deletable = isPurchased || isCustom
+  const { isPublic, isPurchased, isCustom, canUse, purchasable, deletable } = assetStatus(data as AssetWithPurchaseInfo)
   const handleBuy = () => setModalOpen(true)
 
   const handleUse = (asset: AssetWithPurchaseInfo) => {
@@ -79,7 +74,7 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
             }
           </div>
           <div className="absolute left-0 bottom-0 w-full flex flex-row-reverse gap-1 p-1 opacity-0 transition-opacity group-hover:opacity-100">
-            {hasPrice && (
+            {purchasable && (
               <Button size="sm" className="h-7 bg-black text-white flex-1 rounded-full text-xs" onClick={(e) => { e.stopPropagation(); handleBuy() }}>
                 BUY
               </Button>
@@ -101,7 +96,6 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
             )}
           </div>
         </CardContent>
-
         <CardFooter className="py-2 px-0">
           <CardTitle>
             <h6>{data.title || data.name}</h6>

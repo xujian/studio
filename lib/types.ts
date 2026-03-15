@@ -75,7 +75,6 @@ export type Asset = {
   type: AssetType // face, reference, outfit, scene, etc.
   path?: string | null // if image-based asset
   content?: string | null // if text-based asset
-  is_public?: boolean
   price?: number | null // credits cost (NULL = personal asset, not for sale)
   created_at?: string
 }

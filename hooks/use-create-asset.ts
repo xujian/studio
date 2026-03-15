@@ -31,8 +31,7 @@ export const useCreateAsset = () => {
           description: description || undefined,
           content: content || undefined,
           type,
-          path: path || null,
-          is_public: false
+          path: path || null
         })
 
       if (error) throw error

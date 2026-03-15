@@ -1,17 +1,13 @@
 'use client'
 
 import Image from 'next/image'
+import { Price } from '@/components/price'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-} from '@/components/ui/sheet'
-import { Price } from '@/components/price'
-import { assetUrl } from '@/lib/utils'
-import { Check, Loader2 } from 'lucide-react'
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
 import type { AssetWithPurchaseInfo } from '@/lib/types'
+import { assetUrl, assetStatus } from '@/lib/utils'
+import { Check, Loader2 } from 'lucide-react'
 
 type AssetDetailSheetProps = {
   asset: AssetWithPurchaseInfo
@@ -32,20 +28,15 @@ export const AssetDetailSheet = ({
   isDeleting,
   onBuy,
   onUse,
-  onDelete,
+  onDelete
 }: AssetDetailSheetProps) => {
-  const isPublic = !!asset.is_public
-  const isPurchased = !!asset.is_purchased
-  const isCustom = !isPublic && !isPurchased
-  const canUse = isPublic || isPurchased || isCustom
-  const purchasable = !isPublic && !isPurchased
-  const deletable = isPurchased || isCustom
+  const { isPublic, isPurchased, isCustom, canUse, purchasable, deletable } =
+    assetStatus(asset)
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:max-w-sm">
+      <SheetContent className="flex h-full w-full flex-col gap-0 bg-muted p-0 sm:max-w-sm">
         <SheetTitle className="sr-only">{asset.title || asset.name}</SheetTitle>
-
         {/* Hero */}
         <div className="relative aspect-square w-full overflow-hidden bg-black">
           {asset.path ? (
@@ -63,10 +54,8 @@ export const AssetDetailSheet = ({
               </p>
             </div>
           )}
-
           {/* Scrim */}
           <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-black/70 to-transparent" />
-
           {/* Badges overlay */}
           <div className="absolute right-3 bottom-3 left-3 flex items-end justify-between">
             <Badge className="border-white/20 bg-white/10 text-[10px] tracking-widest text-white uppercase backdrop-blur-sm">
@@ -75,18 +64,19 @@ export const AssetDetailSheet = ({
             {isPurchased ? (
               <Badge className="gap-1 bg-primary/90 text-xs">
                 <Check className="size-3" />
-                Owned
+                Bought
               </Badge>
             ) : isCustom ? (
-              <Badge variant="secondary" className="text-xs">Custom</Badge>
+              <Badge variant="secondary" className="text-xs">
+                Custom
+              </Badge>
             ) : null}
           </div>
         </div>
-
         {/* Info */}
-        <div className="flex flex-col gap-4 p-4">
+        <div className="flex flex-1 flex-col gap-4 p-4">
           <div className="flex flex-col gap-1">
-            <h2 className="text-base font-semibold leading-tight">
+            <h2 className="text-base leading-tight font-semibold">
               {asset.title || asset.name}
             </h2>
             {asset.name && asset.title && (
@@ -99,8 +89,6 @@ export const AssetDetailSheet = ({
             )}
           </div>
         </div>
-
-        {/* Actions */}
         <div className="mt-auto flex flex-col gap-2 p-4 pt-0">
           {hasPrice && asset.price != null && (
             <Price value={asset.price} variant="button" />
@@ -123,7 +111,11 @@ export const AssetDetailSheet = ({
               className="w-full rounded-xl"
               disabled={isDeleting}
               onClick={onDelete}>
-              {isDeleting ? <Loader2 className="size-4 animate-spin" /> : 'Delete'}
+              {isDeleting ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                'Delete'
+              )}
             </Button>
           )}
         </div>

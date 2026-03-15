@@ -9,7 +9,7 @@ Print a quick reference of all 9 database tables, storage buckets, and RLS patte
 | `profiles` | `id`, `name`, `avatar`, `credits`, `stripe_customer_id`, `subscription_tier` | Own row only (view + update) | — |
 | `moments` | `id`, `user_id`, `prompt`, `mixins` (JSONB), `final_prompt`, `status` | Own rows only | — |
 | `photos` | `id`, `moment_id`, `url`, `storage_path`, `prompt` (delta), `mixins` (delta) | Own moments' photos | — |
-| `assets` | `id`, `user_id`, `name`, `type`, `url`, `content`, `is_public`, `price` | Own + public read; purchased | `get_user_assets(user_uuid)` |
+| `assets` | `id`, `user_id`, `name`, `type`, `url`, `content`, `price` | Own + public read (user_id IS NULL); purchased | `get_user_assets(user_uuid)` |
 | `purchases` | `id`, `buyer_id`, `asset_id`, `created_at` | Own rows | — |
 | `posts` | `id`, `user_id`, `moment_id` (UNIQUE) | Insert own; public read | — |
 | `likes` | `id`, `post_id`, `user_id` (UNIQUE pair) | Insert/delete own; public read | — |

@@ -39,7 +39,6 @@ CREATE TABLE assets (
   type text NOT NULL, -- face, reference, outfit, scene, etc.
   path text, -- if image-based asset (relative path in assets bucket)
   content text, -- if text-based asset
-  is_public boolean DEFAULT false, -- true = visible in store
   price integer, -- credits cost (NULL = personal asset, not for sale)
   created_at timestamptz DEFAULT now()
 );
@@ -119,7 +118,6 @@ CREATE INDEX IF NOT EXISTS idx_moments_mixins ON moments USING GIN (mixins);
 
 CREATE INDEX idx_assets_user_id ON assets(user_id);
 CREATE INDEX idx_assets_type ON assets(type);
-CREATE INDEX idx_assets_is_public ON assets(is_public) WHERE is_public = true;
 
 CREATE INDEX idx_photos_moment_id ON photos(moment_id);
 CREATE INDEX IF NOT EXISTS idx_photos_mixins ON photos USING GIN (mixins);
@@ -205,7 +203,7 @@ CREATE POLICY "Users can view own assets"
 
 CREATE POLICY "Users can view public store assets"
   ON assets FOR SELECT
-  USING (is_public = true AND user_id IS NULL);
+  USING (user_id IS NULL);
 
 CREATE POLICY "Users can insert own assets"
   ON assets FOR INSERT
@@ -436,7 +434,6 @@ RETURNS TABLE (
   type text,
   path text,
   content text,
-  is_public boolean,
   price integer,
   created_at timestamptz,
   is_purchased boolean
@@ -448,13 +445,13 @@ SET search_path = ''
 AS $$
   SELECT
     a.id, a.user_id, a.name, a.title, a.description,
-    a.type, a.path, a.content, a.is_public, a.price, a.created_at,
+    a.type, a.path, a.content, a.price, a.created_at,
     (p.id IS NOT NULL) AS is_purchased
   FROM public.assets a
   LEFT JOIN public.purchases p ON p.asset_id = a.id AND p.buyer_id = user_uuid
   WHERE a.user_id = user_uuid
      OR p.id IS NOT NULL
-     OR (a.is_public = true AND a.price IS NULL)
+     OR (a.user_id IS NULL AND a.price IS NULL)
   ORDER BY a.created_at DESC;
 $$;
 
@@ -469,7 +466,6 @@ RETURNS TABLE (
   type text,
   path text,
   content text,
-  is_public boolean,
   price integer,
   created_at timestamptz,
   is_purchased boolean
@@ -481,7 +477,7 @@ SET search_path = ''
 AS $$
   SELECT
     a.id, a.user_id, a.name, a.title, a.description,
-    a.type, a.path, a.content, a.is_public, a.price, a.created_at,
+    a.type, a.path, a.content, a.price, a.created_at,
     EXISTS (
       SELECT 1 FROM public.purchases p
       WHERE p.asset_id = a.id AND p.buyer_id = user_uuid
@@ -571,7 +567,7 @@ BEGIN
   END IF;
 
   -- Must be a public asset with a price
-  IF v_asset.is_public IS NOT TRUE OR v_asset.price IS NULL THEN
+  IF v_asset.user_id IS NOT NULL OR v_asset.price IS NULL THEN
     RETURN json_build_object('success', false, 'error', 'Asset is not for sale');
   END IF;
 

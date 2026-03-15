@@ -27,7 +27,6 @@ type Asset = {
   type: AssetType
   path?: string | null   // relative path in 'assets' storage bucket (image-based), for text-based assets, it's a preview image
   content?: string | null // text fed to the engine (text-based)
-  is_public?: boolean    // true = visible in store
   price?: number | null  // credits cost; NULL = personal, not for sale
   created_at?: string
 }
@@ -48,11 +47,11 @@ All other asset types support two modes:
 
 ## Ownership Model
 
-| `user_id` | `is_public` | `is_purchased` | Description |
-|---|---|---|---|
-| NULL | true | — | Official Kanojo Studio asset (store) |
-| user's id | false | false | Personal/custom asset |
-| another user's id | true | true | Purchased from store |
+| `user_id` | `is_purchased` | Description |
+|---|---|---|
+| NULL | — | Official Kanojo Studio asset (free or purchasable) |
+| user's id | false | Personal/custom asset |
+| another user's id | true | Purchased from store |
 
 The `get_user_assets` Postgres RPC returns all three categories in one query.
 

@@ -202,7 +202,7 @@ Core tables with RLS policies:
    - Display logic: `photo.prompt || moment.prompt` and `{ ...moment.mixins, ...photo.mixins }`
 
 4. **`assets`** - Reusable prompt components (faces, styles, scenes, etc.)
-   - Fields: `id`, `user_id`, `name`, `type`, `url`, `content`, `is_public`, `price`, `created_at`
+   - Fields: `id`, `user_id`, `name`, `type`, `url`, `content`, `price`, `created_at`
    - Types: face, makeup, hair, outfit, scene, lighting, camera
    - Supports both image-based (URL) and text-based (content) assets
    - Marketplace functionality with credits system
