@@ -12,6 +12,7 @@ import { Price } from '@/components/price'
 import { PurchaseModal } from '@/components/purchase'
 import { useBus } from '@/lib/bus'
 import { useDeleteAsset, useRemovePurchase } from '@/hooks/use-delete-asset'
+import { AssetDetailSheet } from '@/components/asset-detail-sheet'
 
 interface AssetCardProps {
   data: Asset
@@ -23,6 +24,8 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
   const deleteAsset = useDeleteAsset()
   const removePurchase = useRemovePurchase()
   const [modalOpen, setModalOpen] = useState(false)
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const isDeleting = deleteAsset.isPending || removePurchase.isPending
   const isPublic = !!data.is_public,
     isPurchased = !!(data as AssetWithPurchaseInfo).is_purchased,
     isCustom = !isPublic && !isPurchased,
@@ -46,7 +49,7 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
 
   return (
     <>
-      <Card className="asset-card group gap-0 p-0 transition-all cursor-pointer border-0">
+      <Card className="asset-card group gap-0 p-0 transition-all cursor-pointer border-0" onClick={() => setSheetOpen(true)}>
         <CardContent className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted p-0">
           {data.path
             ? (<Image
@@ -77,14 +80,14 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
           </div>
           <div className="absolute left-0 bottom-0 w-full flex flex-row-reverse gap-1 p-1 opacity-0 transition-opacity group-hover:opacity-100">
             {hasPrice && (
-              <Button size="sm" className="h-7 bg-black text-white flex-1 rounded-full text-xs" onClick={handleBuy}>
+              <Button size="sm" className="h-7 bg-black text-white flex-1 rounded-full text-xs" onClick={(e) => { e.stopPropagation(); handleBuy() }}>
                 BUY
               </Button>
             )}
             {canUse  && (
               <Button size="sm"
                 className="h-7 bg-black text-white gap-1 flex-1 rounded-full text-xs"
-                onClick={() => handleUse(data as AssetWithPurchaseInfo)}>
+                onClick={(e) => { e.stopPropagation(); handleUse(data as AssetWithPurchaseInfo) }}>
                 USE
               </Button>
             )}
@@ -92,7 +95,7 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
               <Button size="sm"
                 variant="destructive"
                 className="h-7 bg-destructive text-white flex-0 w-20 gap-1 rounded-full text-xs"
-                onClick={() => handleDelete(data as AssetWithPurchaseInfo)}>
+                onClick={(e) => { e.stopPropagation(); handleDelete(data as AssetWithPurchaseInfo) }}>
                 DELETE
               </Button>
             )}
@@ -107,9 +110,23 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
         </CardFooter>
       </Card>
 
-      {purchasable && (
-        <PurchaseModal asset={data as AssetWithPurchaseInfo} open={modalOpen} onOpenChange={setModalOpen} />
-      )}
+      <PurchaseModal asset={data as AssetWithPurchaseInfo} open={modalOpen} onOpenChange={setModalOpen} />
+      <AssetDetailSheet
+        asset={data as AssetWithPurchaseInfo}
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        hasPrice={hasPrice}
+        isDeleting={isDeleting}
+        onBuy={() => { setSheetOpen(false); setModalOpen(true) }}
+        onUse={() => handleUse(data as AssetWithPurchaseInfo)}
+        onDelete={() => {
+          if ((data as AssetWithPurchaseInfo).is_purchased) {
+            removePurchase.mutate(data.id!, { onSuccess: () => setSheetOpen(false) })
+          } else {
+            deleteAsset.mutate({ id: data.id!, path: data.path }, { onSuccess: () => setSheetOpen(false) })
+          }
+        }}
+      />
     </>
   )
 }
