@@ -2,6 +2,17 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Quick Reference
+
+- **What:** AI portrait photography platform (Kanojo Studio) — MVP, pre-public-launch
+- **Dev server:** `sudo pnpm dev` → HTTPS port 443 at `https://kanojostudio.io`
+- **CRITICAL:** Three Supabase clients — never mix contexts (see Architecture below)
+- **Style:** kebab-case files, arrow functions, no semicolons, single quotes — see `docs/CODING_STYLE.md`
+- **Commits:** `feat|fix|refactor|docs: message` + `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`
+- **Plans:** `docs/plans/{date}-{slug}-design.md` + `{date}-{slug}-plan.md` — use `/new-plan` to scaffold
+- **DB:** 9 tables total — `profiles`, `moments`, `photos`, `assets`, `purchases`, `posts`, `likes`, `transactions`, `subscriptions`
+- **Open questions:** `docs/OPEN_QUESTIONS.md` — check before touching content policy, look curation, or onboarding
+
 ## Project Overview
 
 AI-powered portrait photography platform (Kanojo Studio MVP) built with Next.js 16, Supabase, and Google Gemini API.
@@ -24,6 +35,15 @@ pnpm start
 # Lint code
 pnpm lint
 ```
+
+## Development Server
+
+The dev server runs **HTTPS on port 443** using local certs:
+
+- Cert files in repo root (gitignored): `kanojostudio.io.pem` + `kanojostudio.io-key.pem`
+- Local DNS: add `127.0.0.1 kanojostudio.io` to `/etc/hosts`
+- OAuth redirect must be `https://kanojostudio.io/auth/callback`
+- Binding port 443 may require `sudo pnpm dev` (EACCES without it on some setups)
 
 ## Architecture
 
@@ -191,6 +211,27 @@ Core tables with RLS policies:
    - Tracks which assets users have purchased
    - Used by `get_user_assets()` RPC to return owned + purchased assets
 
+6. **`posts`** - Community sharing
+   - Fields: `id`, `user_id`, `moment_id`, `created_at`
+   - One moment → one post enforced via UNIQUE constraint on `moment_id`
+   - RLS: Users can insert own posts; public read for published posts
+
+7. **`likes`** - User-post reactions (many-to-many)
+   - Fields: `id`, `post_id`, `user_id`, `created_at`
+   - One like per user per post enforced via UNIQUE constraint
+   - RLS: Users can insert/delete own likes; public read
+
+8. **`transactions`** - Credit ledger
+   - Fields: `id`, `user_id`, `amount` (signed int), `type`, `reference_id`, `created_at`
+   - `amount` is signed: positive = credit, negative = debit
+   - Types: `asset_purchase`, `generation_cost`, `credit_purchase`, `refund`
+   - RLS: Users can only view own transactions
+
+9. **`subscriptions`** - Stripe subscription state
+   - Fields: `id`, `user_id`, `stripe_subscription_id`, `tier`, `status`, `created_at`
+   - One active subscription per user; tiers: `free`, `basic`, `pro`, `max`
+   - `profiles` table also has `stripe_customer_id` and `subscription_tier` columns
+
 ### Component Architecture
 
 - **Server Components by default** - Use for static content, data fetching
@@ -294,3 +335,45 @@ NEXT_PUBLIC_APP_URL=                    # For OAuth redirects
 - **Analysis Merging:** When both reference + prompt provided, prompt analysis overrides reference (deep merge)
 - **State Management:** TanStack Query for server state, React Hook Form for form state
 - **Styling:** Tailwind CSS + Shadcn UI components
+
+## Coding Style
+
+Full guide: `docs/CODING_STYLE.md` — this is the authoritative reference.
+
+Quick summary:
+- **File naming:** kebab-case always (`use-assets.ts`, `face-picker.tsx`)
+- **Components:** arrow functions with named exports; pages use default export
+- **Formatting:** no semicolons, single quotes, trailing commas
+- **Import order:** React/Next → external packages → `@/` internal → relative → `import type` last
+- **Props:** inline `type` (not `interface`), destructure in function signature
+- **No** barrel files (`index.ts`) — import directly from source
+
+## Common Mistakes ⚠️
+
+1. **Wrong Supabase client** — server client in browser throws; browser client in API route silently misses the session. Match client to context (see Architecture → Supabase Client Pattern).
+2. **Missing `'use client'`** — any component importing from `/hooks/` must have `'use client'` at the top. Runtime error often points to wrong file.
+3. **`assets.path` is not a URL** — it's a Supabase Storage path. Use `supabase.storage.from('assets').getPublicUrl(path)` before rendering.
+4. **Photo fields are deltas** — always merge with moment baseline: `photo.prompt || moment.prompt` and `{ ...moment.mixins, ...photo.mixins }`.
+5. **Schema has 9 tables, docs show 5** — `posts`, `likes`, `transactions`, `subscriptions` also exist. Don't design around a missing table.
+6. **Port 443 needs `sudo`** — if `pnpm dev` throws EACCES, run `sudo pnpm dev`.
+7. **Credits are integers, not cents** — convert Stripe amounts (`stripeAmountInCents / 100`) before writing to `profiles.credits`.
+
+## Plans Workflow
+
+For any non-trivial feature, write docs before code:
+
+1. **Design doc** (`docs/plans/{YYYY-MM-DD}-{slug}-design.md`): problem, solution, key decisions, open questions, rejected alternatives
+2. **Implementation plan** (`docs/plans/{YYYY-MM-DD}-{slug}-plan.md`): ordered `- [ ]` checklist with sequencing notes
+
+See `docs/plans/2026-03-14-google-one-tap-design.md` as format reference.
+
+Use `/new-plan <feature-name>` to scaffold the pair automatically.
+
+## Open Questions
+
+`docs/OPEN_QUESTIONS.md` tracks three launch-blocking decisions:
+1. **Content policy** — affects what can be generated and shared publicly
+2. **Look curation pipeline** — affects asset marketplace design and moderation flow
+3. **First-shoot onboarding** — affects studio UX and API design
+
+Check this file before implementing features that touch any of these areas.
