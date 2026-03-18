@@ -33,7 +33,7 @@ h6 {
 }
 
 .button {
-  @apply cursor-pointer h-8 text-xs rounded-full hover:bg-accent px-4;
+  @apply cursor-pointer h-8 text-xs rounded-full px-4;
 }
 
 .icon-button {

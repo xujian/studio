@@ -116,22 +116,19 @@ export function PurchaseModal({
           )}
           {/* Action */}
           {isOwned ? (
-            <Button className="button w-full rounded-full" onClick={handleUse}>
+            <Button className="button w-full" onClick={handleUse}>
               Use
             </Button>
           ) : (
             <Button
-              className={cn('w-full rounded-xl cursor-pointer',
-                purchase.isPending && 'animate-pulse',
-                canAfford ? 'bg-green-500 hover:bg-green-700' : 'bg-muted text-muted-foreground'
-              )}
+              className={cn('button w-full', purchase.isPending && 'animate-pulse')}
               onClick={handleBuy}
               disabled={purchase.isPending || !canAfford}>
               {purchase.isPending
                 ? (<Loader2 className="size-4 animate-spin" />)
                 : canAfford
                   ? 'BUY'
-                  : 'Credits Unsufficient'
+                  : 'Insufficient Credits'
               }
             </Button>
           )}

@@ -106,7 +106,8 @@ export default async function CreditsPage() {
                         className="w-full">
                         <Button
                           type="submit"
-                          className="button bg-secondary text-secondary-foreground w-full">
+                          variant="secondary"
+                          className="button w-full">
                           <CreditCard className="size-4" />
                           Manage Plan
                         </Button>
@@ -119,12 +120,8 @@ export default async function CreditsPage() {
                         <input type="hidden" name="planId" value={plan.id} />
                         <Button
                           type="submit"
-                          className={cn(
-                            'button bg-secondary text-secondary-foreground w-full',
-                            isPopular
-                              ? 'bg-secondary text-primary-foreground hover:bg-primary/90'
-                              : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                          )}>
+                          variant={isPopular ? 'default' : 'secondary'}
+                          className="button w-full">
                           <Zap className="size-4" />
                           {hasSubscription ? 'Switch Plan' : 'Subscribe'}
                         </Button>
@@ -187,7 +184,7 @@ export default async function CreditsPage() {
                     method="POST"
                     className="w-full">
                     <input type="hidden" name="packageId" value={pkg.id} />
-                    <Button type="submit" className="button w-full bg-secondary text-secondary-foreground">
+                    <Button type="submit" variant="secondary" className="button w-full">
                       <Zap className="size-4" />
                       Buy Now
                     </Button>

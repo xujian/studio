@@ -94,21 +94,19 @@ export const AssetDetailSheet = ({
             <Price value={asset.price} variant="button" />
           )}
           {canUse && (
-            <Button className="w-full rounded-full" onClick={onUse}>
+            <Button className="button w-full" onClick={onUse}>
               Use
             </Button>
           )}
           {hasPrice && purchasable && (
-            <Button
-              className="w-full rounded-xl bg-green-500 hover:bg-green-700"
-              onClick={onBuy}>
+            <Button className="button w-full" onClick={onBuy}>
               Buy
             </Button>
           )}
           {deletable && (
             <Button
               variant="destructive"
-              className="w-full rounded-xl"
+              className="button w-full"
               disabled={isDeleting}
               onClick={onDelete}>
               {isDeleting ? (

@@ -75,13 +75,13 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
           </div>
           <div className="absolute left-0 bottom-0 w-full flex flex-row-reverse gap-1 p-1 opacity-0 transition-opacity group-hover:opacity-100">
             {purchasable && (
-              <Button size="sm" className="h-7 bg-black text-white flex-1 rounded-full text-xs" onClick={(e) => { e.stopPropagation(); handleBuy() }}>
+              <Button size="sm" className="h-7 bg-black hover:bg-black/70 text-white flex-1 rounded-full text-xs" onClick={(e) => { e.stopPropagation(); handleBuy() }}>
                 BUY
               </Button>
             )}
             {canUse  && (
               <Button size="sm"
-                className="h-7 bg-black text-white gap-1 flex-1 rounded-full text-xs"
+                className="h-7 bg-black hover:bg-black/70 text-white flex-1 rounded-full text-xs"
                 onClick={(e) => { e.stopPropagation(); handleUse(data as AssetWithPurchaseInfo) }}>
                 USE
               </Button>
@@ -89,7 +89,7 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
             {deletable && (
               <Button size="sm"
                 variant="destructive"
-                className="h-7 bg-destructive text-white flex-0 w-20 gap-1 rounded-full text-xs"
+                className="h-7 flex-0 w-20 rounded-full text-xs"
                 onClick={(e) => { e.stopPropagation(); handleDelete(data as AssetWithPurchaseInfo) }}>
                 DELETE
               </Button>

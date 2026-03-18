@@ -295,9 +295,9 @@ const filterAssets = (type?: AssetType) => {
           {mode === 'retry' && (
             <Button
               type="button"
-              variant="outline"
+              variant="default"
               tooltip="retry"
-              className="h-10 w-10 rounded-xl bg-primary! text-primary-foreground"
+              className="h-10 w-10 rounded-xl"
               onClick={handleNew}
               disabled={isPending}>
               <X />
@@ -306,8 +306,8 @@ const filterAssets = (type?: AssetType) => {
           {/* Generate/Retry button */}
           <Button
             type="button"
-            variant="outline"
-            className="h-10 w-10 rounded-xl bg-primary! text-primary-foreground"
+            variant="default"
+            className="h-10 w-10 rounded-xl"
             tooltip="generate"
             onClick={handleGenerate}
             disabled={isPending || couldNotSubmit}>

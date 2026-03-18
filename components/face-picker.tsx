@@ -96,7 +96,7 @@ export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
       {selected && (
         <Button
           onClick={() => onSelect?.('')}
-          className="absolute h-4 w-4 px-0! py-0 left-7 bottom-0 cursor-pointer bg-black hover:bg-amber-800 text-white">
+          className="absolute h-4 w-4 px-0! py-0 left-7 bottom-0 bg-black hover:bg-black/70 text-white">
           <X />
         </Button>
       )}
