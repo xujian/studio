@@ -2,6 +2,15 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Skill Pipeline Override
+
+**For small tasks (≤3 files, clear requirements, no architectural decisions): skip all skill pipelines.**
+Do NOT invoke brainstorming, planning, subagent-driven-development, or review skills.
+Just do the work directly: read → write → done.
+
+Reserve the full skill pipeline only for: large features, high-risk changes, multi-subsystem work,
+or when the user explicitly asks for a formal plan.
+
 ## Quick Reference
 
 - **What:** AI portrait photography platform (Kanojo Studio) — MVP, pre-public-launch

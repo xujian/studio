@@ -17,7 +17,13 @@
       "Bash(git:*)",
       "Bash(npx:*)",
       "Bash(node:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Read(//Users/mike/.claude/skills/**)",
+      "Read(//Users/mike/.claude/**)",
+      "Bash(find:*)"
     ]
+  },
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": false
   }
 }
