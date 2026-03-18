@@ -18,7 +18,7 @@ export function Credits({ prefix = '', className, ...props }: CreditsProps) {
     <Link href="/credits" className="w-full">
       <div
         className={cn(
-          'credits flex h-9 items-center justify-between rounded-full gap-4',
+          'credits flex h-8 items-center justify-between gap-4 px-1',
           'text-sm tabular-nums',
           'cursor-pointer w-full',
           'hover:bg-accent transition-colors',
@@ -28,9 +28,9 @@ export function Credits({ prefix = '', className, ...props }: CreditsProps) {
         <div className="flex items-center gap-1">
           <span className="font-medium">{prefix}</span>
           <Zap className="size-4 text-yellow-400" />
-          <span className="number font-bold">{profile.credits}</span>
+          <span className="text-sm number font-bold">{profile.credits}</span>
         </div>
-        <div>CREDITS</div>
+        <div className="text-xs">CREDITS</div>
       </div>
     </Link>
   )

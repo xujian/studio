@@ -13,7 +13,8 @@ import {
   PopoverTrigger
 } from '@/components/ui/popover'
 import { useAuth } from '@/context/auth-provider'
-import { LogOut, Moon, Settings, Sun, CircleUserRound } from 'lucide-react'
+import { LogOut, Settings, CircleUserRound } from 'lucide-react'
+import { ThemeSwitch } from './theme-switch'
 
 export const Profile = () => {
   const router = useRouter()
@@ -45,32 +46,41 @@ export const Profile = () => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button className="cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
+        <Button
+          size="icon"
+          className="cursor-pointer rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <Avatar className="h-8 w-8">
             <AvatarImage src={user.userMetadata?.avatar_url} />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
-        </button>
+        </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="glass w-56 rounded-xl border p-1">
-        <div className="mb-1 px-2 py-1.5">
-          <p className="truncate text-sm font-medium">{name}</p>
-          {user.email && (
-            <p className="truncate text-xs text-muted-foreground">
-              {user.email}
-            </p>
-          )}
+      <PopoverContent align="end" className="glass flex flex-col gap-1 w-56 rounded-xl border p-1">
+        <div className="bg-background rounded-lg">
+          <div className="bg-secondary rounded-lg p-2">
+            <p className="truncate text-sm font-medium">{name}</p>
+            {user.email && (
+              <p className="truncate text-xs text-muted-foreground">
+                {user.email}
+              </p>
+            )}
+          </div>
+          <div>
+            {user.plan && (
+              <p className="truncate text-xs text-muted-foreground px-2">
+                Plan: {user.plan.name}
+              </p>
+            )}
+          </div>
+          <Credits />
         </div>
-
-        <Credits className="mb-1 rounded-lg" />
-
         <Button
           variant="ghost"
           size="sm"
           className="w-full cursor-pointer justify-start gap-2"
-          onClick={() => router.push('/studio')}>
-          <CircleUserRound className="h-8 w-8" />
-          Profile
+          onClick={() => router.push('/account')}>
+          <CircleUserRound className="h-4 w-4" />
+          Account
         </Button>
         <Button
           variant="ghost"
@@ -80,22 +90,6 @@ export const Profile = () => {
           <Settings className="h-4 w-4" />
           Settings
         </Button>
-        {mounted && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full cursor-pointer justify-start gap-2"
-            onClick={() =>
-              setTheme(currentTheme === 'dark' ? 'light' : 'dark')
-            }>
-            {currentTheme === 'dark' ? (
-              <Sun className="h-4 w-4" />
-            ) : (
-              <Moon className="h-4 w-4" />
-            )}
-            {currentTheme === 'dark' ? 'Light mode' : 'Dark mode'}
-          </Button>
-        )}
         <Button
           variant="ghost"
           size="sm"
@@ -104,6 +98,10 @@ export const Profile = () => {
           <LogOut className="h-4 w-4" />
           Sign out
         </Button>
+        <div className="flex items-center justify-between bg-muted rounded-lg pl-2">
+          <span className="text-sm font-medium">Theme</span>
+          <ThemeSwitch />
+        </div>
       </PopoverContent>
     </Popover>
   )
