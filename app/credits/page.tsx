@@ -61,12 +61,12 @@ export default async function CreditsPage() {
                 <Card
                   key={plan.id}
                   className={cn(
-                    'relative flex flex-col rounded-2xl border p-0 aspect-square transition-colors',
+                    'relative rounded-2xl p-0 aspect-square transition-colors',
                     isCurrentPlan
                       ? 'border-green-500 ring-2 ring-green-500'
                       : isPopular
                         ? 'border-primary bg-primary/5 ring-2 ring-primary'
-                        : 'border-border bg-card hover:border-primary/50'
+                        : 'hover:border-primary/50'
                   )}>
                   {isCurrentPlan && (
                     <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-green-500 px-3 py-0.5 text-xs font-medium text-white">
@@ -79,7 +79,7 @@ export default async function CreditsPage() {
                     </span>
                   )}
                   <CardTitle className="p-4">{plan.label}</CardTitle>
-                  <CardContent className="p-4 flex flex-col flex-1 gap-1 justify-between">
+                  <CardContent className="flex flex-col flex-1 gap-1 justify-between">
                     <p className="mt-1 flex items-baseline gap-1">
                       <span className="text-4xl font-bold">
                         ${(plan.price / 100).toFixed(0)}
@@ -160,9 +160,9 @@ export default async function CreditsPage() {
             {CREDIT_PACKAGES.map(pkg => (
               <Card
                 key={pkg.id}
-                className="flex aspect-square flex-col rounded-2xl border border-border bg-card p-0 transition-colors hover:border-primary/50">
+                className="aspect-square rounded-2xl p-0 transition-colors hover:border-primary/50">
                 <CardTitle className="p-4">{pkg.label}</CardTitle>
-                <CardContent className="p-4">
+                <CardContent>
                   <p className="flex items-baseline gap-1">
                     <span className="text-4xl font-bold">
                       ${(pkg.price / 100).toFixed(0)}

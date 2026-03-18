@@ -68,7 +68,7 @@ export default async function AccountPage() {
           <div className="grid grid-cols-2 gap-3">
             {/* Credits card */}
             <Card className="relative overflow-hidden">
-              <CardContent className="p-5 flex flex-col gap-4">
+              <CardContent className="flex flex-col gap-4">
                 <div>
                   <p className="text-xs text-muted-foreground mb-2">Credits</p>
                   <p className="text-3xl font-bold tabular-nums flex items-center gap-1.5">
@@ -87,7 +87,7 @@ export default async function AccountPage() {
 
             {/* Subscription card */}
             <Card>
-              <CardContent className="p-5 flex flex-col gap-4">
+              <CardContent className="flex flex-col gap-4">
                 <div>
                   <p className="text-xs text-muted-foreground mb-2">Plan</p>
                   <div className="flex items-center gap-2 mb-1">
@@ -126,7 +126,7 @@ export default async function AccountPage() {
         <section className="space-y-3">
           <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Connected Accounts</h2>
           <Card>
-            <CardContent className="p-4 flex items-center gap-3">
+            <CardContent className="flex items-center gap-3">
               <div className="size-8 rounded-full bg-secondary flex items-center justify-center shrink-0">
                 <Chrome className="size-4" />
               </div>
@@ -145,7 +145,7 @@ export default async function AccountPage() {
         <section className="space-y-3">
           <h2 className="text-xs font-medium text-destructive uppercase tracking-wider">Danger Zone</h2>
           <Card>
-            <CardContent className="p-4 flex items-center justify-between gap-4">
+            <CardContent className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-sm font-medium">Delete account</p>
                 <p className="text-xs text-muted-foreground mt-0.5">

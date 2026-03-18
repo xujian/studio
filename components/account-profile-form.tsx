@@ -5,7 +5,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Camera, Loader2, Pencil } from 'lucide-react'
 
 type Props = {
@@ -69,7 +69,8 @@ export const AccountProfileForm = ({ name: initialName, avatar: initialAvatar, c
   const initials = name?.[0]?.toUpperCase() ?? '?'
 
   return (
-    <Card className="p-4">
+    <Card>
+      <CardContent>
       <div className="flex items-center gap-4">
         <div className="relative shrink-0">
           <Avatar className="h-16 w-16">
@@ -133,6 +134,7 @@ export const AccountProfileForm = ({ name: initialName, avatar: initialAvatar, c
           </p>
         </div>
       </div>
+      </CardContent>
     </Card>
   )
 }

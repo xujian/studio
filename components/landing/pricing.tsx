@@ -50,10 +50,8 @@ export const Pricing = () => {
           <Card
             key={plan.id}
             className={cn(
-              'relative flex flex-col rounded-2xl border p-0 transition-all',
-              plan.popular
-                ? 'border-primary bg-primary/5 ring-2 ring-primary scale-105 elevation-3'
-                : 'border-border bg-card'
+              'relative rounded-2xl p-0 transition-all',
+              plan.popular && 'border-primary bg-primary/5 ring-2 ring-primary scale-105 elevation-3'
             )}
           >
             {plan.popular && (
