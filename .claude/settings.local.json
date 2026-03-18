@@ -23,7 +23,5 @@
       "Bash(find:*)"
     ]
   },
-  "enabledPlugins": {
-    "superpowers@claude-plugins-official": false
-  }
+  "enabledPlugins": {}
 }
