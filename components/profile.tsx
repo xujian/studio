@@ -65,13 +65,7 @@ export const Profile = () => {
               </p>
             )}
           </div>
-          <div>
-            {user.plan && (
-              <p className="truncate text-xs text-muted-foreground px-2">
-                Plan: {user.plan.name}
-              </p>
-            )}
-          </div>
+
           <Credits />
         </div>
         <Button
