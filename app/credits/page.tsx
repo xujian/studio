@@ -8,7 +8,6 @@ import {
   CardTitle
 } from '@/components/ui'
 import { CREDIT_PACKAGES, SUBSCRIPTION_PLANS } from '@/lib/constants'
-import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import type { Subscription } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -26,14 +25,13 @@ export default async function CreditsPage() {
   } = await supabase.auth.getSession()
   if (!session) redirect('/login')
 
-  const admin = createAdminClient()
-  const { data: profile } = await admin
+  const { data: profile } = await supabase
     .from('profiles')
     .select('credits, subscription_tier')
     .eq('id', session.user.id)
     .single()
 
-  const { data: subscription } = (await admin
+  const { data: subscription } = (await supabase
     .from('subscriptions')
     .select('*')
     .eq('user_id', session.user.id)
