@@ -79,7 +79,7 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
                           title={asset.title}
                           description={asset.description}
                           side="right">
-                          <div>{/** to tix the toggle's pressed state */}
+                          <div>{/** wrapper to fix the toggle's pressed state */}
                             <Toggle
                               variant="outline"
                               size="sm"

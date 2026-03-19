@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { Section, SubSection } from '../legal-components'
 
 export const metadata: Metadata = {
@@ -36,7 +37,7 @@ export default function TermsPage() {
         <Section title="1. Acceptance of Terms">
           <p>
             By accessing or using Kanojo Studio (&ldquo;the Service&rdquo;), you agree to these Terms of Service
-            and our <a href="/privacy" className="underline underline-offset-4 hover:text-foreground transition-colors">Privacy Policy</a>.
+            and our <Link href="/privacy" className="underline underline-offset-4 hover:text-foreground transition-colors">Privacy Policy</Link>.
             If you do not agree, do not use the Service.
           </p>
           <p>

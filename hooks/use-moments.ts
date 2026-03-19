@@ -65,7 +65,6 @@ export const useDeletePhoto = () => {
       photoId: string
     }) => {
       const path = `${userId}/${momentId}/${photoId}.jpg`
-      console.log('delete photo--------', path)
       const { error: storageError } = await supabase.storage
         .from('photos')
         .remove([path])

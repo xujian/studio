@@ -5,7 +5,6 @@ import { Header } from '@/components/header'
 import { GoogleOneTap } from '@/components/google-one-tap'
 import { cn } from '@/lib/utils'
 import '@/styles/app.css'
-import Sidebar from '@/components/sidebar'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair' })

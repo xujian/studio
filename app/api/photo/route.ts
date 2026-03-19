@@ -58,7 +58,7 @@ export const POST = withAxiom(async function POST(request: NextRequest) {
         { status: 429, headers: { 'X-RateLimit-Remaining': '0' } }
       )
     }
-    let momentId = input.momentId || crypto.randomUUID()
+    const momentId = input.momentId || crypto.randomUUID()
     const mixins: Mixins = input.mixins as Mixins,
       /**
        * params to generate image

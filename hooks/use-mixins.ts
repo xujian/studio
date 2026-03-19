@@ -20,7 +20,6 @@ export const useMixins = (data: Mixins) => {
         .from('assets')
         .select('*')
         .in('id', ids)
-      console.log('fetching mixin assets for ids', ids, assets)
       if (error) throw error
       const assetsMap = new Map<string, Asset>(
         (assets || []).map(asset => [asset.id, asset])
