@@ -5,13 +5,13 @@
   }
 
   h1 {
-    @apply my-4 text-4xl font-bold leading-8;
+    @apply my-4 text-4xl font-bold leading-tight;
   }
   h2 {
-    @apply my-4 text-2xl font-bold leading-8;
+    @apply my-4 text-2xl font-bold leading-snug;
   }
   h3 {
-    @apply my-4 text-xl font-bold leading-4;
+    @apply my-4 text-xl font-bold leading-snug;
   }
   .p {
     @apply p-4;
@@ -100,7 +100,7 @@ br::selection {
 }
 
 .tooltip {
-  @apply text-xs bg-black text-white rounded-full p-2;
+  @apply text-xs bg-popover text-popover-foreground rounded-full p-2;
 }
 .carousel [data-slot="carousel-content"] {
   height: 100%;

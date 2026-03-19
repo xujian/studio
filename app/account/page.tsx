@@ -65,7 +65,7 @@ export default async function AccountPage() {
         {/* Credits + Subscription side-by-side */}
         <section className="space-y-3">
           <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Billing</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             {/* Credits card */}
             <Card className="relative overflow-hidden">
               <CardContent className="flex flex-col gap-4">

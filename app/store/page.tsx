@@ -44,7 +44,7 @@ export default async function StorePage() {
           <div key={section.type}>
             <h2 className="mb-3 text-lg font-semibold leading-6">{section.name}</h2>
             <p className="caption mb-4">{section.assets.length} items total</p>
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-6">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
               {section.assets.map(asset => (
                 <AssetCard
                   key={asset.id}
