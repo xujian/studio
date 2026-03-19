@@ -1,7 +1,7 @@
 :root {
   --edge: 2px;
-  --pulse-color: 100 90% 50%;
-  --pulse-glow: 50 90% 60%;
+  --pulse-color: 100 60% 55%;
+  --pulse-glow: 50 60% 62%;
 }
 
 @layer base {

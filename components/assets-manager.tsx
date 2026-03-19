@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { AssetCard } from '@/components/asset-card'
-import { AssetCreateDialog } from '@/components/asset-create-dialog'
+import { AssetCreate } from '@/components/asset-create'
+import { Sidepane } from '@/components/sidepane'
 import { Button } from '@/components/button'
 import type { AssetType } from '@/lib/types'
 import { useAssets } from '@/hooks/use-assets'
@@ -59,11 +60,13 @@ export function AssetsManager({ type, onClose }: AssetsManagerProps) {
         </div>
       </div>
 
-      <AssetCreateDialog
-        type={type}
-        open={dialogOpen}
+      <Sidepane open={dialogOpen}
         onOpenChange={setDialogOpen}
-      />
+        title={`New ${label}`}>
+        <AssetCreate
+          type={type}
+          onClose={() => setDialogOpen(false)} />
+      </Sidepane>
     </div>
   )
 }

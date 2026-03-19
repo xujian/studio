@@ -12,7 +12,8 @@ import { Price } from '@/components/price'
 import { PurchaseModal } from '@/components/purchase'
 import { useBus } from '@/lib/bus'
 import { useDeleteAsset, useRemovePurchase } from '@/hooks/use-delete-asset'
-import { AssetDetailSheet } from '@/components/asset-detail-sheet'
+import { AssetDetail } from '@/components/asset-detail'
+import { Sidepane } from '@/components/sidepane'
 
 interface AssetCardProps {
   data: Asset
@@ -105,22 +106,25 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
       </Card>
 
       <PurchaseModal asset={data as AssetWithPurchaseInfo} open={modalOpen} onOpenChange={setModalOpen} />
-      <AssetDetailSheet
-        asset={data as AssetWithPurchaseInfo}
+      <Sidepane
         open={sheetOpen}
         onOpenChange={setSheetOpen}
-        hasPrice={hasPrice}
-        isDeleting={isDeleting}
-        onBuy={() => { setSheetOpen(false); setModalOpen(true) }}
-        onUse={() => handleUse(data as AssetWithPurchaseInfo)}
-        onDelete={() => {
-          if ((data as AssetWithPurchaseInfo).is_purchased) {
-            removePurchase.mutate(data.id!, { onSuccess: () => setSheetOpen(false) })
-          } else {
-            deleteAsset.mutate({ id: data.id!, path: data.path }, { onSuccess: () => setSheetOpen(false) })
-          }
-        }}
-      />
+        className="sm:max-w-sm">
+        <AssetDetail
+          asset={data as AssetWithPurchaseInfo}
+          hasPrice={hasPrice}
+          isDeleting={isDeleting}
+          onBuy={() => { setSheetOpen(false); setModalOpen(true) }}
+          onUse={() => handleUse(data as AssetWithPurchaseInfo)}
+          onDelete={() => {
+            if ((data as AssetWithPurchaseInfo).is_purchased) {
+              removePurchase.mutate(data.id!, { onSuccess: () => setSheetOpen(false) })
+            } else {
+              deleteAsset.mutate({ id: data.id!, path: data.path }, { onSuccess: () => setSheetOpen(false) })
+            }
+          }}
+        />
+      </Sidepane>
     </>
   )
 }
