@@ -87,7 +87,7 @@ export default function ModalLayout({
         variant="outline"
         size="icon"
         aria-label="Close modal"
-        className="absolute top-4 right-4 z-20">
+        className="absolute top-3 right-3 z-20 size-11 md:size-9">
         <X className="h-4 w-4" />
       </Button>
     </div>

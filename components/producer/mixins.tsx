@@ -1,12 +1,12 @@
 import * as React from 'react'
 import { Button, ButtonGroup, Toggle } from '@/components/ui'
 import { assetTypes } from '@/lib/constants'
-import type { AssetType, AssetValue, Mixins } from '@/lib/types'
+import type { AssetType, Mixins } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { useAssets } from '@/hooks/use-assets'
 import { Popover, PopoverTrigger, PopoverContent } from '../ui'
 import { Peekable } from '@/components/peekable'
-import { MoreHorizontalIcon, XIcon } from 'lucide-react'
+import { MoreHorizontalIcon } from 'lucide-react'
 
 export type MixinsProps = {
   value?: Mixins
@@ -15,7 +15,6 @@ export type MixinsProps = {
 
 export function Mixins({ value = {}, onChange }: MixinsProps) {
   const { data: assets = [], isLoading } = useAssets()
-  const [openPopover, setOpenPopover] = React.useState<AssetType | null>(null)
 
   // Group assets by type
   const assetsByType = React.useMemo(() => {
@@ -29,14 +28,6 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
     return grouped
   }, [assets])
 
-  const handleTogglePopover = (type: AssetType) => {
-    setOpenPopover(prev => (prev === type ? null : type))
-  }
-
-  const handleClosePopover = () => {
-    setOpenPopover(null)
-  }
-
   const handleSelect = (type: AssetType, assetId: string) => {
     const v = { ...value }
     if (v[type] === assetId) {
@@ -45,14 +36,6 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
       v[type] = assetId
     }
     onChange?.(v)
-    setOpenPopover(null)
-  }
-
-  const handleClear = (type: AssetType, e: React.MouseEvent) => {
-    e.stopPropagation()
-    const newValue = { ...value }
-    delete newValue[type]
-    onChange?.(newValue)
   }
 
   return (
@@ -62,9 +45,6 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
         .map(assetType => {
           const typeAssets = assetsByType[assetType.type] || []
           const isSelected = assetType.type in value
-          const selectedAsset = isSelected
-            ? assets.find(a => a.id === value[assetType.type])
-            : null
           return (
             <Popover key={assetType.type} modal={false}>
               <PopoverTrigger asChild>

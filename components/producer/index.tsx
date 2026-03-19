@@ -237,7 +237,7 @@ const filterAssets = (type?: AssetType) => {
                     <Button
                       type="button"
                       size="icon"
-                      className="absolute top-1 right-1 h-4 w-4 rounded-full bg-background/60 text-foreground hover:bg-background/80"
+                      className="absolute top-1 right-1 h-6 w-6 rounded-full bg-background/60 text-foreground hover:bg-background/80"
                       onClick={handleReferenceClear}>
                       <X className="h-3 w-3" />
                     </Button>

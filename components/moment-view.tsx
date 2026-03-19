@@ -336,7 +336,7 @@ export function MomentView({
             <>
               <div className="flex flex-0 items-center gap-2">
                 <Button
-                  size="icon"
+                  size="icon-lg"
                   tooltip="load setting and redo this photo"
                   className="cursor-pointer bg-primary text-primary-foreground"
                   variant="ghost"
@@ -344,7 +344,7 @@ export function MomentView({
                   <RotateCcw />
                 </Button>
                 <Button
-                  size="icon"
+                  size="icon-lg"
                   tooltip="download original image"
                   className="cursor-pointer bg-primary text-primary-foreground"
                   variant="ghost"
@@ -352,7 +352,7 @@ export function MomentView({
                   <Download />
                 </Button>
                 <Button
-                  size="icon"
+                  size="icon-lg"
                   tooltip={
                     shared ? 'unshare from community' : 'share to community'
                   }

@@ -48,7 +48,7 @@ export default async function AccountPage() {
   const credits = profile?.credits ?? 0
 
   return (
-    <div className="page-body flex w-full flex-col items-center px-8 pt-2 pb-16">
+    <div className="page-body flex w-full flex-col items-center px-4 md:px-8 pt-2 pb-16">
       <div className="w-full max-w-2xl space-y-10">
         <h1 className="text-2xl font-semibold">Account</h1>
 

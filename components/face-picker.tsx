@@ -100,7 +100,7 @@ export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
         <Button
           onClick={() => onSelect?.('')}
           aria-label="Clear face selection"
-          className="absolute h-4 w-4 px-0! py-0 left-7 bottom-0 bg-foreground hover:bg-foreground/70 text-background">
+          className="absolute h-6 w-6 px-0! py-0 left-7 bottom-0 bg-foreground hover:bg-foreground/70 text-background">
           <X />
         </Button>
       )}

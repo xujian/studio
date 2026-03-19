@@ -33,12 +33,12 @@ export const Header = () => {
           <img src="/kanojo.svg" className='h-12' alt="Kanojo Studio" />
         </Link>
       </div>
-      <nav aria-label="Main navigation" className="flex items-center elevation-2 rounded-full p-1 gap-0 glass h-10">
+      <nav aria-label="Main navigation" className="flex items-center elevation-2 rounded-full p-1 gap-0 glass h-12 md:h-10">
         {routes.map(route => (
           <Link key={route.href} href={route.href} aria-current={testSelected(route.href) ? 'page' : undefined}>
             <Button
               variant={testSelected(route.href) ? 'default' : 'ghost'}
-              className="h-8 md:h-8 rounded-full min-w-0 md:min-w-30 justify-center md:justify-start gap-1 px-2 md:pl-1 md:pr-6 cursor-pointer">
+              className="h-10 md:h-8 rounded-full min-w-0 md:min-w-30 justify-center md:justify-start gap-1 px-2 md:pl-1 md:pr-6 cursor-pointer">
               <div className="icon" aria-hidden="true">
                 <route.icon className="h-5! w-5!" />
               </div>
