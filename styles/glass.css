@@ -161,5 +161,13 @@
       transition: none !important;
       animation: none !important;
     }
+
+    .glass {
+      backdrop-filter: none !important;
+    }
+
+    .animate-float-up {
+      animation: none !important;
+    }
   }
 }

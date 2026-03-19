@@ -26,6 +26,7 @@ export const ThemeSwitch = () => {
   return (
     <Switch
       checked={currentTheme === 'dark'}
+      aria-label={`Switch to ${currentTheme === 'dark' ? 'light' : 'dark'} theme`}
       className="h-7 w-12 bg-transparent data-[state=checked]:bg-muted/50 data-[state=unchecked]:bg-secondary"
       icon={
         currentTheme === 'dark' ? (

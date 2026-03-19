@@ -8,9 +8,10 @@ import { Producer } from '@/components/producer'
 import { AssetsManager } from '@/components/assets-manager'
 import { StaggerGrid } from '@/components/stagger-grid'
 import { Button } from '@/components/ui'
-import type { AssetType, MomentWithPhotos } from '@/lib/types'
+import type { AssetType } from '@/lib/types'
 import { useMoments } from '@/hooks/use-moments'
 import { useBus } from '@/lib/bus'
+import { ArrowRight } from 'lucide-react'
 
 export default function StudioPage() {
   const [activeAssets, setActiveAssets] = useState<AssetType | null>(null)
@@ -29,10 +30,6 @@ export default function StudioPage() {
     isFetchingNextPage
   } = useMoments()
 
-  const handleGenerationComplete = (moment: MomentWithPhotos) => {
-    console.log('Generation complete:', moment)
-  }
-
   // Flatten all pages into single array
   const allMoments =
     data?.pages
@@ -41,38 +38,45 @@ export default function StudioPage() {
 
   return (
     <>
-      <section className={activeAssets ? 'hidden' : 'moments flex w-full flex-col items-start justify-center px-16 pb-52'}>
+      <section className={activeAssets ? 'hidden' : 'moments flex w-full flex-col items-start justify-center px-4 pb-52 md:px-8 lg:px-16'}>
         <h1 className="mb-6 text-2xl font-semibold">Moments</h1>
         {isLoading && (
-          <StaggerGrid className="w-full grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-5">
+          <StaggerGrid className="w-full grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
             {Array.from({ length: 10 }).map((_, i) => (
               <MomentSkeleton key={i} />
             ))}
           </StaggerGrid>
         )}
         {error && (
-          <div className="text-destructive">
-            Failed to load moments: {error.message}
+          <div role="alert" className="flex flex-col items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-6">
+            <p className="text-sm text-destructive">Failed to load moments: {error.message}</p>
+            <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+              Try again
+            </Button>
           </div>
         )}
         {allMoments.length === 0 && !isLoading && !error && (
-          <div className="text-muted-foreground">No moments yet</div>
+          <div className="flex flex-col items-center gap-3 py-20 text-center w-full">
+            <p className="text-muted-foreground">There is all your moments</p>
+            <p className="text-sm text-muted-foreground/70">Use the prompt bar below to create your first portrait</p>
+          </div>
         )}
         <LayoutGroup>
-          <StaggerGrid className="w-full grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-5">
+          <StaggerGrid className="w-full grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
             {allMoments.map(moment => (
               <MomentCard key={moment.id} moment={moment} />
             ))}
             {hasNextPage && (
               <div
-                className="relative flex aspect-9/16 w-full items-center justify-center rounded-2xl bg-muted p-4"
+                className="relative flex aspect-9/16 w-full items-center justify-center rounded-3xl p-0"
                 key="load-more">
                 <Button
-                  className="w-full rounded-full"
+                  className="button w-full! h-full! rounded-2xl!"
                   onClick={() => fetchNextPage()}
                   disabled={isFetchingNextPage}
                   variant="outline">
                   {isFetchingNextPage ? 'Loading...' : 'Load More'}
+                  <ArrowRight className="" />
                 </Button>
               </div>
             )}
@@ -80,7 +84,7 @@ export default function StudioPage() {
         </LayoutGroup>
       </section>
       {activeAssets && (
-        <section className="flex w-full flex-col items-start justify-center px-16 pb-52">
+        <section className="flex w-full flex-col items-start justify-center px-4 pb-52 md:px-8 lg:px-16">
           <AssetsManager type={activeAssets} onClose={() => {
             setActiveAssets(null)
             $bus.emit('assets:close', undefined)
@@ -88,7 +92,7 @@ export default function StudioPage() {
         </section>
       )}
       <Suspense>
-        <Producer onGenerationComplete={handleGenerationComplete} />
+        <Producer />
       </Suspense>
     </>
   )

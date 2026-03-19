@@ -1,14 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { AssetCard } from '@/components/asset-card'
 import { AssetCreateDialog } from '@/components/asset-create-dialog'
 import { Button } from '@/components/button'
-import { useBus } from '@/lib/bus'
-import { createClient } from '@/lib/supabase/client'
-import type { AssetWithPurchaseInfo, AssetType } from '@/lib/types'
+import type { AssetType } from '@/lib/types'
 import { useAssets } from '@/hooks/use-assets'
-import { useDeleteAsset } from '@/hooks/use-delete-asset'
 import { ArrowLeft, Plus } from 'lucide-react'
 
 interface AssetsManagerProps {
@@ -17,18 +14,9 @@ interface AssetsManagerProps {
 }
 
 export function AssetsManager({ type, onClose }: AssetsManagerProps) {
-  const [userId, setUserId] = useState('')
   const [dialogOpen, setDialogOpen] = useState(false)
 
-  useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) setUserId(data.session.user.id)
-    })
-  }, [])
-
   const { data: assets = [] } = useAssets()
-  console.log('assetsdata-----------------------------///:', assets)
   const filtered = assets.filter(a => a.type === type)
   const label = type.charAt(0).toUpperCase() + type.slice(1)
 
@@ -54,19 +42,21 @@ export function AssetsManager({ type, onClose }: AssetsManagerProps) {
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-4 md:grid-cols-4 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
         {filtered.map(asset => (
           <AssetCard
             key={asset.id}
             data={asset}
           />
         ))}
-        <button
-          onClick={() => setDialogOpen(true)}
-          className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground">
-          <Plus className="size-6" />
-          <span className="text-xs">Add an {label.toLowerCase()} asset</span>
-        </button>
+        <div>
+          <button
+            onClick={() => setDialogOpen(true)}
+            className="flex flex-col items-center aspect-square w-full cursor-pointer justify-center gap-2 rounded-xl border-2 border-dashed border-border text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground">
+            <Plus className="size-6" />
+            <span className="text-xs">Add an {label.toLowerCase()} asset</span>
+          </button>
+        </div>
       </div>
 
       <AssetCreateDialog

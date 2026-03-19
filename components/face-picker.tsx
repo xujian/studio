@@ -55,7 +55,7 @@ export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
               <p>Choose face</p>
             </TooltipContent>
           </Tooltip>
-        <PopoverContent className="draw-left min-h-20 w-80 mt-4 bg-black rounded-2xl glass p-1"
+        <PopoverContent className="draw-left min-h-20 w-80 mt-4 bg-popover rounded-2xl glass p-1"
           side="left" sideOffset={4} align="start">
           {faces.length === 0 ? (
             <div className="flex flex-col items-center gap-2 p-4">
@@ -72,17 +72,20 @@ export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
                   title={face.title}
                   description={face.description}>
                   {face.path ? (
-                  <div className='face w-18 h-18 '>
+                  <button
+                    type="button"
+                    className='face w-18 h-18 cursor-pointer rounded-xl overflow-hidden focus-visible:ring-2 focus-visible:ring-ring'
+                    aria-label={`Select face: ${face.name || 'Unnamed'}`}
+                    onClick={() => onSelect?.(face.id!)}>
                     <Image
                       src={assetUrl(face.path!)}
-                      alt={face.name || ''}
+                      alt={face.name || 'Face asset'}
                       width={72}
                       height={72}
                       className="object-cover rounded-xl"
                       sizes="72px"
-                      onClick={() => onSelect?.(face.id!)}
                     />
-                  </div>
+                  </button>
                   ) : (
                     face.name
                   )}
@@ -96,7 +99,8 @@ export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
       {selected && (
         <Button
           onClick={() => onSelect?.('')}
-          className="absolute h-4 w-4 px-0! py-0 left-7 bottom-0 bg-black hover:bg-black/70 text-white">
+          aria-label="Clear face selection"
+          className="absolute h-4 w-4 px-0! py-0 left-7 bottom-0 bg-foreground hover:bg-foreground/70 text-background">
           <X />
         </Button>
       )}

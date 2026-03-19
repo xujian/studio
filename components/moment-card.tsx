@@ -52,7 +52,7 @@ export function MomentCard({ moment }: MomentCardProps) {
   // Multiple photos - carousel
   return (
     <div
-      className="relative overflow-hidden rounded-2xl"
+      className="relative overflow-hidden rounded-3xl"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}>
       <Carousel setApi={setApi} opts={{ loop: false }}>
@@ -68,11 +68,11 @@ export function MomentCard({ moment }: MomentCardProps) {
         <div
           className={cn(
             'absolute bottom-6 h-8 w-full transition-opacity duration-200',
-            isHovered ? 'opacity-100' : 'opacity-0'
+            isHovered ? 'opacity-100' : 'opacity-0 focus-within:opacity-100'
           )}
           onClick={(e) => { e.preventDefault(); e.stopPropagation() }}>
-          <CarouselPrevious className="left-2 bg-black!" />
-          <CarouselNext className="right-2 bg-black!" />
+          <CarouselPrevious className="left-2 bg-black!" aria-label="Previous photo" />
+          <CarouselNext className="right-2 bg-black!" aria-label="Next photo" />
         </div>
       </Carousel>
       <div className="absolute right-0 bottom-2 left-0 z-10 flex justify-center gap-1.5">

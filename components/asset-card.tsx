@@ -34,7 +34,6 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
   }
 
   const handleDelete = (asset: AssetWithPurchaseInfo) => {
-    console.log('Deleting asset:', asset)
     if (asset.is_purchased) {
       removePurchase.mutate(asset.id!)
     } else {
@@ -44,8 +43,8 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
 
   return (
     <>
-      <Card className="asset-card group gap-0 p-0 transition-all cursor-pointer border-0" onClick={() => setSheetOpen(true)}>
-        <CardContent className="relative aspect-square w-full overflow-hidden rounded-xl bg-muted p-0">
+      <Card className="asset-card group gap-0 p-0 transition-all cursor-pointer border-0 bg-transparent focus-within:ring-2 focus-within:ring-ring" tabIndex={0} role="button" aria-label={`${data.title || data.name} asset`} onClick={() => setSheetOpen(true)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSheetOpen(true) } }}>
+        <CardContent className="relative aspect-square w-full overflow-hidden rounded-xl bg-neutral p-0">
           {data.path
             ? (<Image
                 src={assetUrl(data.path)}
@@ -55,7 +54,7 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
                 sizes="(max-width: 768px) 50vw, 25vw"
               />)
             : (<div className="asset-content flex h-full items-center justify-center p-3">
-                <p className="line-clamp-6 text-xs text-neutral-400">{data.content}</p>
+                <p className="line-clamp-6 text-xs text-muted-foreground">{data.content}</p>
               </div>)
           }
           <div className="absolute top-2 right-2">
@@ -73,23 +72,24 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
                   : null
             }
           </div>
-          <div className="absolute left-0 bottom-0 w-full flex flex-row-reverse gap-1 p-1 opacity-0 transition-opacity group-hover:opacity-100">
+          <div className="absolute left-0 bottom-0 w-full flex flex-row-reverse gap-1 p-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
             {purchasable && (
-              <Button size="sm" className="h-7 bg-black hover:bg-black/70 text-white flex-1 rounded-full text-xs" onClick={(e) => { e.stopPropagation(); handleBuy() }}>
+              <Button size="xs" className="flex-1" variant="secondary"
+                onClick={(e) => { e.stopPropagation(); handleBuy() }}>
                 BUY
               </Button>
             )}
             {canUse  && (
-              <Button size="sm"
-                className="h-7 bg-black hover:bg-black/70 text-white flex-1 rounded-full text-xs"
+              <Button size="xs"
+                variant="secondary"
+                className="flex-1"
                 onClick={(e) => { e.stopPropagation(); handleUse(data as AssetWithPurchaseInfo) }}>
                 USE
               </Button>
             )}
             {deletable && (
-              <Button size="sm"
+              <Button size="xs"
                 variant="destructive"
-                className="h-7 flex-0 w-20 rounded-full text-xs"
                 onClick={(e) => { e.stopPropagation(); handleDelete(data as AssetWithPurchaseInfo) }}>
                 DELETE
               </Button>

@@ -4,162 +4,172 @@
   --pulse-glow: 50 90% 60%;
 }
 
-.page-body {
-  @apply px-4 min-h-[calc(100vh-8rem)] mx-auto w-full flex flex-col;
-}
+@layer base {
 
-.page-body section {
-  @apply mb-16;
-}
-
-.footer {
-  padding-top: 4rem;
-}
-
-h6 {
-  @apply text-sm leading-none;
-}
-
-.caption {
-  @apply text-neutral-500 font-normal text-xs;
-}
-
-.contain {
-  @apply bg-contain bg-no-repeat bg-center;
-}
-
-.response-grid {
-  @apply grid gap-4 grid-cols-1 md:grid-cols-2 items-center content-center justify-center auto-rows-fr md:auto-cols-fr
-}
-
-.button {
-  @apply cursor-pointer h-8 text-xs rounded-full px-4;
-}
-
-.icon-button {
-  @apply cursor-pointer rounded-full size-8 hover:bg-accent;
-}
-.mixin {
-  @apply bg-neutral-700 text-xs h-6 rounded-full px-2 
-    hover:bg-amber-400/50 data-[state=on]:bg-amber-400/50 data-[state=on]:border-amber-400
-    cursor-pointer;
-}
-
-@keyframes draw-left {
-  from {
-    max-width: 0;
+  body {
+    @apply bg-background text-foreground;
   }
-  to {
-    max-width: 500px;
+
+  .page-body {
+    @apply px-4 min-h-[calc(100vh-8rem)] mx-auto w-full flex flex-col;
   }
-}
 
-@keyframes draw-left-back {
-  from {
-    max-width: 500px;
+  .page-body section {
+    @apply mb-16;
   }
-  to {
-    max-width: 0;
+
+  .footer {
+    padding-top: 4rem;
   }
-}
 
-.draw-left {
-  @apply overflow-hidden rounded-r-none;
-  transform-origin: right;
-}
-
-.draw-left[data-state="open"] {
-  animation: draw-left 600ms ease-out forwards;
-}
-
-.draw-left[data-state="closed"] {
-  animation: draw-left-back 200ms ease-in forwards;
-}
-
-@keyframes draw-up {
-  from {
-    max-height: 0;
+  h6 {
+    @apply text-sm leading-none;
   }
-  to {
-    max-height: 500px;
+
+  .caption {
+    @apply text-neutral-500 font-normal text-xs;
   }
-}
 
-@keyframes draw-up-back {
-  from {
-    max-height: 500px;
+  .contain {
+    @apply bg-contain bg-no-repeat bg-center;
   }
-  to {
-    max-height: 0;
+
+  .response-grid {
+    @apply grid gap-4 grid-cols-1 md:grid-cols-2 items-center content-center justify-center auto-rows-fr md:auto-cols-fr
   }
-}
 
-.draw-up {
-  transform-origin: bottom;
-}
-
-.draw-up[data-state="open"] {
-  animation: draw-up 600ms ease-out forwards;
-}
-
-.draw-up[data-state="closed"] {
-  animation: draw-up-back 600ms ease-in forwards;
-}
-
-.face {
-  @apply rounded-xl max-w-20 max-h-20 overflow-hidden border border-muted/50 cursor-pointer;
-}
-
-.face img {
-  @apply w-full h-full aspect-square object-cover object-top;
-}
-
-.asset-content {
-  background-color: #E4E4E1;
-  background-image: radial-gradient(at top center, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.03) 100%), linear-gradient(to top, rgba(255,255,255,0.1) 0%, rgba(143,152,157,0.60) 100%);
-  background-blend-mode: normal, multiply;
-}
-
-.pulse {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 55;
-  width: 100%;
-  height: 100%;
-  backdrop-filter: blur(20px);
-  background: 
-    radial-gradient(ellipse 80% 50% at 50% 50%, hsl(var(--pulse-color) / 0.3), transparent),
-    radial-gradient(ellipse 60% 40% at 30% 30%, hsl(var(--pulse-glow) / 0.2), transparent),
-    radial-gradient(ellipse 70% 45% at 70% 70%, hsl(var(--pulse-color) / 0.25), transparent);
-  animation: wave-flow 4s ease-in-out infinite;
-  transition: transform;
-  transition-duration: 600;
-}
-
-.pulse.on {
-  transform: translate3d(0, 0, 0);
-}
-
-.pulse.off {
-  transform: translate3d(0, 100%, 0);
-}
-
-@keyframes wave-flow {
-  0%, 100% {
-    background-position: 0% 0%, 0% 0%, 100% 100%;
-    opacity: 0.6;
+  .button {
+    @apply cursor-pointer h-8 text-xs rounded-full px-4;
   }
-  25% {
-    background-position: 50% 25%, 25% 50%, 75% 50%;
-    opacity: 1;
+
+  .icon-button {
+    @apply cursor-pointer rounded-full size-8 hover:bg-accent;
   }
-  50% {
-    background-position: 100% 50%, 50% 100%, 50% 0%;
-    opacity: 0.8;
+  .mixin {
+    @apply bg-neutral-700 text-xs h-6 rounded-full px-2 
+      hover:bg-amber-400/50 data-[state=on]:bg-amber-400/50 data-[state=on]:border-amber-400
+      cursor-pointer;
   }
-  75% {
-    background-position: 50% 75%, 75% 50%, 25% 50%;
-    opacity: 1;
+
+  @keyframes draw-left {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+
+  @keyframes draw-left-back {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
+  }
+
+  .draw-left {
+    @apply overflow-hidden rounded-r-none;
+    transform-origin: right;
+  }
+
+  .draw-left[data-state="open"] {
+    animation: draw-left 400ms ease-out forwards;
+  }
+
+  .draw-left[data-state="closed"] {
+    animation: draw-left-back 200ms ease-in forwards;
+  }
+
+  @keyframes draw-up {
+    from { transform: scaleY(0); }
+    to { transform: scaleY(1); }
+  }
+
+  @keyframes draw-up-back {
+    from { transform: scaleY(1); }
+    to { transform: scaleY(0); }
+  }
+
+  .draw-up {
+    transform-origin: bottom;
+  }
+
+  .draw-up[data-state="open"] {
+    animation: draw-up 400ms ease-out forwards;
+  }
+
+  .draw-up[data-state="closed"] {
+    animation: draw-up-back 400ms ease-in forwards;
+  }
+
+  .face {
+    @apply rounded-xl max-w-20 max-h-20 overflow-hidden border border-muted/50 cursor-pointer;
+  }
+
+  .face img {
+    @apply w-full h-full aspect-square object-cover object-top;
+  }
+
+  .asset-content {
+    background-image: radial-gradient(at top center, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.03) 100%), linear-gradient(to top, rgba(255,255,255,0.1) 0%, rgba(143,152,157,0.60) 100%);
+    background-blend-mode: normal, multiply;
+  }
+
+  .pulse {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 55;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(20px);
+    background: 
+      radial-gradient(ellipse 80% 50% at 50% 50%, hsl(var(--pulse-color) / 0.3), transparent),
+      radial-gradient(ellipse 60% 40% at 30% 30%, hsl(var(--pulse-glow) / 0.2), transparent),
+      radial-gradient(ellipse 70% 45% at 70% 70%, hsl(var(--pulse-color) / 0.25), transparent);
+    animation: wave-flow 4s ease-in-out infinite;
+    transition: transform;
+    transition-duration: 600;
+  }
+
+  .pulse.on {
+    transform: translate3d(0, 0, 0);
+  }
+
+  .pulse.off {
+    transform: translate3d(0, 100%, 0);
+  }
+
+  @keyframes wave-flow {
+    0%, 100% {
+      background-position: 0% 0%, 0% 0%, 100% 100%;
+      opacity: 0.6;
+    }
+    25% {
+      background-position: 50% 25%, 25% 50%, 75% 50%;
+      opacity: 1;
+    }
+    50% {
+      background-position: 100% 50%, 50% 100%, 50% 0%;
+      opacity: 0.8;
+    }
+    75% {
+      background-position: 50% 75%, 75% 50%, 25% 50%;
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pulse {
+      animation: none !important;
+      backdrop-filter: none !important;
+    }
+
+    .draw-left[data-state="open"],
+    .draw-left[data-state="closed"],
+    .draw-up[data-state="open"],
+    .draw-up[data-state="closed"] {
+      animation: none !important;
+      transform: scaleX(1);
+    }
+
+    .draw-up[data-state="open"],
+    .draw-up[data-state="closed"] {
+      transform: scaleY(1);
+    }
   }
 }

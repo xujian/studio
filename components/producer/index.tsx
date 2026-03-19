@@ -195,8 +195,8 @@ const filterAssets = (type?: AssetType) => {
 
   return (
     <div className={cn(
-        'producer fixed bottom-4 left-1/2 z-50 w-full max-w-2xl -translate-x-1/2',
-        'glass animate-float-up rounded-2xl bg-accent/80',
+        'producer fixed bottom-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-2xl -translate-x-1/2',
+        'glass animate-float-up rounded-3xl bg-accent/80',
         'transition-all duration-300 overflow-hidden',
         className
       )}>
@@ -205,10 +205,9 @@ const filterAssets = (type?: AssetType) => {
         )}>
         <Mixins value={mixins} onChange={setMixins} />
       </div>
-      <div className="relative -m-px overflow-hidden rounded-2xl border border-white/50 bg-black/20 p-1">
+      <div className="relative -m-px overflow-hidden rounded-3xl border border-foreground/50 bg-background/20 p-1">
         <div className="inputs min-h-32 gap-1 flex items-stretch">
           <div className="h-18 w-18"></div>
-          {/** the reference image */}
           <div className={cn(
               'reference transtion-all relative overflow-hidden rounded-xl duration-500',
               reference
@@ -235,7 +234,7 @@ const filterAssets = (type?: AssetType) => {
                     <Button
                       type="button"
                       size="icon"
-                      className="absolute top-1 right-1 h-4 w-4 rounded-full bg-black/60 text-white hover:bg-black/80"
+                      className="absolute top-1 right-1 h-4 w-4 rounded-full bg-background/60 text-foreground hover:bg-background/80"
                       onClick={handleReferenceClear}>
                       <X className="h-3 w-3" />
                     </Button>
@@ -259,6 +258,7 @@ const filterAssets = (type?: AssetType) => {
             <Textarea
               ref={textareaRef}
               data-lenis-prevent-wheel
+              aria-label="Portrait description"
               placeholder="Describe the portrait you want to create..."
               className={cn([
                 'min-h-32 max-h-40 h-full text-xs resize-none rounded-none border-none bg-transparent!',
@@ -335,19 +335,23 @@ const filterAssets = (type?: AssetType) => {
         />
       </div>
       {/* Error display */}
-      <div className={cn([
+      <div
+        role="alert"
+        aria-live="assertive"
+        className={cn([
           'absolute glass flex items-center justify-between bottom-0 right-0 left-0 rounded-full',
           'bg-destructive/80! text-xs h-12 p-2 pl-4',
           'text-destructive-foreground',
           error ? 'translate-y-0' : 'translate-y-full',
         ].join(' '))}>
         {error && error.message}
-        <Button className="absolute top-2 right-2 icon-button" onClick={clearError}>
+        <Button className="absolute top-2 right-2 icon-button" aria-label="Dismiss error" onClick={clearError}>
           <X />
         </Button>
       </div>
-      <div className={cn('pulse', isPending ? 'on' : 'off')}>
-        <Button className="absolute top-4 right-4 icon-button" tooltip="stop">
+      <div className={cn('pulse', isPending ? 'on' : 'off')} aria-live="polite">
+        {isPending && <span className="sr-only">Generating portrait...</span>}
+        <Button className="absolute top-4 right-4 icon-button" tooltip="stop" aria-label="Stop generation">
           <Square />
         </Button>
       </div>

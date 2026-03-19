@@ -65,7 +65,9 @@ export function PostCard({ post, href }: PostCardProps) {
       <button
         onClick={handleLike}
         disabled={like.isPending}
-        className="flex cursor-pointer items-center gap-1 text-white transition-colors hover:text-red-400">
+        aria-label={post.liked ? `Unlike post (${post.likes_count} likes)` : `Like post (${post.likes_count} likes)`}
+        aria-pressed={post.liked}
+        className="flex cursor-pointer items-center gap-1 text-white transition-colors hover:text-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-foreground rounded-sm">
         <Heart
           className={cn('size-4', post.liked && 'fill-red-500 text-red-500')}
         />
@@ -145,12 +147,16 @@ export function PostCard({ post, href }: PostCardProps) {
         </div>
       </Carousel>
       {/* Dots indicator */}
-      <div className="absolute right-0 bottom-14 left-0 z-10 flex justify-center gap-1.5">
+      <div role="tablist" aria-label="Photo navigation" className="absolute right-0 bottom-14 left-0 z-10 flex justify-center gap-1.5">
         {Array.from({ length: count }).map((_, index) => (
-          <div
+          <button
             key={index}
+            role="tab"
+            aria-selected={index === current}
+            aria-label={`Photo ${index + 1}`}
+            onClick={(e) => { e.stopPropagation(); api?.scrollTo(index) }}
             className={cn(
-              'h-1.5 w-1.5 rounded-full transition-all duration-200',
+              'h-1.5 w-1.5 rounded-full transition-all duration-200 cursor-pointer',
               index === current ? 'w-3 bg-white' : 'bg-white/50'
             )}
           />

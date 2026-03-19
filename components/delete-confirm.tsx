@@ -41,7 +41,9 @@ export function DeleteConfirm({
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="z-101 flex w-auto min-w-80 items-center justify-between rounded-4xl bg-black p-3"
+        role="alertdialog"
+        aria-label={message}
+        className="z-101 flex w-auto min-w-80 items-center justify-between rounded-4xl bg-popover p-3"
         side="top"
         align="start">
         <p className="text-sm">{message}</p>

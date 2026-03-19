@@ -17,13 +17,14 @@ type ButtonProps = React.ComponentProps<"button"> &
     tooltip?: React.ReactNode
   }
 
-function Button({ tooltip, ...props }: ButtonProps) {
-  if (!tooltip) return <ShadcnButton {...props} />
+function Button({ tooltip, "aria-label": ariaLabel, ...props }: ButtonProps) {
+  const label = ariaLabel || (typeof tooltip === 'string' ? tooltip : undefined)
+  if (!tooltip) return <ShadcnButton aria-label={label} {...props} />
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <ShadcnButton {...props} />
+        <ShadcnButton aria-label={label} {...props} />
       </TooltipTrigger>
       <TooltipContent align="center" side="top" sideOffset={10}>{tooltip}</TooltipContent>
     </Tooltip>

@@ -163,16 +163,16 @@ export function MomentView({
                 <AvatarFallback>{(author.name || '?')[0]}</AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-semibold text-white">
+                <p className="font-semibold text-foreground">
                   {author.name || 'Anonymous'}
                 </p>
               </div>
             </div>
             {moment.title && (
-              <h1 className="text-3xl font-bold text-white">{moment.title}</h1>
+              <h1 className="text-3xl font-bold text-foreground">{moment.title}</h1>
             )}
             {moment.created_at && (
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-muted-foreground">
                 {new Date(moment.created_at).toLocaleString('en-US', {
                   month: 'short',
                   day: 'numeric',
@@ -214,12 +214,16 @@ export function MomentView({
             <CarouselPrevious className="left-4" />
             <CarouselNext className="right-4" />
             {/* Dots indicator */}
-            <div className="absolute right-0 bottom-20 left-0 z-20 flex justify-center gap-2">
+            <div role="tablist" aria-label="Photo navigation" className="absolute right-0 bottom-20 left-0 z-20 flex justify-center gap-2">
               {Array.from({ length: moment.photos.length }).map((_, index) => (
-                <div
+                <button
                   key={index}
+                  role="tab"
+                  aria-selected={index === current}
+                  aria-label={`Photo ${index + 1} of ${moment.photos.length}`}
+                  onClick={() => api?.scrollTo(index)}
                   className={cn(
-                    'h-2 w-2 rounded-full transition-all duration-200',
+                    'h-2 w-2 rounded-full transition-all duration-200 cursor-pointer',
                     index === current ? 'w-4 bg-white' : 'bg-white/50'
                   )}
                 />
@@ -244,7 +248,7 @@ export function MomentView({
         <div className="@container flex h-full flex-col gap-4 pt-16 pr-4 pb-4">
           <div className="min-h-20 gap flex items-start justify-start">
             <div className="face relative">
-              <Badge className="absolute top-1 left-1 bg-black/80 text-foreground">
+              <Badge className="absolute top-1 left-1 bg-background/80 text-foreground">
                 Face
               </Badge>
               <Image
@@ -261,8 +265,8 @@ export function MomentView({
               />
             </div>
             {moment.reference && (
-              <div className="reference relative overflow-hidden rounded-lg border border-white!">
-                <Badge className="absolute top-1 left-1 bg-black/80 text-foreground">
+              <div className="reference relative overflow-hidden rounded-lg border border-border">
+                <Badge className="absolute top-1 left-1 bg-background/80 text-foreground">
                   Reference image
                 </Badge>
                 <Image
@@ -277,7 +281,7 @@ export function MomentView({
             )}
           </div>
           {nonFaceMixins.length > 0 && (
-            <div className="mixins grid grid-cols-2 gap-px overflow-hidden rounded border bg-white/10 @sm:grid-cols-3 @lg:grid-cols-4">
+            <div className="mixins grid grid-cols-2 gap-px overflow-hidden rounded border bg-foreground/10 @sm:grid-cols-3 @lg:grid-cols-4">
               {nonFaceMixins.map(([type, assetId]) => {
                 const assetType = assetTypes.find(t => t.type === type)
                 const displayName = assetType?.name || type
@@ -286,8 +290,8 @@ export function MomentView({
                 return (
                   <div
                     key={type}
-                    className="mixin-item relative flex h-20 items-center justify-center overflow-hidden bg-black/75">
-                    <Badge className="absolute top-1 left-1 z-10 bg-white/50">
+                    className="mixin-item relative flex h-20 items-center justify-center overflow-hidden bg-background/75">
+                    <Badge className="absolute top-1 left-1 z-10 bg-background/50">
                       {displayName}
                     </Badge>
                     {asset?.path ? (
@@ -299,7 +303,7 @@ export function MomentView({
                         sizes="120px"
                       />
                     ) : (
-                      <Badge className="bg-black/50 text-white">
+                      <Badge className="bg-background/50 text-foreground">
                         {asset?.name || displayName}
                       </Badge>
                     )}
@@ -309,13 +313,13 @@ export function MomentView({
               {emptyAssets.map((_, index) => (
                 <div
                   key={`empty-${index}`}
-                  className="mixin-item h-20 bg-black/75"
+                  className="mixin-item h-20 bg-background/75"
                 />
               ))}
             </div>
           )}
-          <div className="relative rounded border bg-linear-to-t from-black/80 to-black/40 p-4">
-            <Badge className="absolute -top-2 left-1 bg-black/80 text-foreground">
+          <div className="relative rounded border bg-linear-to-t from-background/80 to-background/40 p-4">
+            <Badge className="absolute -top-2 left-1 bg-background/80 text-foreground">
               Prompt
             </Badge>
             <motion.div
@@ -323,7 +327,7 @@ export function MomentView({
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}>
-              <p className="text-xs text-white">
+              <p className="text-xs text-foreground">
                 {currentPhoto.prompt || moment.prompt || '(EMPTY)'}
               </p>
             </motion.div>

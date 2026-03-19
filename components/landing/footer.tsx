@@ -22,7 +22,7 @@ export const Footer = () => {
           <p className="text-sm text-muted-foreground">Your personal portrait studio</p>
         </div>
 
-        <nav className="flex items-center gap-6">
+        <nav aria-label="Main pages" className="flex items-center gap-6">
           {LINKS.map((link) => (
             <Link
               key={link.href}
@@ -35,7 +35,7 @@ export const Footer = () => {
         </nav>
 
         <div className="flex flex-col items-center md:items-end gap-2">
-          <nav className="flex items-center gap-4">
+          <nav aria-label="Legal" className="flex items-center gap-4">
             {LEGAL_LINKS.map((link) => (
               <Link
                 key={link.href}

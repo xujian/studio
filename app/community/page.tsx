@@ -46,18 +46,19 @@ export default async function CommunityPage() {
     : [{ title: 'Recent', posts: recent }]
 
   return (
-    <div className="page-body flex w-full flex-col px-16 pb-16 pt-2">
+    <div className="page-body flex w-full flex-col px-4 pb-16 pt-2 md:px-8 lg:px-16">
       <h1 className="mb-8 text-2xl font-semibold">Community</h1>
       {allPosts.length === 0 ? (
-        <div className="py-20 text-center text-muted-foreground">
-          No posts yet. Be the first to share a moment!
+        <div className="flex flex-col items-center gap-3 py-20 text-center">
+          <p className="text-muted-foreground">No posts yet</p>
+          <p className="text-sm text-muted-foreground/70">Share your moments from the Studio to see them here</p>
         </div>
       ) : (
         <div className="flex flex-col gap-10">
           {sections.map(section => (
             <section key={section.title} className="flex flex-col gap-4">
               <h2 className="my-0 text-lg font-semibold">{section.title}</h2>
-              <div className="scrollbar-none -mx-16 flex gap-4 overflow-x-auto px-16 pb-4">
+              <div role="list" aria-label={`${section.title} posts`} className="scrollbar-none -mx-4 flex gap-4 overflow-x-auto px-4 pb-4 md:-mx-8 md:px-8 lg:-mx-16 lg:px-16">
                 {section.posts.map(post => (
                   <div key={post.id} className="w-48 shrink-0 md:w-56">
                     <PostCard

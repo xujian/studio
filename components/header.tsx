@@ -4,10 +4,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Profile } from '@/components/profile'
 import { Button } from '@/components/ui/button'
-import { useAuth } from '@/context/auth-provider'
 import { cn } from '@/lib/utils'
 import { Aperture, ShoppingBag, Earth, BookOpen } from 'lucide-react'
-import path from 'path/win32'
 
 export const Header = () => {
   const pathname = usePathname()
@@ -24,7 +22,7 @@ export const Header = () => {
   }
 
   return (
-    <header className="fixed top-4 z-50 h-16 flex w-full items-center justify-between px-8">
+    <header className="fixed top-4 z-50 h-16 flex w-full items-center justify-between px-4 md:px-8">
       <div className="flex flex-1 items-center">
         <Link
           href="/"
@@ -35,18 +33,16 @@ export const Header = () => {
           <img src="/kanojo.svg" className='h-12' alt="Kanojo Studio" />
         </Link>
       </div>
-      <nav className="flex items-center elevation-2 rounded-full p-1 gap-0 glass h-10">
+      <nav aria-label="Main navigation" className="flex items-center elevation-2 rounded-full p-1 gap-0 glass h-10">
         {routes.map(route => (
-          <Link key={route.href} href={route.href}>
+          <Link key={route.href} href={route.href} aria-current={testSelected(route.href) ? 'page' : undefined}>
             <Button
               variant={testSelected(route.href) ? 'default' : 'ghost'}
-              className={cn('h-8 rounded-full min-w-30 justify-start gap-1 pl-1 pr-6 cursor-pointer',
-                testSelected(route.href) ? 'bg-white/90': ''
-              )}>
-              <div className="icon">
+              className="h-8 md:h-8 rounded-full min-w-0 md:min-w-30 justify-center md:justify-start gap-1 px-2 md:pl-1 md:pr-6 cursor-pointer">
+              <div className="icon" aria-hidden="true">
                 <route.icon className="h-5! w-5!" />
               </div>
-              {route.label}
+              <span className="hidden md:inline">{route.label}</span>
             </Button>
           </Link>
         ))}

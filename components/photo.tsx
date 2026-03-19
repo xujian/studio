@@ -25,7 +25,7 @@ export function Photo({ data, className }: PhotoProps) {
       >
         <Image
           src={photoUrl(data.user_id, data.moment_id, data.id)}
-          alt=""
+          alt="Generated portrait"
           fill
           loading="lazy"
           className="object-cover"

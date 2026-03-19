@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import * as React from 'react'
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { useUpload, type UploadResult } from '@/hooks/use-upload'
 import { Loader2, Upload as UploadIcon } from 'lucide-react'
@@ -65,29 +66,36 @@ export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
     e.target.value = ''
   }
 
+  const inputId = React.useId()
+
   return (
-    <div
-      className={`relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-border bg-muted transition-colors hover:border-foreground/30 ${className ?? ''}`}
-      onClick={() => fileInputRef.current?.click()}>
+    <label
+      htmlFor={inputId}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInputRef.current?.click() } }}
+      className={`relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-border bg-muted transition-colors hover:border-foreground/30 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${className ?? ''}`}>
       {preview
-        ? (<Image src={preview} alt="preview" fill className="object-cover" />)
+        ? (<Image src={preview} alt="Upload preview" fill className="object-cover" />)
         : (<div className="flex flex-col items-center gap-2 text-muted-foreground">
-            <UploadIcon className="size-6" />
+            <UploadIcon className="size-6" aria-hidden="true" />
             <span className="text-xs">{placeholder}</span>
           </div>)
       }
       {uploading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-background/60">
+        <div className="absolute inset-0 flex items-center justify-center bg-background/60" aria-live="polite">
           <Loader2 className="size-6 animate-spin" />
+          <span className="sr-only">Uploading...</span>
         </div>
       )}
       <input
+        id={inputId}
         ref={fileInputRef}
         type="file"
         accept="image/*"
         className="hidden"
         onChange={handleFileChange}
       />
-    </div>
+    </label>
   )
 })
