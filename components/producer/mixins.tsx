@@ -56,7 +56,7 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
   }
 
   return (
-    <ButtonGroup className="-mt-px h-7 rounded-none bg-white/20">
+    <ButtonGroup className="-mt-px h-7 rounded-none bg-foreground/10">
       {assetTypes
         .filter(t => t.type !== 'face')
         .map(assetType => {
@@ -82,39 +82,39 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
                 align="start"
                 side="top"
                 sideOffset={0}
-                className="draw-up rounded-top glass w-48 overflow-hidden border-border p-2">
-                <div className="flex max-h-60 flex-col items-start justify-start gap-2 overflow-y-auto">
-                  {isLoading ? (
-                    <div className="p-2 text-xs text-muted-foreground">
-                      Loading...
-                    </div>
-                  ) : typeAssets.length === 0 ? (
-                    <div className="p-2 text-xs text-muted-foreground">
-                      No {assetType.name.toLowerCase()} assets yet
-                    </div>
-                  ) : (
-                    typeAssets.map(asset => (
-                      <Peekable key={asset.id}
-                        content={asset.path || asset.content}
-                        title={asset.title}
-                        description={asset.description}
-                        side="right">
-                        <div>{/** to tix the toggle's pressed state */}
-                          <Toggle
-                            variant="outline"
-                            size="sm"
-                            className="mixin justify-start"
-                            pressed={value[assetType.type] === asset.id}
-                            onPressedChange={() =>
-                              handleSelect(assetType.type, asset.id!)
-                            }>
-                            <span className="truncate">{asset.name}</span>
-                          </Toggle>
-                        </div>
-                      </Peekable>
-                    ))
-                  )}
-                </div>
+                className="draw-up rounded-top glass w-48 border-border p-2">
+                <div data-lenis-prevent-wheel className="max-h-60 overflow-y-auto flex flex-col items-start justify-start gap-1">
+                    {isLoading ? (
+                      <div className="p-2 text-xs text-muted-foreground">
+                        Loading...
+                      </div>
+                    ) : typeAssets.length === 0 ? (
+                      <div className="p-2 text-xs text-muted-foreground">
+                        No {assetType.name.toLowerCase()} assets yet
+                      </div>
+                    ) : (
+                      typeAssets.map(asset => (
+                        <Peekable key={asset.id}
+                          content={asset.path || asset.content}
+                          title={asset.title}
+                          description={asset.description}
+                          side="right">
+                          <div>{/** to tix the toggle's pressed state */}
+                            <Toggle
+                              variant="outline"
+                              size="sm"
+                              className="h-5 mixin justify-start"
+                              pressed={value[assetType.type] === asset.id}
+                              onPressedChange={() =>
+                                handleSelect(assetType.type, asset.id!)
+                              }>
+                              <span className="truncate text-xs">{asset.name}</span>
+                            </Toggle>
+                          </div>
+                        </Peekable>
+                      ))
+                    )}
+                  </div>
               </PopoverContent>
             </Popover>
           )

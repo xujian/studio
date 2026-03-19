@@ -52,22 +52,22 @@
   }
 
   @keyframes draw-left {
-    from { transform: scaleX(0); }
-    to { transform: scaleX(1); }
+    from { max-width: 0; }
+    to { max-width: 500px; }
   }
 
   @keyframes draw-left-back {
-    from { transform: scaleX(1); }
-    to { transform: scaleX(0); }
+    from { max-width: 500px; }
+    to { max-width: 0; }
   }
 
   .draw-left {
-    @apply overflow-hidden rounded-r-none;
-    transform-origin: right;
+    overflow: clip;
+    border-radius: 0 var(--radius) var(--radius) 0;
   }
 
   .draw-left[data-state="open"] {
-    animation: draw-left 400ms ease-out forwards;
+    animation: draw-left 600ms ease-out forwards;
   }
 
   .draw-left[data-state="closed"] {
@@ -75,21 +75,22 @@
   }
 
   @keyframes draw-up {
-    from { transform: scaleY(0); }
-    to { transform: scaleY(1); }
+    from { max-height: 0; }
+    to { max-height: 500px; }
   }
 
   @keyframes draw-up-back {
-    from { transform: scaleY(1); }
-    to { transform: scaleY(0); }
+    from { max-height: 500px; }
+    to { max-height: 0; }
   }
 
   .draw-up {
+    overflow: clip;
     transform-origin: bottom;
   }
 
   .draw-up[data-state="open"] {
-    animation: draw-up 400ms ease-out forwards;
+    animation: draw-up 600ms ease-out forwards;
   }
 
   .draw-up[data-state="closed"] {
@@ -160,16 +161,15 @@
     }
 
     .draw-left[data-state="open"],
-    .draw-left[data-state="closed"],
-    .draw-up[data-state="open"],
-    .draw-up[data-state="closed"] {
+    .draw-left[data-state="closed"] {
       animation: none !important;
-      transform: scaleX(1);
+      max-width: 500px;
     }
 
     .draw-up[data-state="open"],
     .draw-up[data-state="closed"] {
-      transform: scaleY(1);
+      animation: none !important;
+      max-height: 500px;
     }
   }
 }

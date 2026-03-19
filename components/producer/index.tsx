@@ -194,22 +194,25 @@ const filterAssets = (type?: AssetType) => {
 
 
   return (
-    <div className={cn(
+    <div data-lenis-prevent-wheel className={cn(
         'producer fixed bottom-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-2xl -translate-x-1/2',
         'glass animate-float-up rounded-3xl bg-accent/80',
         'transition-all duration-300 overflow-hidden',
         className
       )}>
-      <div className={cn('-mb-7 flex px-8 opacity-0 transition-all duration-300',
-          expanded ? 'mb-0 opacity-100' : ''
+      <div className={cn(
+          'overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out',
+          expanded ? 'max-h-14 opacity-100' : 'max-h-0 opacity-0'
         )}>
-        <Mixins value={mixins} onChange={setMixins} />
+        <div className="flex px-8">
+          <Mixins value={mixins} onChange={setMixins} />
+        </div>
       </div>
       <div className="relative -m-px overflow-hidden rounded-3xl border border-foreground/50 bg-background/20 p-1">
         <div className="inputs min-h-32 gap-1 flex items-stretch">
           <div className="h-18 w-18"></div>
           <div className={cn(
-              'reference transtion-all relative overflow-hidden rounded-xl duration-500',
+              'reference relative overflow-hidden rounded-xl transition-[width,height] duration-300',
               reference
                 ? 'h-40 w-32 border'
                 : 'h-8 w-8'

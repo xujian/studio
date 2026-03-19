@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import { MDXRemote } from 'next-mdx-remote/rsc'
 import { notFound } from 'next/navigation'
 import { mdxComponents } from '@/components/mdx-components'
@@ -44,11 +45,14 @@ export default async function MagazinePostPage({ params }: Props) {
     <article className="magazine-article">
       <div className="cover-layout mb-10 flex items-center h-100vh">
         {post.coverImage && (
-          <div className="h-[75vh] w-full overflow-hidden">
-            <img
+          <div className="relative h-[75vh] w-full overflow-hidden">
+            <Image
               src={post.coverImage}
               alt={post.title}
-              className="h-full w-full object-cover rounded-2xl"
+              fill
+              className="object-cover rounded-2xl"
+              sizes="(max-width: 1280px) 100vw, 1280px"
+              priority
             />
           </div>
         )}

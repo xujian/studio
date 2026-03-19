@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { getAllPosts } from '@/lib/magazine'
 
@@ -35,11 +36,14 @@ export default function MagazinePage() {
           {hero && (
             <Link href={`/magazine/${hero.slug}`} className="group block mb-20">
               {hero.coverImage && (
-                <div className="w-full h-[55vh] overflow-hidden mb-8">
-                  <img
+                <div className="relative w-full h-[55vh] overflow-hidden mb-8">
+                  <Image
                     src={hero.coverImage}
                     alt={hero.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1280px) 83vw, 1024px"
+                    priority
                   />
                 </div>
               )}
@@ -76,11 +80,13 @@ export default function MagazinePage() {
                     className="group block"
                   >
                     {post.coverImage && (
-                      <div className="w-full aspect-[4/3] overflow-hidden mb-5">
-                        <img
+                      <div className="relative w-full aspect-[4/3] overflow-hidden mb-5">
+                        <Image
                           src={post.coverImage}
                           alt={post.title}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                          fill
+                          className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 480px"
                         />
                       </div>
                     )}

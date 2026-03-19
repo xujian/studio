@@ -56,7 +56,7 @@ export const Profile = () => {
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="glass flex flex-col gap-1 w-56 rounded-xl border p-1">
-        <div className="bg-background rounded-lg">
+        <div className="bg-background rounded-lg overflow-hidden">
           <div className="bg-secondary rounded-lg p-2">
             <p className="truncate text-sm font-medium">{name}</p>
             {user.email && (
@@ -65,7 +65,6 @@ export const Profile = () => {
               </p>
             )}
           </div>
-
           <Credits />
         </div>
         <Button

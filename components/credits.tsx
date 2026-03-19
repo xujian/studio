@@ -12,7 +12,7 @@ export interface CreditsProps extends React.HTMLAttributes<HTMLDivElement> {
 export function Credits({ prefix = '', className, ...props }: CreditsProps) {
   const { data: profile, isLoading } = useProfile()
 
-  if (isLoading || profile == null) return null
+  if (profile == null) return null
 
   return (
     <Link href="/credits" className="w-full">
@@ -21,16 +21,20 @@ export function Credits({ prefix = '', className, ...props }: CreditsProps) {
           'credits flex h-8 items-center justify-between gap-4 px-1',
           'text-sm tabular-nums',
           'cursor-pointer w-full',
-          'hover:bg-accent transition-colors',
+          'rounded-lg hover:bg-accent transition-colors',
           className
         )}
         {...props}>
-        <div className="flex items-center gap-1">
-          <span className="font-medium">{prefix}</span>
-          <Zap className="size-4 text-yellow-400" />
-          <span className="text-sm number font-bold">{profile.credits}</span>
-        </div>
-        <div className="text-xs">CREDITS</div>
+        {isLoading
+          ? (<div className="h-4 w-12 rounded bg-muted animate-pulse" />)
+          : (<>
+              <div className="flex items-center gap-1">
+                <span className="font-medium">{prefix}</span>
+                <Zap className="size-4 text-yellow-400" />
+                <span className="text-xs number font-bold">{profile.credits}</span>
+              </div>
+              <div className="text-xs">CREDITS</div>
+            </>)}
       </div>
     </Link>
   )

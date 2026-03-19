@@ -55,7 +55,7 @@ export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
               <p>Choose face</p>
             </TooltipContent>
           </Tooltip>
-        <PopoverContent className="draw-left min-h-20 w-80 mt-4 bg-popover rounded-2xl glass p-1"
+        <PopoverContent className="draw-left min-h-20 w-80 mt-4 bg-popover rounded-3xl rounded-r-none glass p-1"
           side="left" sideOffset={4} align="start">
           {faces.length === 0 ? (
             <div className="flex flex-col items-center gap-2 p-4">
