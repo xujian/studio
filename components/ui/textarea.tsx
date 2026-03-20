@@ -12,7 +12,7 @@ function Textarea({ label, className, ...props }: TextAreaProps) {
   return (
     <div className={cn(
       'border-input bg-background',
-      'focus-within:border-none focus-within:ring-ring/0',
+      'focus-within:border-ring focus-within:ring-ring/50',
       'has-aria-invalid:ring-destructive/20',
       'dark:has-aria-invalid:ring-destructive/40 has-aria-invalid:border-destructive',
       'relative w-full rounded-md',
@@ -30,7 +30,7 @@ function Textarea({ label, className, ...props }: TextAreaProps) {
       }
       <textarea
         id={id}
-        className='text-foreground h-full placeholder:text-muted-foreground/70 flex w-full p-1 text-sm focus-visible:outline-none min-h-28 resize-none'
+        className='text-foreground h-full placeholder:text-muted-foreground/70 flex w-full px-3 py-2 text-sm focus-visible:outline-none min-h-28 resize-none'
         {...props}
       />
     </div>
