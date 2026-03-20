@@ -14,8 +14,8 @@ import { cn } from '@/lib/utils'
 import { useAssets } from '@/hooks/use-assets'
 import { useEngine } from '@/hooks/use-engine'
 import { useUpload } from '@/hooks/use-upload'
-import { FacePicker } from '../face-picker'
-import { Mixins } from './mixins'
+import { FacePicker } from '@/components/face-picker'
+import { Mixins } from '@/components/mixins'
 import { Loader2, ArrowUp, Plus, GripHorizontal, X, Square, RotateCcw } from 'lucide-react'
 
 interface ProducerProps {
