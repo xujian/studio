@@ -1,21 +1,45 @@
-import * as React from "react"
+import { useId } from 'react'
+import { cn } from '@/lib/utils'
 
-import { cn } from "@/lib/utils"
+export type InputProps = {
+  label?: string,
+  required?: boolean
+} & React.ComponentProps<'input'>
 
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+export const Input = ({ label, required, className, ...props }: InputProps) => {
+  const id = useId()
+
   return (
-    <input
-      type={type}
-      data-slot="input"
+    <div
       className={cn(
-        "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-        "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+        'border-input bg-background',
+        'focus-within:border-ring focus-within:ring-ring/50',
+        'has-aria-invalid:ring-destructive/20',
+        'has-aria-invalid:border-destructive dark:has-aria-invalid:ring-destructive/40',
+        'relative w-full rounded-md overflow-hidden',
+        'border shadow-xs',
+        'transition-[color,box-shadow] outline-none',
+        'focus-within:ring-[3px]',
+        'has-disabled:pointer-events-none has-disabled:cursor-not-allowed',
+        'has-disabled:opacity-50 has-[input:is(:disabled)]:*:pointer-events-none',
         className
+      )}>
+      {label && (
+        <label
+          htmlFor={id}
+          className="block px-2 pt-2 text-xs font-medium text-foreground/75 dark:bg-input/30">
+          {label}
+          {
+            required && <span className="text-destructive"> *</span>
+          }
+        </label>
       )}
-      {...props}
-    />
+      <input
+        id={id}
+        data-lpignore="true"
+        className="flex h-9 w-full bg-transparent px-3 pb-1 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none dark:bg-input/30"
+        {...props}
+      />
+    </div>
   )
 }
-
-export { Input }

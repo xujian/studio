@@ -53,7 +53,12 @@ export function AssetCreate({ type, onClose }: AssetCreateProps) {
   const handleSave = () => {
     createAsset.mutate(
       { name, title, description, content, type, path: uploadedPath },
-      { onSuccess: () => { resetForm(); onClose() } }
+      {
+        onSuccess: () => {
+          resetForm()
+          onClose()
+        }
+      }
     )
   }
 
@@ -75,80 +80,71 @@ export function AssetCreate({ type, onClose }: AssetCreateProps) {
   const canSave = !!name && !createAsset.isPending
 
   return (
-    <div className="asset-create flex flex-col gap-4 p-4 min-h-full">
+    <div className="asset-create flex min-h-full flex-col gap-2 p-2">
       {/* Asset content */}
       <Upload
         ref={uploadRef}
         className="aspect-square"
         path={({ userId }) => `assets/${userId}/${type}`}
-        onComplete={setUploadedPath}
-      />
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="asset-content" className="text-sm font-medium">
-          Prompt text
-        </label>
-        <Textarea
-          id="asset-content"
-          value={content}
-          className="min-h-28 resize-none"
+        onComplete={setUploadedPath} />
+      {type !== 'face' && (
+        <Textarea label="Content"
           onChange={e => setContent(e.target.value)}
           placeholder={`Describe the ${label.toLowerCase()} (e.g. light linen pants, white crop top)`}
-          rows={3}
-        />
-      </div>
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        disabled={!canSuggest}
-        onClick={handleSuggest}
-        className="gap-2 self-start">
-        {suggesting
-          ? <Loader2 className="size-3.5 animate-spin" />
-          : <Sparkles className="size-3.5" />
-        }
-        Suggest name &amp; title
-      </Button>
-      {/* Metadata */}
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="asset-name" className="text-sm font-medium">
-          Name <span className="text-destructive">*</span>
-        </label>
-        <Input
-          id="asset-name"
-          value={name}
-          onChange={e => setName(e.target.value)}
-          placeholder="e.g. summer-casual"
-        />
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="asset-title" className="text-sm font-medium">
-          Title
-        </label>
-        <Input
-          id="asset-title"
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-          placeholder="e.g. Summer Casual"
-        />
-      </div>
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor="asset-description" className="text-sm font-medium">
-          Description
-        </label>
-        <Input
-          id="asset-description"
-          value={description}
-          onChange={e => setDescription(e.target.value)}
-          placeholder="A note for yourself"
-        />
-      </div>
-      <div className="flex-1 flex items-end gap-2 pt-2">
-        <Button variant="outline" className="flex-1" onClick={handleCancel}>
+          rows={3} />)
+      }
+      {type !== 'face' && (
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            size="xs"
+            disabled={!canSuggest}
+            onClick={handleSuggest}
+            className="gap-2 self-start">
+            {suggesting ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <Sparkles className="size-3.5" />
+            )}
+            Suggest name &amp; title
+          </Button>
+        </div>)
+      }
+      <Input
+        id="asset-name"
+        label="Name"
+        required
+        value={name}
+        onChange={e => setName(e.target.value)}
+        placeholder="e.g. summer-casual"
+      />
+      <Input
+        label="Title"
+        value={title}
+        onChange={e => setTitle(e.target.value)}
+        placeholder="e.g. Summer Casual" />
+      <Input
+        label='Description'
+        value={description}
+        onChange={e => setDescription(e.target.value)}
+        placeholder="A note for yourself" />
+      <div className="flex flex-1 items-end gap-2 pt-2">
+        <Button
+          variant="outline"
+          className="flex-1"
+          size="sm"
+          onClick={handleCancel}>
           Cancel
         </Button>
-        <Button className="flex-1" onClick={handleSave} disabled={!canSave}>
-          {createAsset.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+        <Button
+          className="flex-1"
+          size="sm"
+          onClick={handleSave}
+          disabled={!canSave}>
+          {createAsset.isPending && (
+            <Loader2 className="mr-2 size-4 animate-spin" />
+          )}
           Save
         </Button>
       </div>

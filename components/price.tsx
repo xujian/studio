@@ -16,7 +16,7 @@ export function Price({ value, variant = 'badge', className }: PriceProps) {
     return (
       <span
         className={cn(
-          'flex w-full items-center justify-between rounded-xl border px-3 py-2 text-sm font-medium',
+          'h-8 flex w-full items-center justify-between rounded-xl border px-3 text-sm font-medium',
           'border-border bg-secondary text-secondary-foreground',
           className
         )}>

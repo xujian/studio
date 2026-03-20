@@ -50,11 +50,13 @@ export const AssetDetail = ({
         </div>
       </div>
       <div className="flex flex-col flex-1 gap-1 p-4">
-        <h2 className="text-base leading-tight font-semibold">
+        <h2 className="text-base my-0 font-semibold">
           {asset.title || asset.name}
         </h2>
         {asset.name && asset.title && (
-          <p className="text-xs text-muted-foreground">{asset.name}</p>
+          <Badge className="bg-background text-xs text-background-foreground">
+            {asset.name}
+          </Badge>
         )}
         {asset.description && (
           <p className="text-sm leading-snug text-muted-foreground">
@@ -62,31 +64,32 @@ export const AssetDetail = ({
           </p>
         )}
       </div>
-
-      {/* Actions */}
-      <div className="flex flex-col gap-1 p-2">
+      <div className="flex-1 p-2 flex flex-col gap-1 justify-end">
         {hasPrice && asset.price != null && (
           <Price value={asset.price} variant="button" />
         )}
-        {canUse && (
-          <Button className="button w-full" onClick={onUse}>
-            Use
-          </Button>
-        )}
-        {hasPrice && purchasable && (
-          <Button className="button w-full" onClick={onBuy}>
-            Buy
-          </Button>
-        )}
-        {deletable && (
-          <Button
-            variant="destructive"
-            className="button w-full"
-            disabled={isDeleting}
-            onClick={onDelete}>
-            {isDeleting ? <Loader2 className="size-4 animate-spin" /> : 'Delete'}
-          </Button>
-        )}
+        <div className="flex items-center gap-1">
+          {deletable && (
+            <Button
+              variant="destructive"
+              size="sm"
+              className="button"
+              disabled={isDeleting}
+              onClick={onDelete}>
+              {isDeleting ? <Loader2 className="size-4 animate-spin" /> : 'Delete'}
+            </Button>
+          )}
+          {canUse && (
+            <Button className="button flex-1" size="sm" onClick={onUse}>
+              Use
+            </Button>
+          )}
+          {hasPrice && purchasable && (
+            <Button className="button flex-1" size="sm" onClick={onBuy}>
+              Buy
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   )

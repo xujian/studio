@@ -51,7 +51,7 @@ export function PurchaseModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="gap-0 overflow-hidden rounded-2xl p-0 sm:max-w-sm"
+        className="gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-sm"
         showCloseButton={false}>
         <DialogTitle className="sr-only">Purchase Asset</DialogTitle>
         {/* Hero — full bleed */}
@@ -71,18 +71,12 @@ export function PurchaseModal({
               </p>
             </div>
           )}
-
-          {/* Scrim */}
           <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-black/70 to-transparent" />
-
-          {/* Close button */}
-          <button
+          <Button
             onClick={() => onOpenChange(false)}
-            className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-colors hover:bg-black/60">
-            <X className="size-3.5" />
-          </button>
-
-          {/* Bottom overlays: type badge + price/owned */}
+            className="absolute top-1 right-1 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-colors hover:bg-black/60">
+            <X className="size-4" />
+          </Button>
           <div className="absolute right-3 bottom-3 left-3 flex items-end justify-between">
             <Badge className="border-white/20 bg-white/10 text-[10px] tracking-widest text-white uppercase backdrop-blur-sm">
               {asset.type}
@@ -121,6 +115,7 @@ export function PurchaseModal({
             </Button>
           ) : (
             <Button
+              size="sm"
               className={cn('button w-full', purchase.isPending && 'animate-pulse')}
               onClick={handleBuy}
               disabled={purchase.isPending || !canAfford}>

@@ -99,10 +99,8 @@
     border: 1px solid color-mix(in oklch, var(--glass-border), transparent 40%);
   }
 
-  .glass {
-    .border {
-      border-color: var(--glass-border);
-    }
+  .glass.border {
+    border-color: var(--glass-border);
   }
 
   /* Elevation Classes (depth + shadows) */

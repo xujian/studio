@@ -264,10 +264,12 @@ const filterAssets = (type?: AssetType) => {
               data-lenis-prevent-wheel
               aria-label="Portrait description"
               placeholder="Describe the portrait you want to create..."
-              className={cn([
+              className={cn(
                 'min-h-32 max-h-40 h-full text-xs resize-none rounded-none border-none bg-transparent!',
-                'p-0 focus-visible:ring-0 focus-visible:ring-offset-0',
-                '[&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-track]:bg-transparent'].join(' '))}
+                'p-0 focus-visible:outline-none',
+                '[&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full',
+                '[&::-webkit-scrollbar-thumb]:bg-white/20',
+                '[&::-webkit-scrollbar-track]:bg-transparent')}
               value={prompt}
               onChange={handlePromptChange}
               onWheel={handleTextareaWheel}

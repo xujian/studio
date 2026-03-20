@@ -1,17 +1,39 @@
 import * as React from "react"
+import { useId } from 'react'
 
 import { cn } from "@/lib/utils"
 
-function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
+export type TextAreaProps = {
+  label?: string
+} & React.ComponentProps<"textarea">
+
+function Textarea({ label, className, ...props }: TextAreaProps) {
+  const id = useId()
   return (
-    <textarea
-      data-slot="textarea"
-      className={cn(
-        "border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
-        className
-      )}
-      {...props}
-    />
+    <div className={cn(
+      'border-input bg-background',
+      'focus-within:border-none focus-within:ring-ring/0',
+      'has-aria-invalid:ring-destructive/20',
+      'dark:has-aria-invalid:ring-destructive/40 has-aria-invalid:border-destructive',
+      'relative w-full rounded-md',
+      'border shadow-xs transition-[color,box-shadow]',
+      'outline-none focus-within:ring-[3px]',
+      'has-disabled:pointer-events-none',
+      'has-disabled:cursor-not-allowed has-disabled:opacity-50',
+      'has-[input:is(:disabled)]:*:pointer-events-none',
+      className)}>
+      {label && (
+        <label htmlFor={id}
+          className='text-foreground block px-2 pt-2 text-xs font-medium'>
+          Content
+        </label>)
+      }
+      <textarea
+        id={id}
+        className='text-foreground h-full placeholder:text-muted-foreground/70 flex w-full p-1 text-sm focus-visible:outline-none min-h-28 resize-none'
+        {...props}
+      />
+    </div>
   )
 }
 
