@@ -75,7 +75,7 @@ export function AssetCreate({ type, onClose }: AssetCreateProps) {
   const canSave = !!name && !createAsset.isPending
 
   return (
-    <div className="asset-create flex flex-col gap-4 p-4">
+    <div className="asset-create flex flex-col gap-4 p-4 min-h-full">
       {/* Asset content */}
       <Upload
         ref={uploadRef}
@@ -96,7 +96,6 @@ export function AssetCreate({ type, onClose }: AssetCreateProps) {
           rows={3}
         />
       </div>
-
       <Button
         type="button"
         variant="outline"
@@ -110,9 +109,6 @@ export function AssetCreate({ type, onClose }: AssetCreateProps) {
         }
         Suggest name &amp; title
       </Button>
-
-      <hr className="border-border" />
-
       {/* Metadata */}
       <div className="flex flex-col gap-1.5">
         <label htmlFor="asset-name" className="text-sm font-medium">
@@ -147,8 +143,7 @@ export function AssetCreate({ type, onClose }: AssetCreateProps) {
           placeholder="A note for yourself"
         />
       </div>
-
-      <div className="flex gap-2 pt-2">
+      <div className="flex-1 flex items-end gap-2 pt-2">
         <Button variant="outline" className="flex-1" onClick={handleCancel}>
           Cancel
         </Button>

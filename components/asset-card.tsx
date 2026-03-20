@@ -1,18 +1,18 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/button'
 import type { Asset, AssetWithPurchaseInfo } from '@/lib/types'
-import { assetUrl, assetStatus } from '@/lib/utils'
+import { assetStatus } from '@/lib/utils'
 import { Check } from 'lucide-react'
 import { Price } from '@/components/price'
 import { PurchaseModal } from '@/components/purchase'
 import { useBus } from '@/lib/bus'
 import { useDeleteAsset, useRemovePurchase } from '@/hooks/use-delete-asset'
 import { AssetDetail } from '@/components/asset-detail'
+import { AssetPreview } from '@/components/asset-preview'
 import { Sidepane } from '@/components/sidepane'
 
 interface AssetCardProps {
@@ -45,19 +45,8 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
   return (
     <>
       <Card className="asset-card group gap-0 p-0 transition-all cursor-pointer border-0 bg-transparent focus-within:ring-2 focus-within:ring-ring" tabIndex={0} role="button" aria-label={`${data.title || data.name} asset`} onClick={() => setSheetOpen(true)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSheetOpen(true) } }}>
-        <CardContent className="relative aspect-square w-full overflow-hidden rounded-xl bg-neutral p-0">
-          {data.path
-            ? (<Image
-                src={assetUrl(data.path)}
-                alt={data.name || 'Asset'}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 50vw, 25vw"
-              />)
-            : (<div className="asset-content flex h-full items-center justify-center p-3">
-                <p className="line-clamp-6 text-xs text-muted-foreground">{data.content}</p>
-              </div>)
-          }
+        <CardContent className="relative aspect-square w-full overflow-hidden rounded-3xl bg-neutral p-0">
+          <AssetPreview asset={data} />
           <div className="absolute top-2 right-2">
             {isPurchased
               ? (<Badge variant="default" className="gap-1 bg-primary/90 text-xs">

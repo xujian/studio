@@ -47,7 +47,7 @@ export function Sidepane({
               </div>)
             : (<SheetTitle sr-only="true" className="hidden" />)
           }
-          <div className="sidepane-content bg-background rounded-3xl min-h-0 flex-1 overflow-y-auto overscroll-contain" data-lenis-prevent>
+          <div className="sidepane-content bg-popover rounded-3xl min-h-0 flex-1 overflow-y-auto overscroll-contain" data-lenis-prevent>
             {children}
           </div>
         </DialogPrimitive.Content>
