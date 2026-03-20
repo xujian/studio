@@ -1,11 +1,17 @@
 import * as React from 'react'
-import { Button, ButtonGroup, Toggle } from '@/components/ui'
+import { Peekable } from '@/components/peekable'
+import {
+  Button,
+  ButtonGroup,
+  Toggle,
+  Popover,
+  PopoverTrigger,
+  PopoverContent
+} from '@/components/ui'
 import { assetTypes } from '@/lib/constants'
 import type { AssetType, Mixins } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { useAssets } from '@/hooks/use-assets'
-import { Popover, PopoverTrigger, PopoverContent } from '../ui'
-import { Peekable } from '@/components/peekable'
 import { MoreHorizontalIcon } from 'lucide-react'
 
 export type MixinsProps = {
@@ -63,38 +69,44 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
                 side="top"
                 sideOffset={0}
                 className="draw-up rounded-top glass w-48 border-border p-2">
-                <div data-lenis-prevent-wheel className="max-h-60 overflow-y-auto flex flex-col items-start justify-start gap-1">
-                    {isLoading ? (
-                      <div className="p-2 text-xs text-muted-foreground">
-                        Loading...
-                      </div>
-                    ) : typeAssets.length === 0 ? (
-                      <div className="p-2 text-xs text-muted-foreground">
-                        No {assetType.name.toLowerCase()} assets yet
-                      </div>
-                    ) : (
-                      typeAssets.map(asset => (
-                        <Peekable key={asset.id}
-                          content={asset.path || asset.content}
-                          title={asset.title}
-                          description={asset.description}
-                          side="right">
-                          <div>{/** wrapper to fix the toggle's pressed state */}
-                            <Toggle
-                              variant="outline"
-                              size="sm"
-                              className="h-5 mixin justify-start"
-                              pressed={value[assetType.type] === asset.id}
-                              onPressedChange={() =>
-                                handleSelect(assetType.type, asset.id!)
-                              }>
-                              <span className="truncate text-xs">{asset.name}</span>
-                            </Toggle>
-                          </div>
-                        </Peekable>
-                      ))
-                    )}
-                  </div>
+                <div
+                  data-lenis-prevent-wheel
+                  className="flex max-h-60 flex-col items-start justify-start gap-1 overflow-y-auto">
+                  {isLoading ? (
+                    <div className="p-2 text-xs text-muted-foreground">
+                      Loading...
+                    </div>
+                  ) : typeAssets.length === 0 ? (
+                    <div className="p-2 text-xs text-muted-foreground">
+                      No {assetType.name.toLowerCase()} assets yet
+                    </div>
+                  ) : (
+                    typeAssets.map(asset => (
+                      <Peekable
+                        key={asset.id}
+                        content={asset.path || asset.content}
+                        title={asset.title}
+                        description={asset.description}
+                        side="right">
+                        <div>
+                          {/** wrapper to fix the toggle's pressed state */}
+                          <Toggle
+                            variant="outline"
+                            size="sm"
+                            className="mixin h-5 justify-start"
+                            pressed={value[assetType.type] === asset.id}
+                            onPressedChange={() =>
+                              handleSelect(assetType.type, asset.id!)
+                            }>
+                            <span className="truncate text-xs">
+                              {asset.name}
+                            </span>
+                          </Toggle>
+                        </div>
+                      </Peekable>
+                    ))
+                  )}
+                </div>
               </PopoverContent>
             </Popover>
           )
