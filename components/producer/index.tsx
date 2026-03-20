@@ -212,10 +212,10 @@ const filterAssets = (type?: AssetType) => {
         <div className="inputs min-h-32 gap-1 flex items-stretch">
           <div className="h-18 w-18"></div>
           <div className={cn(
-              'reference relative overflow-hidden rounded-xl transition-[width,height] duration-300',
+              'reference relative transition-[width,height] duration-300',
               reference
-                ? 'h-40 w-32 border'
-                : 'h-8 w-8'
+                ? 'h-40 w-32 border overflow-hidden rounded-xl'
+                : 'h-9 w-9'
             )}>
             <input
               ref={fileInputRef}
@@ -247,8 +247,9 @@ const filterAssets = (type?: AssetType) => {
                   <Button
                     type="button"
                     variant="outline"
+                    size="icon-lg"
                     tooltip="Upload reference image"
-                    className="icon-button"
+                    className="button"
                     disabled={isPending || uploading}
                     onClick={() => fileInputRef.current?.click()}>
                     {uploading
