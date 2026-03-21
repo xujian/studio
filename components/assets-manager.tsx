@@ -62,7 +62,7 @@ export function AssetsManager({ type, onClose }: AssetsManagerProps) {
 
       <Sidepane open={dialogOpen}
         onOpenChange={setDialogOpen}
-        title={`New ${label}`}>
+        title={`Create a new ${label} Mixin`}>
         <AssetCreate
           type={type}
           onClose={() => setDialogOpen(false)} />
