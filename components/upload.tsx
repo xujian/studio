@@ -20,7 +20,8 @@ interface UploadProps {
   onComplete: (storagePath: string) => void
   onError?: () => void
   placeholder?: string
-  className?: string
+  className?: string,
+  children?: React.ReactNode
 }
 
 export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
@@ -28,8 +29,9 @@ export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
     path,
     onComplete,
     onError,
-    placeholder = 'Upload image (optional)',
-    className
+    placeholder = 'Upload image here',
+    className,
+    children
   },
   ref
 ) {
@@ -96,6 +98,7 @@ export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
         className="hidden"
         onChange={handleFileChange}
       />
+      { children }
     </label>
   )
 })
