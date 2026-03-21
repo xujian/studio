@@ -7,8 +7,10 @@ import { CreditButton } from '@/components/credit-button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Upload, type UploadHandle } from '@/components/upload'
-import type { AssetRunMode, AssetType, AssetWorkMode } from '@/lib/types'
+import type { Asset, AssetRunMode, AssetType, AssetWorkMode } from '@/lib/types'
 import { useCreateAsset } from '@/hooks/use-create-asset'
+import { useUpdateAsset } from '@/hooks/use-update-asset'
+import { assetUrl } from '@/lib/utils'
 import { ArrowDownUp, Loader2, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Hint } from './ui'
@@ -46,14 +48,17 @@ const assetModes: Record<AssetType, AssetWorkMode> = {
   mood: 'text-only'
 }
 
-type AssetCreateProps = {
+type AssetFormProps = {
   type: AssetType
+  asset?: Asset
   onClose: () => void
 }
 
-export function AssetCreate({ type, onClose }: AssetCreateProps) {
+export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   const uploadRef = useRef<UploadHandle>(null)
   const createAsset = useCreateAsset()
+  const updateAsset = useUpdateAsset()
+  const isEditing = !!asset
 
   const [uploadedPath, setUploadedPath] = useState<string>('')
   const savedRef = useRef(false)
@@ -63,6 +68,7 @@ export function AssetCreate({ type, onClose }: AssetCreateProps) {
     uploadedPathRef.current = uploadedPath
   }, [uploadedPath])
 
+  // Cleanup newly-uploaded (unsaved) image on unmount
   useEffect(() => {
     return () => {
       if (uploadedPathRef.current && !savedRef.current) {
@@ -70,24 +76,24 @@ export function AssetCreate({ type, onClose }: AssetCreateProps) {
       }
     }
   }, [])
-  const [name, setName] = useState('')
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [content, setContent] = useState('')
+
+  const [name, setName] = useState(asset?.name ?? '')
+  const [title, setTitle] = useState(asset?.title ?? '')
+  const [description, setDescription] = useState(asset?.description ?? '')
+  const [content, setContent] = useState(asset?.content ?? '')
   const [suggesting, setSuggesting] = useState(false)
   const assetMode = assetModes[type]
-  
+
   const [runMode, setRunMode] = useState<AssetRunMode>(
     assetMode === 'image-only'
       ? 'image'
-      : 'text')
+      : asset?.path
+        ? 'image'
+        : 'text'
+  )
 
   const toggleWorkMode = () => {
-    if (runMode === 'text') {
-      setRunMode('image')
-    } else {
-      setRunMode('text')
-    }
+    setRunMode(runMode === 'text' ? 'image' : 'text')
   }
 
   const handleSuggest = async () => {
@@ -114,22 +120,39 @@ export function AssetCreate({ type, onClose }: AssetCreateProps) {
   }
 
   const handleSave = () => {
-    createAsset.mutate(
-      { name, title, description, content, type, path: uploadedPath },
-      {
-        onSuccess: () => {
-          savedRef.current = true
-          resetForm()
-          onClose()
+    if (isEditing) {
+      const pathToSave = uploadedPath || asset.path || null
+      updateAsset.mutate(
+        { id: asset.id!, name, title, description, content, type, path: pathToSave },
+        {
+          onSuccess: () => {
+            // Delete old image from storage if it was replaced
+            if (uploadedPath && asset.path && uploadedPath !== asset.path) {
+              createClient().storage.from('assets').remove([asset.path])
+            }
+            savedRef.current = true
+            onClose()
+          }
         }
-      }
-    )
+      )
+    } else {
+      createAsset.mutate(
+        { name, title, description, content, type, path: uploadedPath },
+        {
+          onSuccess: () => {
+            savedRef.current = true
+            resetForm()
+            onClose()
+          }
+        }
+      )
+    }
   }
 
   const handleCancel = async () => {
     savedRef.current = true
     await uploadRef.current?.clear()
-    resetForm()
+    if (!isEditing) resetForm()
     onClose()
   }
 
@@ -142,7 +165,8 @@ export function AssetCreate({ type, onClose }: AssetCreateProps) {
   }
 
   const canSuggest = (!!uploadedPath || !!content) && !suggesting
-  const canSave = !!name && !createAsset.isPending
+  const isPending = createAsset.isPending || updateAsset.isPending
+  const canSave = !!name && !isPending
 
   return (
     <div className="asset-create flex min-h-full flex-col gap-2 p-2">
@@ -151,6 +175,7 @@ export function AssetCreate({ type, onClose }: AssetCreateProps) {
         )}>
         {assetMode !== 'image-only' && (
           <Textarea label="Content"
+            value={content}
             onChange={e => setContent(e.target.value)}
             placeholder={contentPlaceholders[type]}
             disabled={runMode === 'image'}
@@ -177,6 +202,7 @@ export function AssetCreate({ type, onClose }: AssetCreateProps) {
           ref={uploadRef}
           className="aspect-square"
           path={({ userId }) => `assets/${userId}/${type}`}
+          initialPreview={asset?.path ? assetUrl(asset.path) : undefined}
           placeholder={
             runMode === 'text'
               ? `Upload preview image (optional)`
@@ -249,10 +275,10 @@ export function AssetCreate({ type, onClose }: AssetCreateProps) {
           size="sm"
           onClick={handleSave}
           disabled={!canSave}>
-          {createAsset.isPending && (
+          {isPending && (
             <Loader2 className="mr-2 size-4 animate-spin" />
           )}
-          Save
+          {isEditing ? 'Update' : 'Save'}
         </Button>
       </div>
     </div>

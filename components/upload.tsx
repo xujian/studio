@@ -22,6 +22,7 @@ interface UploadProps {
   onError?: () => void
   placeholder?: string
   className?: string,
+  initialPreview?: string
   children?: React.ReactNode
 }
 
@@ -32,13 +33,14 @@ export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
     onError,
     placeholder = 'Upload image here',
     className,
+    initialPreview,
     children
   },
   ref
 ) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { upload, remove, uploading } = useUpload({ path })
-  const [preview, setPreview] = useState<string | null>(null)
+  const [preview, setPreview] = useState<string | null>(initialPreview ?? null)
   const [uploaded, setUploaded] = useState<Pick<UploadResult, 'bucket' | 'storagePath'> | null>(null)
 
   useImperativeHandle(ref, () => ({

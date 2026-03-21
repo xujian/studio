@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { AssetCard } from '@/components/asset-card'
-import { AssetCreate } from '@/components/asset-create'
+import { AssetForm } from '@/components/asset-form'
 import { Sidepane } from '@/components/sidepane'
 import { Button } from '@/components/button'
 import type { AssetType } from '@/lib/types'
@@ -63,7 +63,7 @@ export function AssetsManager({ type, onClose }: AssetsManagerProps) {
       <Sidepane open={dialogOpen}
         onOpenChange={setDialogOpen}
         title={`Create a new ${label} Mixin`}>
-        <AssetCreate
+        <AssetForm
           type={type}
           onClose={() => setDialogOpen(false)} />
       </Sidepane>

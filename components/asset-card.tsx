@@ -13,6 +13,7 @@ import { PurchaseModal } from '@/components/purchase'
 import { useBus } from '@/lib/bus'
 import { useDeleteAsset, useRemovePurchase } from '@/hooks/use-delete-asset'
 import { AssetDetail } from '@/components/asset-detail'
+import { AssetForm } from '@/components/asset-form'
 import { AssetPreview } from '@/components/asset-preview'
 import { Sidepane } from '@/components/sidepane'
 
@@ -27,6 +28,7 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
   const removePurchase = useRemovePurchase()
   const [modalOpen, setModalOpen] = useState(false)
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [editOpen, setEditOpen] = useState(false)
   const isDeleting = deleteAsset.isPending || removePurchase.isPending
   const { isPublic, isPurchased, isCustom, canUse, purchasable, deletable } = assetStatus(data as AssetWithPurchaseInfo)
   const handleBuy = () => setModalOpen(true)
@@ -79,6 +81,13 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
                 USE
               </Button>
             )}
+            {isCustom && (
+              <Button size="xs"
+                variant="outline"
+                onClick={(e) => { e.stopPropagation(); setSheetOpen(false); setEditOpen(true) }}>
+                EDIT
+              </Button>
+            )}
             {deletable && (
               <Button size="xs"
                 variant="destructive"
@@ -95,6 +104,17 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
           </CardTitle>
         </CardFooter>
       </Card>
+
+      <Sidepane
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        title={`Edit ${data.title || data.name}`}
+        className="sm:max-w-sm">
+        <AssetForm
+          type={data.type}
+          asset={data}
+          onClose={() => setEditOpen(false)} />
+      </Sidepane>
 
       <PurchaseModal asset={data as AssetWithPurchaseInfo} open={modalOpen} onOpenChange={setModalOpen} />
       <Sidepane
