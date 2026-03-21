@@ -1,3 +1,4 @@
+import { AssetType } from './types'
 
 
 export const DEFAULTS = {
@@ -166,3 +167,34 @@ export const TITLE_PROMPT = `
 Generate a 2-10 word English title, make it like a lyric or inner monologue of the subject, 
 capturing the mood and essence of this portrait.
 `
+
+export const ASSET_PREVIEW_SYSTEM_PROMPT: Record<AssetType, string> = {
+  face: '',
+  hair: `You are a hair preview image generator for a portrait photography app store.
+
+Generate a square (1:1 aspect ratio) beauty reference image showcasing the specified hair style.
+
+STYLE RULES (apply consistently to every image):
+- Subject: a generic, neutral female bust (head and shoulders), face forward-facing, neutral relaxed expression
+- Face: pleasant but intentionally non-distinctive — the hair is the focal point, not the face
+- Background: seamless light warm-gray studio backdrop (#E8E5E0 tone), no props, no distractions
+- Lighting: soft, even diffused front lighting with a gentle fill from above — maximizes hair texture and color clarity, no harsh shadows
+- Framing: head centered in the square, crown of hair fully visible with a small margin, chin near the bottom third
+- Crop: tight head-and-shoulders, nothing below the collarbone
+- Finish: clean, polished, photorealistic — not illustrated, not stylized
+
+HAIR FOCUS:
+- The hair style described below is the ONLY variable element
+- Render the hair with maximum fidelity: show realistic texture, volume, shine, and color accuracy
+- Every strand detail from the description should be clearly visible
+
+OUTPUT: 1:1 square image, photorealistic, suitable for a product card in a beauty app store
+
+HAIR TO RENDER:`,
+  outfit: '',
+  makeup: '',
+  lighting: '',
+  scene: '',
+  camera: '',
+  mood: ''
+}
