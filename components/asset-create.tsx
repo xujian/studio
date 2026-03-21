@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/button'
+import { CreditButton } from '@/components/credit-button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Upload, type UploadHandle } from '@/components/upload'
-import type { AssetType } from '@/lib/types'
+import type { AssetRunMode, AssetType, AssetWorkMode } from '@/lib/types'
 import { useCreateAsset } from '@/hooks/use-create-asset'
 import { ArrowDownUp, Loader2, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -34,11 +35,6 @@ const contentPlaceholders: Record<AssetType, string> = {
   mood: 'Describe the mood (e.g. vibrant and energetic)'
 }
 
-type AssetWorkMode = 
-  'text-first'
-  | 'image-only'
-  | 'text-only'
-
 const assetModes: Record<AssetType, AssetWorkMode> = {
   face: 'image-only',
   hair: 'text-first',
@@ -49,8 +45,6 @@ const assetModes: Record<AssetType, AssetWorkMode> = {
   camera: 'text-only',
   mood: 'text-only'
 }
-
-type WorkMode = 'text' | 'image'
 
 type AssetCreateProps = {
   type: AssetType
@@ -83,16 +77,16 @@ export function AssetCreate({ type, onClose }: AssetCreateProps) {
   const [suggesting, setSuggesting] = useState(false)
   const assetMode = assetModes[type]
   
-  const [workMode, setWorkMode] = useState<WorkMode>(
+  const [runMode, setRunMode] = useState<AssetRunMode>(
     assetMode === 'image-only'
       ? 'image'
       : 'text')
 
   const toggleWorkMode = () => {
-    if (workMode === 'text') {
-      setWorkMode('image')
+    if (runMode === 'text') {
+      setRunMode('image')
     } else {
-      setWorkMode('text')
+      setRunMode('text')
     }
   }
 
@@ -153,28 +147,30 @@ export function AssetCreate({ type, onClose }: AssetCreateProps) {
   return (
     <div className="asset-create flex min-h-full flex-col gap-2 p-2">
       <div className={cn('flex flex-col items-center gap-2',
-        workMode === 'image' && 'flex-col-reverse'
-      )}>
+        runMode === 'image' && 'flex-col-reverse'
+        )}>
         {assetMode !== 'image-only' && (
           <Textarea label="Content"
             onChange={e => setContent(e.target.value)}
             placeholder={contentPlaceholders[type]}
-            disabled={workMode === 'image'}
+            disabled={runMode === 'image'}
             rows={3}>
               { content.length > 0 && (
-              <Button
+              <CreditButton
+                cost={1}
                 type="button"
                 variant="outline"
                 size="xs"
                 onClick={handleSuggest}
+                disabled={suggesting}
                 className="absolute bottom-1 right-1 gap-2 self-start">
                 {suggesting ? (
                   <Loader2 className="size-3.5 animate-spin" />
                 ) : (
                   <Sparkles className="size-3.5" />
                 )}
-                Suggest name &amp; title
-              </Button>)}
+                Generate preview image
+              </CreditButton>)}
             </Textarea>)
         }
         <Upload
@@ -182,7 +178,7 @@ export function AssetCreate({ type, onClose }: AssetCreateProps) {
           className="aspect-square"
           path={({ userId }) => `assets/${userId}/${type}`}
           placeholder={
-            workMode === 'text'
+            runMode === 'text'
               ? `Upload preview image (optional)`
               : uploadPlaceholders[type]
           }
@@ -192,14 +188,14 @@ export function AssetCreate({ type, onClose }: AssetCreateProps) {
               className="absolute bg-muted/50 top-1 right-1 z-1"
               onClick={toggleWorkMode}>
               <ArrowDownUp className="size-4" />
-              { workMode === 'text'
+              { runMode === 'text'
                 ? 'Use image as reference'
                 : 'Input as text prompt' }
             </Button>
           )}
           <Hint variant="tooltip"
             className="absolute bottom-1 left-1 z-1 max-w-[200px]">
-            {workMode === 'text'
+            {runMode === 'text'
               ? 'Upload an image to use as reference for this asset. It can be used as a hint for AI generation or just for your own reference.'
               : 'Describe the asset in text. This can be used as a prompt for AI generation or just as a note for yourself.'}
           </Hint>
@@ -213,11 +209,13 @@ export function AssetCreate({ type, onClose }: AssetCreateProps) {
         onChange={e => setName(e.target.value)}
         placeholder="e.g. summer-casual">
         {canSuggest && (
-          <Button
+          <CreditButton
+            cost={1}
             type="button"
             variant="outline"
             size="xs"
             onClick={handleSuggest}
+            disabled={suggesting}
             className="absolute bottom-1 right-1 gap-2 self-start">
             {suggesting ? (
               <Loader2 className="size-3.5 animate-spin" />
@@ -225,7 +223,7 @@ export function AssetCreate({ type, onClose }: AssetCreateProps) {
               <Sparkles className="size-3.5" />
             )}
             Suggest name &amp; title
-          </Button>)
+          </CreditButton>)
         }
       </Input>
       <Input

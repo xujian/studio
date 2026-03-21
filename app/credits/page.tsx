@@ -87,7 +87,7 @@ export default async function CreditsPage() {
                       <span className="text-sm text-muted-foreground">/mo</span>
                     </p>
                     <p className="mt-1 flex items-baseline gap-1">
-                      <Zap className="size-4 text-yellow-400" />
+                      <Zap className="credits size-4" />
                       <span className="font-semibold">
                         {plan.credits.toLocaleString()}
                       </span>
@@ -122,7 +122,7 @@ export default async function CreditsPage() {
                           type="submit"
                           variant={isPopular ? 'default' : 'secondary'}
                           className="button w-full">
-                          <Zap className="size-4" />
+                          <Zap className="credits size-4" />
                           {hasSubscription ? 'Switch Plan' : 'Subscribe'}
                         </Button>
                       </form>
@@ -170,7 +170,7 @@ export default async function CreditsPage() {
                     <span className="text-sm text-muted-foreground">USD</span>
                   </p>
                   <div className="flex items-center gap-1 text-sm">
-                    <Zap className="size-4 text-yellow-400" />
+                    <Zap className="credits size-4" />
                     <span className="font-semibold">
                       {pkg.credits.toLocaleString()}
                     </span>
@@ -185,7 +185,7 @@ export default async function CreditsPage() {
                     className="w-full">
                     <input type="hidden" name="packageId" value={pkg.id} />
                     <Button type="submit" variant="secondary" className="button w-full">
-                      <Zap className="size-4" />
+                      <Zap className="credits size-4" />
                       Buy Now
                     </Button>
                   </form>

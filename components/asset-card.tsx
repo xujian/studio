@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/button'
+import { CreditButton } from '@/components/credit-button'
 import type { Asset, AssetWithPurchaseInfo } from '@/lib/types'
 import { assetStatus } from '@/lib/utils'
 import { Check } from 'lucide-react'
@@ -64,14 +65,15 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
           </div>
           <div className="absolute left-0 bottom-0 w-full flex flex-row-reverse gap-1 p-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
             {purchasable && (
-              <Button size="xs" className="flex-1" variant="secondary"
+              <CreditButton cost={data.price ?? 0}
+                size="xs"
+                className="flex-1 bg-primary/90"
                 onClick={(e) => { e.stopPropagation(); handleBuy() }}>
                 BUY
-              </Button>
+              </CreditButton>
             )}
             {canUse  && (
               <Button size="xs"
-                variant="secondary"
                 className="flex-1"
                 onClick={(e) => { e.stopPropagation(); handleUse(data as AssetWithPurchaseInfo) }}>
                 USE

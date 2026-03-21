@@ -22,7 +22,7 @@ export function Price({ value, variant = 'badge', className }: PriceProps) {
         )}>
         <span className="text-muted-foreground text-xs">PRICE</span>
         <span className="flex items-center gap-1">
-          <Zap className="size-3 text-yellow-400" />
+          <Zap className="credits size-3" />
           {value}
         </span>
       </span>
@@ -36,7 +36,7 @@ export function Price({ value, variant = 'badge', className }: PriceProps) {
         'border-border bg-secondary text-secondary-foreground',
         className
       )}>
-      <Zap className="size-3 text-yellow-400" />
+      <Zap className="credits size-3" />
       {value}
     </span>
   )

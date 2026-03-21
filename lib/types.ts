@@ -146,6 +146,13 @@ export type Subscription = {
   updated_at: string
 }
 
+export type AssetWorkMode = 
+  'text-first'
+  | 'image-only'
+  | 'text-only'
+
+export type AssetRunMode = 'text' | 'image'
+
 export type AssetWithPurchaseInfo = Asset & {
   is_purchased: boolean
 }

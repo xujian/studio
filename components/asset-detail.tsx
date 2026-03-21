@@ -1,8 +1,8 @@
 'use client'
 
-import { Price } from '@/components/price'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { CreditButton } from '@/components/credit-button'
 import type { AssetWithPurchaseInfo } from '@/lib/types'
 import { assetStatus } from '@/lib/utils'
 import { AssetPreview } from '@/components/asset-preview'
@@ -65,9 +65,6 @@ export const AssetDetail = ({
         )}
       </div>
       <div className="flex-1 p-2 flex flex-col gap-1 justify-end">
-        {hasPrice && asset.price != null && (
-          <Price value={asset.price} variant="button" />
-        )}
         <div className="flex items-center gap-1">
           {deletable && (
             <Button
@@ -85,9 +82,9 @@ export const AssetDetail = ({
             </Button>
           )}
           {hasPrice && purchasable && (
-            <Button className="button flex-1" size="sm" onClick={onBuy}>
+            <CreditButton cost={asset.price ?? 0} className="button flex-1" size="sm" onClick={onBuy}>
               Buy
-            </Button>
+            </CreditButton>
           )}
         </div>
       </div>

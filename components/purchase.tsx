@@ -8,10 +8,8 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import type { AssetWithPurchaseInfo } from '@/lib/types'
 import { assetUrl, cn } from '@/lib/utils'
-import { useProfile } from '@/hooks/use-profile'
 import { usePurchase } from '@/hooks/use-purchase'
-import { Credits } from '@/components/credits'
-import { Price } from '@/components/price'
+import { CreditButton } from '@/components/credit-button'
 import { Check, Loader2, X } from 'lucide-react'
 
 interface PurchaseModalProps {
@@ -27,11 +25,9 @@ export function PurchaseModal({
 }: PurchaseModalProps) {
   const router = useRouter()
   const purchase = usePurchase()
-  const { data: profile } = useProfile()
 
   const isOwned = asset.is_purchased
   const hasImage = !!asset.path
-  const canAfford = profile == null || profile.credits >= (asset.price ?? 0)
 
   const handleBuy = () => {
     if (!asset.id) return
@@ -104,28 +100,20 @@ export function PurchaseModal({
           </div>
         </div>
         <div className="p-1 flex flex-col gap-2">
-          {/* Credit balance — only for unowned purchasable assets */}
-          {asset.price != null && (
-            <Price value={asset.price} variant="button" />
-          )}
           {/* Action */}
           {isOwned ? (
             <Button className="button w-full" onClick={handleUse}>
               Use
             </Button>
           ) : (
-            <Button
+            <CreditButton
+              cost={asset.price ?? 0}
               size="sm"
               className={cn('button w-full', purchase.isPending && 'animate-pulse')}
               onClick={handleBuy}
-              disabled={purchase.isPending || !canAfford}>
-              {purchase.isPending
-                ? (<Loader2 className="size-4 animate-spin" />)
-                : canAfford
-                  ? 'BUY'
-                  : 'Insufficient Credits'
-              }
-            </Button>
+              disabled={purchase.isPending}>
+              {purchase.isPending ? <Loader2 className="size-4 animate-spin" /> : 'BUY'}
+            </CreditButton>
           )}
         </div>
       </DialogContent>

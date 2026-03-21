@@ -30,7 +30,7 @@ export function Credits({ prefix = '', className, ...props }: CreditsProps) {
           : (<>
               <div className="flex items-center gap-1">
                 <span className="font-medium">{prefix}</span>
-                <Zap className="size-4 text-yellow-400" />
+                <Zap className="credits size-4" />
                 <span className="text-xs number font-bold">{profile.credits}</span>
               </div>
               <div className="text-xs">CREDITS</div>

@@ -72,7 +72,7 @@ export default async function AccountPage() {
                 <div>
                   <p className="text-xs text-muted-foreground mb-2">Credits</p>
                   <p className="text-3xl font-bold tabular-nums flex items-center gap-1.5">
-                    <Zap className="size-6 text-yellow-400 shrink-0" />
+                    <Zap className="credits size-6 shrink-0" />
                     {credits.toLocaleString()}
                   </p>
                 </div>
