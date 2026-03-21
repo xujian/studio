@@ -4,6 +4,7 @@ import Image from 'next/image'
 import * as React from 'react'
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { useUpload, type UploadResult } from '@/hooks/use-upload'
+import { compressImage } from '@/lib/compress-image'
 import { Loader2, Upload as UploadIcon } from 'lucide-react'
 
 export interface UploadHandle {
@@ -50,11 +51,12 @@ export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
     }
   }))
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    setPreview(URL.createObjectURL(file))
-    upload(file, {
+    const compressed = await compressImage(file)
+    setPreview(URL.createObjectURL(compressed))
+    upload(compressed, {
       onSuccess: ({ bucket, storagePath }) => {
         setUploaded({ bucket, storagePath })
         onComplete(storagePath)

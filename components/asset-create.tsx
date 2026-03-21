@@ -1,6 +1,7 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -61,6 +62,20 @@ export function AssetCreate({ type, onClose }: AssetCreateProps) {
   const createAsset = useCreateAsset()
 
   const [uploadedPath, setUploadedPath] = useState<string>('')
+  const savedRef = useRef(false)
+  const uploadedPathRef = useRef('')
+
+  useEffect(() => {
+    uploadedPathRef.current = uploadedPath
+  }, [uploadedPath])
+
+  useEffect(() => {
+    return () => {
+      if (uploadedPathRef.current && !savedRef.current) {
+        createClient().storage.from('assets').remove([uploadedPathRef.current])
+      }
+    }
+  }, [])
   const [name, setName] = useState('')
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -109,6 +124,7 @@ export function AssetCreate({ type, onClose }: AssetCreateProps) {
       { name, title, description, content, type, path: uploadedPath },
       {
         onSuccess: () => {
+          savedRef.current = true
           resetForm()
           onClose()
         }
@@ -117,6 +133,7 @@ export function AssetCreate({ type, onClose }: AssetCreateProps) {
   }
 
   const handleCancel = async () => {
+    savedRef.current = true
     await uploadRef.current?.clear()
     resetForm()
     onClose()
@@ -172,7 +189,7 @@ export function AssetCreate({ type, onClose }: AssetCreateProps) {
           onComplete={setUploadedPath}>
           {assetMode === 'text-first' && (
             <Button variant="outline" size="xs"
-              className="absolute top-1 right-1 z-1"
+              className="absolute bg-muted/50 top-1 right-1 z-1"
               onClick={toggleWorkMode}>
               <ArrowDownUp className="size-4" />
               { workMode === 'text'
