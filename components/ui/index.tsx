@@ -17,4 +17,5 @@ export * from './tooltip'
 export * from './popover'
 export * from './carousel'
 export * from './sheet'
+export * from './hint'
 
