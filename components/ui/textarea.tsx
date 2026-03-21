@@ -4,10 +4,10 @@ import { useId } from 'react'
 import { cn } from "@/lib/utils"
 
 export type TextAreaProps = {
-  label?: string
+  label?: string,
 } & React.ComponentProps<"textarea">
 
-function Textarea({ label, className, ...props }: TextAreaProps) {
+function Textarea({ label, className, children, ...props }: TextAreaProps) {
   const id = useId()
   return (
     <div className={cn(
@@ -33,6 +33,7 @@ function Textarea({ label, className, ...props }: TextAreaProps) {
         className='text-foreground h-full placeholder:text-muted-foreground/70 flex w-full px-3 py-2 text-sm focus-visible:outline-none min-h-28 resize-none'
         {...props}
       />
+      {children}
     </div>
   )
 }

@@ -3,10 +3,10 @@ import { cn } from '@/lib/utils'
 
 export type InputProps = {
   label?: string,
-  required?: boolean
+  required?: boolean,
 } & React.ComponentProps<'input'>
 
-export const Input = ({ label, required, className, ...props }: InputProps) => {
+export const Input = ({ label, required, className, children, ...props }: InputProps) => {
   const id = useId()
 
   return (
@@ -40,6 +40,7 @@ export const Input = ({ label, required, className, ...props }: InputProps) => {
         className="flex h-9 w-full bg-transparent px-3 pb-1 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none dark:bg-input/30"
         {...props}
       />
+      {children}
     </div>
   )
 }
