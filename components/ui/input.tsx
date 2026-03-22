@@ -16,7 +16,7 @@ export const Input = ({ label, required, className, children, ...props }: InputP
         'focus-within:border-ring focus-within:ring-ring/50',
         'has-aria-invalid:ring-destructive/20',
         'has-aria-invalid:border-destructive dark:has-aria-invalid:ring-destructive/40',
-        'relative w-full rounded-md overflow-hidden',
+        'relative w-full rounded-xl overflow-hidden',
         'border shadow-xs',
         'transition-[color,box-shadow] outline-none',
         'focus-within:ring-[3px]',

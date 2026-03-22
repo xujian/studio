@@ -15,7 +15,7 @@ function Textarea({ label, className, children, ...props }: TextAreaProps) {
       'focus-within:border-ring focus-within:ring-ring/50',
       'has-aria-invalid:ring-destructive/20',
       'dark:has-aria-invalid:ring-destructive/40 has-aria-invalid:border-destructive',
-      'relative w-full rounded-md',
+      'relative w-full rounded-xl',
       'border shadow-xs transition-[color,box-shadow]',
       'outline-none focus-within:ring-[3px]',
       'has-disabled:pointer-events-none',

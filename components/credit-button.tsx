@@ -29,12 +29,14 @@ function CreditButton({
   return (
     <Button
       {...props}
-      className={cn('flex items-center justify-between gap-1 bg-positive text-positive-foreground hover:bg-positive/90', className)}
+      className={cn(
+        'flex items-center justify-between gap-1',
+        'bg-positive/90 border-positive text-positive-foreground hover:bg-positive/90', className)}
       disabled={disabled || !hasEnough}
       tooltip={resolvedTooltip}>
       {children}
       <span className="flex items-center gap-0.5 opacity-70">
-        <Zap className="credits size-3" />
+        <Zap className="bg-write fill-white size-3" />
         <span className="tabular-nums">{cost}</span>
       </span>
     </Button>
