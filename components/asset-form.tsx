@@ -168,8 +168,18 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   const isPending = createAsset.isPending || updateAsset.isPending
   const canSave = !!name && !isPending
 
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const file = Array.from(e.clipboardData.items)
+      .find(item => item.type.startsWith('image/'))
+      ?.getAsFile()
+    if (file) {
+      e.preventDefault()
+      uploadRef.current?.upload(file)
+    }
+  }
+
   return (
-    <div className="asset-create flex min-h-full flex-col gap-2 p-2">
+    <div className="asset-create flex min-h-full flex-col gap-2 p-2" onPaste={handlePaste}>
       <div className={cn('flex flex-col items-center gap-2',
         runMode === 'image' && 'flex-col-reverse'
         )}>
@@ -216,7 +226,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
           </Badge>
           {assetMode === 'text-first' && (
             <Button variant="outline" size="xs"
-              className="absolute bg-muted top-1 right-1 z-1"
+              className="absolute bg-muted bottom-1 right-1 z-1"
               onClick={toggleWorkMode}>
               { runMode === 'text'
                 ? <ArrowUp className="size-4" />

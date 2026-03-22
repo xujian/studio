@@ -170,6 +170,17 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
     setExpanded(!expanded)
   }
 
+  const handleTextareaPaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const file = Array.from(e.clipboardData.items)
+      .find(item => item.type.startsWith('image/'))
+      ?.getAsFile()
+    if (!file) return
+    e.preventDefault()
+    upload(file, {
+      onSuccess: ({ filename }) => setReference(filename),
+    })
+  }
+
   const handleTextareaWheel = (e: React.WheelEvent<HTMLTextAreaElement>) => {
     const el = textareaRef.current
     if (!el) return
@@ -272,6 +283,7 @@ const filterAssets = (type?: AssetType) => {
                 '[&::-webkit-scrollbar-track]:bg-transparent')}
               value={prompt}
               onChange={handlePromptChange}
+              onPaste={handleTextareaPaste}
               onWheel={handleTextareaWheel}
               disabled={isPending}
             />

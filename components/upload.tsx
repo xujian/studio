@@ -11,6 +11,8 @@ import { Loader2, Upload as UploadIcon, X } from 'lucide-react'
 export interface UploadHandle {
   /** Removes the uploaded file from storage and resets the component */
   clear: () => Promise<void>
+  /** Programmatically upload a file (e.g. from paste or drop in a parent) */
+  upload: (file: File) => Promise<void>
 }
 
 type PathOption = string | ((opts: { userId: string }) => string)
@@ -54,7 +56,7 @@ export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
     setUploaded(null)
   }
 
-  useImperativeHandle(ref, () => ({ clear }))
+  useImperativeHandle(ref, () => ({ clear, upload: processFile }))
 
   const processFile = async (file: File) => {
     const compressed = await compressImage(file)
