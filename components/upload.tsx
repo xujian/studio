@@ -104,7 +104,7 @@ export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
 
   return (
     <div
-      className={`relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed bg-muted transition-colors hover:border-foreground/30 ${isDragging ? 'border-foreground/60 bg-muted/80' : 'border-border'} ${className ?? ''}`}
+      className={`relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl border-1 border-dashed bg-muted transition-colors hover:border-foreground/30 ${isDragging ? 'border-foreground/60 bg-muted/80' : 'border-border'} ${className ?? ''}`}
       onDragOver={handleDragOver}
       onDragEnter={handleDragOver}
       onDragLeave={handleDragLeave}

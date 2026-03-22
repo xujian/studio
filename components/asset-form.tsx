@@ -184,7 +184,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
         runMode === 'image' && 'flex-col-reverse'
         )}>
         {assetMode !== 'image-only' && (
-          <Textarea label="Content"
+          <Textarea label="Prompt Text"
             value={content}
             onChange={e => setContent(e.target.value)}
             placeholder={contentPlaceholders[type]}
@@ -219,7 +219,8 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
               : uploadPlaceholders[type]
           }
           onComplete={setUploadedPath}>
-          <Badge className="absolute top-2 left-2 text-xs font-medium bg-neutral text-neutral-foreground z-1">
+          <Badge variant="ghost"
+            className="absolute top-2 left-2 text-xs font-medium bg-neutral text-neutral-foreground z-1">
             { runMode === 'text'
               ? 'Preview (optional)'
               : 'Reference image' }
@@ -227,6 +228,9 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
           {assetMode === 'text-first' && (
             <Button variant="outline" size="xs"
               className="absolute bg-muted bottom-1 right-1 z-1"
+              tooltip={runMode === 'text'
+                ? 'Use the uploaded image as a reference for this asset'
+                : 'Use the text content as a prompt for this asset'}
               onClick={toggleWorkMode}>
               { runMode === 'text'
                 ? <ArrowUp className="size-4" />
@@ -246,7 +250,6 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
         </Upload>
       </div>
       <Input
-        id="asset-name"
         label="Name"
         required
         value={name}
