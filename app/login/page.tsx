@@ -30,13 +30,12 @@ export default function LoginPage() {
           <div className="text-center">
             <h1
               className={cn(
-                'text-4xl font-bold tracking-tight',
-                'glow-primary-hover vibrancy-text'
+                'text-4xl font-bold',
               )}>
               Kanojo Studio
             </h1>
             <p className="mt-2 text-muted-foreground">
-              AI-Powered Portrait Photography
+              Your Personal Portrait Studio
             </p>
           </div>
           <div id="google-signin-button"

@@ -183,3 +183,9 @@
     }
   }
 }
+
+#google-signin-button {
+  >div {
+    width: 100%;
+  }
+}
