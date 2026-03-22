@@ -11,9 +11,9 @@ import type { Asset, AssetRunMode, AssetType, AssetWorkMode } from '@/lib/types'
 import { useCreateAsset } from '@/hooks/use-create-asset'
 import { useUpdateAsset } from '@/hooks/use-update-asset'
 import { assetUrl } from '@/lib/utils'
-import { ArrowDownUp, Loader2, Sparkles } from 'lucide-react'
+import { ArrowDown, ArrowDownUp, ArrowUp, Loader2, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Hint } from './ui'
+import { Badge, Hint } from './ui'
 
 const uploadPlaceholders: Record<AssetType, string> = {
   face: 'Upload your photo with clear face',
@@ -209,11 +209,19 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
               : uploadPlaceholders[type]
           }
           onComplete={setUploadedPath}>
+          <Badge className="absolute top-2 left-2 text-xs font-medium bg-neutral text-neutral-foreground z-1">
+            { runMode === 'text'
+              ? 'Preview (optional)'
+              : 'Reference image' }
+          </Badge>
           {assetMode === 'text-first' && (
             <Button variant="outline" size="xs"
-              className="absolute bg-muted/50 top-1 right-1 z-1"
+              className="absolute bg-muted top-1 right-1 z-1"
               onClick={toggleWorkMode}>
-              <ArrowDownUp className="size-4" />
+              { runMode === 'text'
+                ? <ArrowUp className="size-4" />
+                : <ArrowDown className="size-4" />
+              }
               { runMode === 'text'
                 ? 'Use image as reference'
                 : 'Input as text prompt' }

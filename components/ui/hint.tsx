@@ -29,8 +29,8 @@ export const Hint = ({
             variant="outline"
             aria-label="More information"
             className={cn(
-              'inline-flex items-center justify-center',
-              'text-muted-foreground/60 hover:text-foreground',
+              'inline-flex items-center justify-center bg-muted',
+              'text-foreground/90 hover:text-foreground',
               'cursor-pointer transition-colors',
               className
             )}>

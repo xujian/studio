@@ -75,25 +75,27 @@ export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
   const inputId = React.useId()
 
   return (
-    <label
-      htmlFor={inputId}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInputRef.current?.click() } }}
-      className={`relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-border bg-muted transition-colors hover:border-foreground/30 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${className ?? ''}`}>
-      {preview
-        ? (<Image src={preview} alt="Upload preview" fill className="object-cover" />)
-        : (<div className="flex flex-col items-center gap-2 text-muted-foreground">
-            <UploadIcon className="size-6" aria-hidden="true" />
-            <span className="text-xs">{placeholder}</span>
-          </div>)
-      }
-      {uploading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-background/60" aria-live="polite">
-          <Loader2 className="size-6 animate-spin" />
-          <span className="sr-only">Uploading...</span>
-        </div>
-      )}
+    <div className={`relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-border bg-muted transition-colors hover:border-foreground/30 ${className ?? ''}`}>
+      <label
+        htmlFor={inputId}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInputRef.current?.click() } }}
+        className="absolute inset-0 flex items-center justify-center focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+        {preview
+          ? (<Image src={preview} alt="Upload preview" fill className="object-cover" />)
+          : (<div className="flex flex-col items-center gap-2 text-muted-foreground">
+              <UploadIcon className="size-6" aria-hidden="true" />
+              <span className="text-xs">{placeholder}</span>
+            </div>)
+        }
+        {uploading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/60" aria-live="polite">
+            <Loader2 className="size-6 animate-spin" />
+            <span className="sr-only">Uploading...</span>
+          </div>
+        )}
+      </label>
       <input
         id={inputId}
         ref={fileInputRef}
@@ -102,7 +104,7 @@ export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
         className="hidden"
         onChange={handleFileChange}
       />
-      { children }
-    </label>
+      {children}
+    </div>
   )
 })

@@ -74,7 +74,7 @@ html {
   --positive: oklch(0.5971 0.2541 146.12);
   --positive-foreground: oklch(0.99 0 0);
   --border: oklch(1.00 0 0 / 20%);
-  --input: oklch(1.00 0 0 / 15%);
+  --input: oklch(0% 0 0 / 0.9);
   --ring: oklch(0.56 0 0);
   --chart-1: oklch(0.49 0.24 264.40);
   --chart-2: oklch(0.70 0.16 160.43);
