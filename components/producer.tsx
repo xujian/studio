@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils'
 import { useAssets } from '@/hooks/use-assets'
 import { useEngine } from '@/hooks/use-engine'
 import { useUpload } from '@/hooks/use-upload'
+import { compressImage } from '@/lib/compress-image'
 import { FacePicker } from '@/components/face-picker'
 import { Mixins } from '@/components/mixins'
 import { Loader2, ArrowUp, Plus, GripHorizontal, X, Square, RotateCcw } from 'lucide-react'
@@ -177,8 +178,10 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
       ?.getAsFile()
     if (!file) return
     e.preventDefault()
-    upload(file, {
-      onSuccess: ({ filename }) => setReference(filename),
+    compressImage(file).then(compressed => {
+      upload(compressed, {
+        onSuccess: ({ filename }) => setReference(filename),
+      })
     })
   }
 
