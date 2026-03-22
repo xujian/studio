@@ -273,15 +273,15 @@ const filterAssets = (type?: AssetType) => {
                   </Button>
                 )}
           </div>
-          <div className={cn('flex-1 p-1 pr-0 h-full')}>
+          <div className={cn('flex-1 p-0 h-full')}>
             <Textarea
               ref={textareaRef}
               data-lenis-prevent-wheel
               aria-label="Portrait description"
               placeholder="Describe the portrait you want to create..."
               className={cn(
-                'min-h-32 max-h-40 h-full text-xs resize-none rounded-none border-none bg-transparent!',
-                'p-0 focus-visible:outline-none',
+                'min-h-32 max-h-40 h-full text-xs resize-none rounded-none border-none shadow-none bg-transparent!',
+                'p-0 focus-visible:outline-none focus-visible:ring-0 focus-within:ring-0 focus-within:border-transparent',
                 '[&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full',
                 '[&::-webkit-scrollbar-thumb]:bg-white/20',
                 '[&::-webkit-scrollbar-track]:bg-transparent')}
