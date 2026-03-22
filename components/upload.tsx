@@ -13,6 +13,8 @@ export interface UploadHandle {
   clear: () => Promise<void>
   /** Programmatically upload a file (e.g. from paste or drop in a parent) */
   upload: (file: File) => Promise<void>
+  /** Set preview from an already-uploaded image (url = display URL, storagePath = path in bucket) */
+  setPreview: (url: string, storagePath: string) => void
 }
 
 type PathOption = string | ((opts: { userId: string }) => string)
@@ -56,7 +58,12 @@ export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
     setUploaded(null)
   }
 
-  useImperativeHandle(ref, () => ({ clear, upload: processFile }))
+  const setPreviewFromExternal = (url: string, storagePath: string) => {
+    setPreview(url)
+    setUploaded({ bucket: 'assets', storagePath })
+  }
+
+  useImperativeHandle(ref, () => ({ clear, upload: processFile, setPreview: setPreviewFromExternal }))
 
   const processFile = async (file: File) => {
     const compressed = await compressImage(file)

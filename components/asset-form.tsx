@@ -14,6 +14,8 @@ import { assetUrl } from '@/lib/utils'
 import { ArrowDown, ArrowDownUp, ArrowUp, Loader2, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge, Hint } from './ui'
+import { useQueryClient } from '@tanstack/react-query'
+import { ASSET_PREVIEW_SYSTEM_PROMPT } from '@/lib/prompts'
 
 const uploadPlaceholders: Record<AssetType, string> = {
   face: 'Upload your photo with clear face',
@@ -58,6 +60,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   const uploadRef = useRef<UploadHandle>(null)
   const createAsset = useCreateAsset()
   const updateAsset = useUpdateAsset()
+  const queryClient = useQueryClient()
   const isEditing = !!asset
 
   const [uploadedPath, setUploadedPath] = useState<string>('')
@@ -82,6 +85,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   const [description, setDescription] = useState(asset?.description ?? '')
   const [content, setContent] = useState(asset?.content ?? '')
   const [suggesting, setSuggesting] = useState(false)
+  const [generating, setGenerating] = useState(false)
   const assetMode = assetModes[type]
 
   const [runMode, setRunMode] = useState<AssetRunMode>(
@@ -116,6 +120,27 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
       }
     } finally {
       setSuggesting(false)
+    }
+  }
+
+  const handleGeneratePreview = async () => {
+    if (!content || generating) return
+    setGenerating(true)
+    try {
+      const res = await fetch('/api/assets/preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, content })
+      })
+      if (res.ok) {
+        const data = await res.json()
+        const url = assetUrl(data.storagePath)
+        uploadRef.current?.setPreview(url, data.storagePath)
+        setUploadedPath(data.storagePath)
+        queryClient.invalidateQueries({ queryKey: ['profile'] })
+      }
+    } finally {
+      setGenerating(false)
     }
   }
 
@@ -190,15 +215,15 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
             placeholder={contentPlaceholders[type]}
             disabled={runMode === 'image'}
             rows={3}>
-              { content.length > 0 && (
+              { content.length > 0 && !!ASSET_PREVIEW_SYSTEM_PROMPT[type] && (
               <CreditButton
                 cost={1}
                 type="button"
                 size="xs"
-                onClick={handleSuggest}
-                disabled={suggesting}
+                onClick={handleGeneratePreview}
+                disabled={generating}
                 className="absolute bottom-1 right-1 gap-2 self-start">
-                {suggesting ? (
+                {generating ? (
                   <Loader2 className="size-3.5 animate-spin" />
                 ) : (
                   <Sparkles className="size-3.5" />
