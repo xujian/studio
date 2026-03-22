@@ -25,7 +25,7 @@ function Textarea({ label, className, children, ...props }: TextAreaProps) {
       {label && (
         <label htmlFor={id}
           className='text-foreground block px-2 pt-2 text-xs font-medium'>
-          Content
+          { label }
         </label>)
       }
       <textarea
