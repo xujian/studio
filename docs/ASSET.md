@@ -128,10 +128,18 @@ Cache: 5 minutes (`staleTime`).
 - "Add" button → opens `AssetCreateDialog`
 - Each card: thumbnail (image) or text preview, hover actions: **USE** / **DELETE** / **BUY**
 
-`AssetCard` actions:
+`AssetCard` — clicking the card opens `AssetDetail` in a `Sheet` (slide-in panel).
+
+Hover actions on the card:
 - **USE** — emits `mixin:select { type, assetId }` on `$bus` → `Producer` picks it up and sets the mixin
 - **DELETE** — removes the asset (owned) or removes the purchase (purchased)
-- **BUY** — opens `PurchaseModal` for store assets
+- **BUY** — opens `PurchaseModal` for store assets (uses `CreditButton`)
+
+Detail sheet actions:
+- **USE** — same as hover USE
+- **DELETE** — same as hover DELETE
+- **BUY** — same as hover BUY
+- **EDIT** — opens edit form for custom assets (own assets only)
 
 ## Key Files
 
@@ -141,7 +149,9 @@ Cache: 5 minutes (`staleTime`).
 | `lib/constants.ts` | `assetTypes` array, `defaultAssets` |
 | `components/assets-manager.tsx` | Per-type asset manager panel |
 | `components/asset-create-dialog.tsx` | Create asset dialog (upload + text + suggest) |
-| `components/asset-card.tsx` | Asset grid card with USE/DELETE/BUY actions |
+| `components/asset-card.tsx` | Asset grid card with hover actions + click to open detail sheet |
+| `components/asset-detail.tsx` | Detail sheet content with USE/DELETE/BUY/EDIT actions |
+| `components/credit-button.tsx` | Button variant that shows credit cost and disables when insufficient |
 | `hooks/use-assets.ts` | Fetch owned + purchased assets via RPC |
 | `hooks/use-create-asset.ts` | Insert new asset mutation |
 | `hooks/use-delete-asset.ts` | Delete asset / remove purchase mutations |
