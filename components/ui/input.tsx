@@ -27,7 +27,7 @@ export const Input = ({ label, required, className, children, ...props }: InputP
       {label && (
         <label
           htmlFor={id}
-          className="block px-2 pt-2 text-xs font-medium text-foreground/75 dark:bg-input/30">
+          className="block px-2 pt-2 text-xs font-medium text-muted-foreground">
           {label}
           {
             required && <span className="text-destructive"> *</span>

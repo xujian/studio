@@ -283,7 +283,6 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
           <CreditButton
             cost={1}
             type="button"
-            variant="outline"
             size="xs"
             onClick={handleSuggest}
             disabled={suggesting}

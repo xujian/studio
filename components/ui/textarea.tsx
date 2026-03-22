@@ -24,13 +24,13 @@ function Textarea({ label, className, children, ...props }: TextAreaProps) {
       className)}>
       {label && (
         <label htmlFor={id}
-          className='text-foreground block px-2 pt-2 text-xs font-medium'>
+          className='text-muted-foreground block px-2 pt-2 text-xs font-medium'>
           { label }
         </label>)
       }
       <textarea
         id={id}
-        className='text-foreground h-full placeholder:text-muted-foreground/70 flex w-full px-3 py-2 text-sm focus-visible:outline-none min-h-28 resize-none'
+        className='text-foreground h-full placeholder:text-muted-foreground/70 flex w-full px-2 py-1 text-sm focus-visible:outline-none min-h-28 resize-none leading-4'
         {...props}
       />
       {children}
