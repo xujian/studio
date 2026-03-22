@@ -91,7 +91,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
   // Data
   const { data: assets = [] } = useAssets()
   const { mutate: commit, isPending, error, reset: clearError } = useEngine()
-  const { upload, uploading } = useUpload({
+  const { upload, uploading, remove } = useUpload({
     path: () => `uploads/${userId}`
   })
 
@@ -148,6 +148,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
   }
 
   const handleReferenceClear = () => {
+    if (reference) remove('uploads', `${userId}/${reference}`)
     setReference('')
   }
 
