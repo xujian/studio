@@ -5,7 +5,8 @@ import * as React from 'react'
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { useUpload, type UploadResult } from '@/hooks/use-upload'
 import { compressImage } from '@/lib/compress-image'
-import { Loader2, Upload as UploadIcon } from 'lucide-react'
+import { Loader2, Upload as UploadIcon, X } from 'lucide-react'
+import { Button } from './button'
 
 export interface UploadHandle {
   /** Removes the uploaded file from storage and resets the component */
@@ -43,15 +44,15 @@ export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
   const [preview, setPreview] = useState<string | null>(initialPreview ?? null)
   const [uploaded, setUploaded] = useState<Pick<UploadResult, 'bucket' | 'storagePath'> | null>(null)
 
-  useImperativeHandle(ref, () => ({
-    clear: async () => {
-      if (uploaded) {
-        await remove(uploaded.bucket, uploaded.storagePath)
-      }
-      setPreview(null)
-      setUploaded(null)
+  const clear = async () => {
+    if (uploaded) {
+      await remove(uploaded.bucket, uploaded.storagePath)
     }
-  }))
+    setPreview(null)
+    setUploaded(null)
+  }
+
+  useImperativeHandle(ref, () => ({ clear }))
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -104,6 +105,16 @@ export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
         className="hidden"
         onChange={handleFileChange}
       />
+      {preview && !uploading && (
+        <Button
+          type="button"
+          size="icon-sm"
+          onClick={(e) => { e.stopPropagation(); clear() }}
+          className="absolute top-2 right-2 z-10 flex size-6 items-center justify-center rounded-full bg-background/80 text-foreground hover:bg-background"
+          aria-label="Remove image">
+          <X className="size-3" />
+        </Button>
+      )}
       {children}
     </div>
   )
