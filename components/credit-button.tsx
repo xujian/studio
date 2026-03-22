@@ -29,7 +29,7 @@ function CreditButton({
   return (
     <Button
       {...props}
-      className={cn('flex items-center justify-between gap-1', className)}
+      className={cn('flex items-center justify-between gap-1 bg-positive text-positive-foreground hover:bg-positive/90', className)}
       disabled={disabled || !hasEnough}
       tooltip={resolvedTooltip}>
       {children}

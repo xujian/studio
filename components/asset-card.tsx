@@ -52,7 +52,7 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
           <AssetPreview asset={data} />
           <div className="absolute top-2 right-2">
             {isPurchased
-              ? (<Badge variant="default" className="gap-1 bg-primary/90 text-xs">
+              ? (<Badge variant="default" className="gap-1 bg-positive text-positive-foreground text-xs">
                   <Check className="size-3" />
                   Bought
                 </Badge>)
@@ -69,7 +69,7 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
             {purchasable && (
               <CreditButton cost={data.price ?? 0}
                 size="xs"
-                className="flex-1 bg-primary/90"
+                className="flex-1"
                 onClick={(e) => { e.stopPropagation(); handleBuy() }}>
                 BUY
               </CreditButton>

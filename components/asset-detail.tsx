@@ -38,7 +38,7 @@ export const AssetDetail = ({
             {asset.type}
           </Badge>
           {isPurchased ? (
-            <Badge className="gap-1 bg-primary/90 text-xs">
+            <Badge className="gap-1 bg-positive text-positive-foreground text-xs">
               <Check className="size-3" />
               Bought
             </Badge>
