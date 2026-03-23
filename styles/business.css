@@ -51,6 +51,10 @@
       cursor-pointer;
   }
 
+  .error {
+    @apply bg-destructive/80 text-destructive-foreground text-xs;
+  }
+
   @keyframes draw-left {
     from { max-width: 0; }
     to { max-width: 500px; }

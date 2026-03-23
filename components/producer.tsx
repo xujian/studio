@@ -361,9 +361,8 @@ const filterAssets = (type?: AssetType) => {
         role="alert"
         aria-live="assertive"
         className={cn([
-          'absolute glass flex items-center justify-between bottom-0 right-0 left-0 rounded-full',
-          'bg-destructive/80! text-xs h-12 p-2 pl-4',
-          'text-destructive-foreground',
+          'error absolute glass flex items-center justify-between bottom-0 right-0 left-0 rounded-full',
+          'h-12 p-2 pl-4',
           error ? 'translate-y-0' : 'translate-y-full',
         ].join(' '))}>
         {error && error.message}
