@@ -58,6 +58,11 @@ export const AssetDetail = ({
             {asset.name}
           </Badge>
         )}
+        <p>&nbsp;</p>
+        <h6>Content</h6>
+        <div className="bg-muted p-2 rounded-2xl text-xs leading-tight text-muted-foreground">
+          {asset.content || '(EMPTY)'}
+        </div>
         {asset.description && (
           <p className="text-sm leading-snug text-muted-foreground">
             {asset.description}
