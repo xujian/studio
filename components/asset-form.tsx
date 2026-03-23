@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils'
 import { Badge, Hint } from './ui'
 import { useQueryClient } from '@tanstack/react-query'
 import { ASSET_PREVIEW_SYSTEM_PROMPT } from '@/lib/prompts'
+import { CloseButton } from './close-button'
 
 const uploadPlaceholders: Record<AssetType, string> = {
   face: 'Upload your photo with clear face',
@@ -56,6 +57,11 @@ type AssetFormProps = {
   onClose: () => void
 }
 
+/**
+ * Create or Edit Asset
+ * @param
+ * @returns 
+ */
 export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   const uploadRef = useRef<UploadHandle>(null)
   const createAsset = useCreateAsset()
@@ -86,13 +92,16 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   const [content, setContent] = useState(asset?.content ?? '')
   const [suggesting, setSuggesting] = useState(false)
   const [generating, setGenerating] = useState(false)
+  const [previewError, setPreviewError] = useState('')
   const assetMode = assetModes[type]
 
   const [runMode, setRunMode] = useState<AssetRunMode>(
     assetMode === 'image-only'
       ? 'image'
-      : asset?.path
-        ? 'image'
+      : asset
+        ? asset.content
+          ? 'text'
+          : 'image'
         : 'text'
   )
 
@@ -126,6 +135,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   const handleGeneratePreview = async () => {
     if (!content || generating) return
     setGenerating(true)
+    setPreviewError('')
     try {
       const res = await fetch('/api/assets/preview', {
         method: 'POST',
@@ -138,6 +148,9 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
         uploadRef.current?.setPreview(url, data.storagePath)
         setUploadedPath(data.storagePath)
         queryClient.invalidateQueries({ queryKey: ['profile'] })
+      } else {
+        const data = await res.json()
+        setPreviewError(data.error || 'Generation failed')
       }
     } finally {
       setGenerating(false)
@@ -214,22 +227,29 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
             onChange={e => setContent(e.target.value)}
             placeholder={contentPlaceholders[type]}
             disabled={runMode === 'image'}
+            className="overflow-hidden"
             rows={3}>
-              { content.length > 0 && !!ASSET_PREVIEW_SYSTEM_PROMPT[type] && (
-              <CreditButton
-                cost={1}
-                type="button"
-                size="xs"
-                onClick={handleGeneratePreview}
-                disabled={generating}
-                className="absolute bottom-1 right-1 gap-2 self-start">
-                {generating ? (
-                  <Loader2 className="size-3.5 animate-spin" />
-                ) : (
-                  <Sparkles className="size-3.5" />
-                )}
-                Generate preview image
-              </CreditButton>)}
+              { content.length > 0 && (
+                <CreditButton
+                  cost={1}
+                  type="button"
+                  size="xs"
+                  onClick={handleGeneratePreview}
+                  disabled={generating}
+                  className="absolute bottom-1 right-1 gap-2 self-start">
+                  {generating ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="size-3.5" />
+                  )}
+                  Generate preview image
+                </CreditButton>)}
+              <div className={cn('error absolute left-0 w-full h-full rounded-2xl p-4 transition-top duration-300 backdrop-blur-md',
+                  previewError ? 'top-0' : 'top-full'
+                )}>
+                <CloseButton onClick={() => setPreviewError('')} />
+                {previewError}
+              </div>
             </Textarea>)
         }
         <Upload
@@ -266,7 +286,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
             </Button>
           )}
           <Hint variant="tooltip"
-            className="absolute bottom-1 left-1 z-1 max-w-[200px]">
+            className="absolute bottom-1 left-1 z-1 max-w-50">
             {runMode === 'text'
               ? 'Upload an image to use as reference for this asset. It can be used as a hint for AI generation or just for your own reference.'
               : 'Describe the asset in text. This can be used as a prompt for AI generation or just as a note for yourself.'}
