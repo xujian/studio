@@ -74,20 +74,22 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
             asset={data}
             onClick={() => setSheetOpen(true)} />
           <div className="absolute top-2 right-2">
-            {isPurchased ? (
-              <Badge
-                variant="default"
-                className="gap-1 bg-positive text-xs text-positive-foreground">
-                <Check className="size-3" />
-                Bought
-              </Badge>
-            ) : isCustom ? (
-              <Badge variant="secondary" className="text-xs">
-                Custom
-              </Badge>
-            ) : hasPrice && data.price != null ? (
-              <Price value={data.price} />
-            ) : null}
+            {isPurchased
+              ? (<Badge
+                  variant="default"
+                  className="gap-1 bg-positive text-xs text-positive-foreground">
+                  <Check className="size-3" />
+                  Bought
+                </Badge>)
+              : isCustom
+                ? (<Badge variant="secondary" className="text-xs">
+                    Custom
+                  </Badge>)
+                : hasPrice
+                  ? data.price != null
+                    ? (<Price value={data.price} />)
+                    : null
+                  : <Badge>Store</Badge>}
           </div>
           <div className="absolute bottom-0 left-0 flex w-full flex-row-reverse gap-1 p-1 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
             {purchasable && (
