@@ -21,7 +21,7 @@ import { assetUrl, cn, photoUrl, uploadUrl } from '@/lib/utils'
 import { useMixins } from '@/hooks/use-mixins'
 import { useDeleteMoment, useDeletePhoto } from '@/hooks/use-moments'
 import { useSharePost, useUnsharePost } from '@/hooks/use-posts'
-import { DeleteConfirm } from './delete-confirm'
+import { ConfirmButton } from './confirm-button'
 import { MomentInfo } from './moment-info'
 import {
   Download,
@@ -382,13 +382,7 @@ export function MomentView({
               <div className="flex-1"></div>
               <div className="flex flex-0 items-center gap-2">
                 {hasMultiplePhotos && currentPhoto && (
-                  <DeleteConfirm
-                    icon={
-                      <>
-                        <Trash />
-                        <ImageIcon />
-                      </>
-                    }
+                  <ConfirmButton
                     message="Delete this photo?"
                     isPending={deletePhoto.isPending}
                     action={() =>
@@ -397,25 +391,28 @@ export function MomentView({
                         momentId: moment.id,
                         photoId: currentPhoto.id
                       })
-                    }
-                  />
+                    }>
+                      <div className="flex">
+                        <Trash />
+                        <ImageIcon />
+                      </div>
+                  </ConfirmButton>
                 )}
-                <DeleteConfirm
-                  icon={
-                    <>
-                      <Trash />
-                      <GalleryHorizontal />
-                    </>
-                  }
+                <ConfirmButton
                   message="Delete this moment and all the photos?"
                   isPending={deleteMoment.isPending}
                   className="delete-button"
-                  action={() =>
+                  action={(e) => {
+                    e.stopPropagation()
                     deleteMoment.mutate(moment.id, {
                       onSuccess: () => onClose?.()
                     })
-                  }
-                />
+                  }}>
+                    <div className="flex">
+                      <Trash />
+                      <GalleryHorizontal />
+                    </div>
+                  </ConfirmButton>
               </div>
             </>
           )}

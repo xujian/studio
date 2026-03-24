@@ -48,7 +48,7 @@ export function PurchaseModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="gap-0 overflow-hidden rounded-3xl p-0 sm:max-w-sm"
-        showCloseButton={false}>
+        hasCloseButton={false}>
         <DialogTitle className="sr-only">Purchase Asset</DialogTitle>
         {/* Hero — full bleed */}
         <div className="relative aspect-square rounded-2xl w-full overflow-hidden bg-black">

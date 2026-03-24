@@ -12,6 +12,7 @@ interface UpdateAssetArgs {
   content?: string
   type: AssetType
   path?: string | null
+  price?: number | null
 }
 
 export const useUpdateAsset = () => {
@@ -19,7 +20,7 @@ export const useUpdateAsset = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ id, name, title, description, content, type, path }: UpdateAssetArgs) => {
+    mutationFn: async ({ id, name, title, description, content, type, path, price }: UpdateAssetArgs) => {
       const { error } = await supabase
         .from('assets')
         .update({
@@ -28,7 +29,8 @@ export const useUpdateAsset = () => {
           description: description || undefined,
           content: content || undefined,
           type,
-          path: path || null
+          path: path || null,
+          price: price ?? null,
         })
         .eq('id', id)
 

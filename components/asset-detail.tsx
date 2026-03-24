@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { CreditButton } from '@/components/credit-button'
 import type { AssetWithPurchaseInfo } from '@/lib/types'
-import { assetStatus } from '@/lib/utils'
+import { useAssetStatus } from '@/hooks/use-asset-status'
 import { AssetPreview } from '@/components/asset-preview'
 import { Check, Loader2 } from 'lucide-react'
 
@@ -15,6 +15,8 @@ type AssetDetailProps = {
   onBuy: () => void
   onUse: () => void
   onDelete: () => void
+  onEdit?: () => void
+  onPromote?: () => void
 }
 
 export const AssetDetail = ({
@@ -23,9 +25,11 @@ export const AssetDetail = ({
   isDeleting,
   onBuy,
   onUse,
-  onDelete
+  onDelete,
+  onEdit,
+  onPromote,
 }: AssetDetailProps) => {
-  const { isPurchased, isCustom, canUse, purchasable, deletable } = assetStatus(asset)
+  const { isPurchased, isCustom, canUse, purchasable, deletable, canEdit, canPromote } = useAssetStatus(asset)
 
   return (
     <div className="flex flex-col h-full">
@@ -79,6 +83,16 @@ export const AssetDetail = ({
               disabled={isDeleting}
               onClick={onDelete}>
               {isDeleting ? <Loader2 className="size-4 animate-spin" /> : 'Delete'}
+            </Button>
+          )}
+          {canEdit && (
+            <Button variant="outline" size="sm" className="button" onClick={onEdit}>
+              Edit
+            </Button>
+          )}
+          {canPromote && (
+            <Button variant="outline" size="sm" className="button" onClick={onPromote}>
+              Promote
             </Button>
           )}
           {canUse && (

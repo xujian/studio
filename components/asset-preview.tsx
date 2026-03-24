@@ -6,15 +6,14 @@ import { assetUrl, cn } from '@/lib/utils'
 
 type AssetPreviewProps = {
   asset: Asset
-  className?: string
-}
+} & React.ComponentProps<'div'>
 
-export const AssetPreview = ({ asset, className }: AssetPreviewProps) => {
+export const AssetPreview = ({ asset, ...props }: AssetPreviewProps) => {
   return (
-    <div className={cn(
+    <div {...props} className={cn(
       'asset-preview relative w-full aspect-square',
       'rounded-3xl overflow-hidden',
-      className
+      props.className,
       )}>
       {asset.path
         ? (<Image

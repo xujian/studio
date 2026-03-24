@@ -23,5 +23,9 @@
       "Bash(find:*)"
     ]
   },
-  "enabledPlugins": {}
+  "enabledMcpjsonServers": [
+    "supabase"
+  ],
+  "enabledPlugins": {},
+  "enableAllProjectMcpServers": true
 }

@@ -15,6 +15,7 @@ CREATE TABLE profiles (
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS stripe_customer_id text UNIQUE;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS subscription_tier text DEFAULT 'free';
 -- Values: 'free' | 'basic' | 'pro' | 'max'
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS super boolean NOT NULL DEFAULT false;
 
 -- Moments table (user generations)
 CREATE TABLE moments (
@@ -138,6 +139,18 @@ CREATE UNIQUE INDEX idx_transactions_stripe_session_id
   WHERE stripe_session_id IS NOT NULL;
 
 -- =============================================
+-- Helper Functions (must exist before RLS policies that reference them)
+-- =============================================
+
+-- Check if current user is a superuser
+CREATE OR REPLACE FUNCTION is_super() RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = ''
+AS $$
+  SELECT COALESCE(super, false) FROM public.profiles WHERE id = auth.uid()
+$$;
+
+-- =============================================
 -- Row Level Security (RLS) Policies
 -- =============================================
 
@@ -216,6 +229,18 @@ CREATE POLICY "Users can update own assets"
 CREATE POLICY "Users can delete own assets"
   ON assets FOR DELETE
   USING (auth.uid() = user_id);
+
+CREATE POLICY "Super can view all assets"
+  ON assets FOR SELECT
+  USING (is_super());
+
+CREATE POLICY "Super can update any asset"
+  ON assets FOR UPDATE
+  USING (is_super());
+
+CREATE POLICY "Super can delete any asset"
+  ON assets FOR DELETE
+  USING (is_super());
 
 -- Photos
 ALTER TABLE photos ENABLE ROW LEVEL SECURITY;
@@ -452,6 +477,7 @@ AS $$
   WHERE a.user_id = user_uuid
      OR p.id IS NOT NULL
      OR (a.user_id IS NULL AND a.price IS NULL)
+     OR (a.user_id IS NULL AND (SELECT super FROM public.profiles WHERE id = user_uuid))
   ORDER BY a.created_at DESC;
 $$;
 

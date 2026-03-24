@@ -15,7 +15,6 @@ import { ArrowDown, ArrowDownUp, ArrowUp, Loader2, Sparkles } from 'lucide-react
 import { cn } from '@/lib/utils'
 import { Badge, Hint } from './ui'
 import { useQueryClient } from '@tanstack/react-query'
-import { ASSET_PREVIEW_SYSTEM_PROMPT } from '@/lib/prompts'
 import { CloseButton } from './close-button'
 
 const uploadPlaceholders: Record<AssetType, string> = {
@@ -90,6 +89,8 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   const [title, setTitle] = useState(asset?.title ?? '')
   const [description, setDescription] = useState(asset?.description ?? '')
   const [content, setContent] = useState(asset?.content ?? '')
+  const [price, setPrice] = useState<string>(asset?.price != null ? String(asset.price) : '')
+  const hasPrice = !!asset && asset.user_id == null
   const [suggesting, setSuggesting] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [previewError, setPreviewError] = useState('')
@@ -160,8 +161,9 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   const handleSave = () => {
     if (isEditing) {
       const pathToSave = uploadedPath || asset.path || null
+      const parsedPrice = price !== '' ? parseInt(price, 10) : null
       updateAsset.mutate(
-        { id: asset.id!, name, title, description, content, type, path: pathToSave },
+        { id: asset.id!, name, title, description, content, type, path: pathToSave, price: parsedPrice },
         {
           onSuccess: () => {
             // Delete old image from storage if it was replaced
@@ -326,6 +328,15 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
         value={description}
         onChange={e => setDescription(e.target.value)}
         placeholder="A note for yourself" />
+      {hasPrice && (
+        <Input
+          label="Price (credits)"
+          type="number"
+          min="0"
+          value={price}
+          onChange={e => setPrice(e.target.value)}
+          placeholder="Leave empty for free" />
+      )}
       <div className="flex flex-1 items-end gap-2 pt-2">
         <Button
           variant="outline"

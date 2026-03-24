@@ -26,6 +26,7 @@ export type Profile = {
   credits: number
   stripe_customer_id: string | null
   subscription_tier: SubscriptionTier
+  super: boolean
   created_at: string
 }
 
