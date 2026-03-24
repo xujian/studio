@@ -19,7 +19,10 @@ export interface UploadHandle {
 
 type PathOption = string | ((opts: { userId: string }) => string)
 
-interface UploadProps {
+export type UploadProps = {
+  /**
+   * destination of the uploading
+   */
   path: PathOption
   onComplete: (storagePath: string) => void
   onError?: () => void
@@ -27,7 +30,7 @@ interface UploadProps {
   className?: string
   initialPreview?: string
   children?: React.ReactNode
-}
+} & React.ComponentProps<'div'>
 
 export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
   {

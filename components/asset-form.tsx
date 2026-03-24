@@ -93,6 +93,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   const hasPrice = !!asset && asset.user_id == null
   const [suggesting, setSuggesting] = useState(false)
   const [generating, setGenerating] = useState(false)
+  const [generated, setGenerated] = useState(false)
   const [previewError, setPreviewError] = useState('')
   const assetMode = assetModes[type]
 
@@ -134,20 +135,29 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   }
 
   const handleGeneratePreview = async () => {
-    if (!content || generating) return
+    if ((!content && !uploadedPath) || generating) return
     setGenerating(true)
     setPreviewError('')
     try {
       const res = await fetch('/api/assets/preview', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, content })
+        body: JSON.stringify({
+          type,
+          content: content || undefined,
+          image: uploadedPath || undefined,
+        })
       })
       if (res.ok) {
         const data = await res.json()
+        console.log('preview//////////data', data)
         const url = assetUrl(data.storagePath)
         uploadRef.current?.setPreview(url, data.storagePath)
         setUploadedPath(data.storagePath)
+        setGenerated(true)
+        if (data.title && !title) setTitle(data.title)
+        if (data.slug && !name) setName(data.slug)
+        if (data.description && !description) setDescription(data.description)
         queryClient.invalidateQueries({ queryKey: ['profile'] })
       } else {
         const data = await res.json()
@@ -163,7 +173,16 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
       const pathToSave = uploadedPath || asset.path || null
       const parsedPrice = price !== '' ? parseInt(price, 10) : null
       updateAsset.mutate(
-        { id: asset.id!, name, title, description, content, type, path: pathToSave, price: parsedPrice },
+        {
+          id: asset.id!,
+          name,
+          title,
+          description,
+          content,
+          type,
+          path: pathToSave,
+          price: parsedPrice
+        },
         {
           onSuccess: () => {
             // Delete old image from storage if it was replaced
@@ -202,6 +221,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
     setTitle('')
     setDescription('')
     setContent('')
+    setGenerated(false)
   }
 
   const canSuggest = (!!uploadedPath || !!content) && !suggesting
@@ -231,7 +251,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
             disabled={runMode === 'image'}
             className="overflow-hidden"
             rows={3}>
-              { content.length > 0 && (
+              { content.length > 0 && !generated && (
                 <CreditButton
                   cost={1}
                   type="button"
@@ -264,29 +284,53 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
               ? `Upload preview image (optional)`
               : uploadPlaceholders[type]
           }
-          onComplete={setUploadedPath}>
+          onComplete={(path) => {
+            if (uploadedPath && uploadedPath !== path) {
+              createClient().storage.from('assets').remove([uploadedPath])
+            }
+            setUploadedPath(path)
+            setGenerated(false)
+          }}>
           <Badge variant="ghost"
             className="absolute top-2 left-2 text-xs font-medium bg-neutral text-neutral-foreground z-1">
             { runMode === 'text'
               ? 'Preview (optional)'
               : 'Reference image' }
           </Badge>
-          {assetMode === 'text-first' && (
-            <Button variant="outline" size="xs"
-              className="absolute bg-muted bottom-1 right-1 z-1"
-              tooltip={runMode === 'text'
-                ? 'Use the uploaded image as a reference for this asset'
-                : 'Use the text content as a prompt for this asset'}
-              onClick={toggleWorkMode}>
-              { runMode === 'text'
-                ? <ArrowUp className="size-4" />
-                : <ArrowDown className="size-4" />
-              }
-              { runMode === 'text'
-                ? 'Use image as reference'
-                : 'Input as text prompt' }
-            </Button>
-          )}
+          <div className="absolute bottom-1 right-1 flex items-center gap-1">
+            {uploadedPath && !generated && (
+              <CreditButton
+                cost={1}
+                type="button"
+                size="xs"
+                onClick={handleGeneratePreview}
+                disabled={generating}
+                className="bg-muted z-1 gap-2">
+                {generating ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <Sparkles className="size-3.5" />
+                )}
+                Extract preview
+              </CreditButton>
+            )}
+            {assetMode === 'text-first' && (
+              <Button variant="outline" size="xs"
+                className="bg-muted z-1"
+                tooltip={runMode === 'text'
+                  ? 'Use the uploaded image as a reference for this asset'
+                  : 'Use the text content as a prompt for this asset'}
+                onClick={toggleWorkMode}>
+                { runMode === 'text'
+                  ? <ArrowUp className="size-4" />
+                  : <ArrowDown className="size-4" />
+                }
+                { runMode === 'text'
+                  ? 'Use image as reference'
+                  : 'Input as text prompt' }
+              </Button>)
+            }
+          </div>
           <Hint variant="tooltip"
             className="absolute bottom-1 left-1 z-1 max-w-50">
             {runMode === 'text'

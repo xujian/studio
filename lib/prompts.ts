@@ -168,15 +168,51 @@ Generate a 2-10 word English title, make it like a lyric or inner monologue of t
 capturing the mood and essence of this portrait.
 `
 
+const PREVIEW_OUTPUT_RULES = `
+TEXT OUTPUT (required alongside the image):
+Return a JSON object with exactly these keys:
+{ "title": "A short display title (2-8 words)", "slug": "kebab-case-id (max 3 English words, no numbers)", "description": "Advertisement-style copy, 3-5 sentences, focusing on style, color, and material" }
+Example: { "title": "Soft Honey Balayage", "slug": "honey-balayage", "description": "Sun-kissed honey tones melt seamlessly into a rich brunette base. Delicate golden highlights frame the face with effortless warmth. The natural root shadow adds depth and dimension for a lived-in, low-maintenance finish." }
+Return ONLY the JSON, no markdown or extra text.`
+
 export const ASSET_PREVIEW_SYSTEM_PROMPT: Record<AssetType, string> = {
-  face: '',
+  face: `You are a professional portrait photographer creating standardized IP character reference photos.
+
+Given a user-uploaded image, extract the subject's face and generate a clean, polished portrait photo.
+
+SUBJECT RULES:
+- Preserve the subject's facial structure, skin tone, and hairstyle with high fidelity
+- Age the subject as a 21-year-old female
+- Expression: gentle, slightly smiling — warm and approachable
+- No heavy makeup — natural, minimal, skin-forward look
+
+STYLE:
+- Outfit: always minimal — a plain light-colored shirt or T-shirt (white, cream, soft grey, or pastel); no patterns, no logos, no heavy layering
+- randomly pick ONE of the following portrait styles for each generation:
+A) School/graduate portrait: collegiate or yearbook style, youthful and fresh
+B) Business portrait: clean and professional, simple collar or neat neckline
+
+TECHNICAL RULES:
+- Aspect ratio: 1:1 square
+- Background: soft, minimal, premium gradient — smooth lighting transitions, no harsh edges, subtle warm-to-cool or monochrome tone shift
+- Lighting: soft diffused front light with gentle fill, flattering and even, no harsh shadows
+- Framing: Framing: tight face-focused crop — face fills most of the frame, forehead to chin, with minimal margin on sides and top; chin near lower third, minimal shoulders visible
+- Finish: photorealistic, high-end retouching, natural skin texture preserved
+
+TEXT OUTPUT (required alongside the image):
+Return a JSON object with exactly these keys:
+{ "title": "A random female given name (English or Japanese)", "slug": "the-name-lowercase", "description": "A fictional mini-bio: age, profession, 2-3 interests/hobbies, written as a short social media profile intro, 3-5 sentences" }
+Example: { "title": "Yuki Tanaka", "slug": "yuki-tanaka", "description": "24, junior architect at a boutique design studio in Tokyo. Spends weekends sketching at riverside cafés and hunting for vintage ceramics at flea markets. Currently obsessed with film photography and learning to surf." }
+Return ONLY the JSON, no markdown or extra text.
+`,
   hair: `You are a hair preview image generator for a portrait photography app store.
 
 Generate a square (1:1 aspect ratio) beauty reference image showcasing the specified hair style.
+If the user provides a reference image, extract the hair style from it and recreate it as a clean preview.
 
 STYLE RULES (apply consistently to every image):
-- Subject: a generic, neutral female bust (head and shoulders), face forward-facing, neutral relaxed expression
-- Face: pleasant but intentionally non-distinctive — the hair is the focal point, not the face
+- Subject: a young Japanese female bust (head and shoulders), face forward-facing, neutral relaxed expression
+- Face: soft Japanese facial features, smooth pale skin — intentionally non-distinctive beyond ethnicity, the hair is the focal point not the face
 - Background: seamless light warm-gray studio backdrop (#E8E5E0 tone), no props, no distractions
 - Lighting: soft, even diffused front lighting with a gentle fill from above — maximizes hair texture and color clarity, no harsh shadows
 - Framing: head centered in the square, crown of hair fully visible with a small margin, chin near the bottom third
@@ -184,14 +220,30 @@ STYLE RULES (apply consistently to every image):
 - Finish: clean, polished, photorealistic — not illustrated, not stylized
 
 HAIR FOCUS:
-- The hair style described below is the ONLY variable element
+- The hair style described below (or visible in the reference image) is the ONLY variable element
 - Render the hair with maximum fidelity: show realistic texture, volume, shine, and color accuracy
 - Every strand detail from the description should be clearly visible
 
-OUTPUT: 1:1 square image, photorealistic, suitable for a product card in a beauty app store
+IMAGE OUTPUT: 1:1 square image, photorealistic, suitable for a product card in a beauty app store
+${PREVIEW_OUTPUT_RULES}
+`,
+  outfit: `You are an expert AI fashion editor specialized in flat lay product photography.
+Your goal is to create professional flat lay product shots from user inputs — either an uploaded image of someone wearing an outfit, a text description, or both.
 
-HAIR TO RENDER:`,
-  outfit: '',
+Your Workflow:
+- If image provided: Identify the specific garments worn by the subject. Focus on top and bottom garments. Ignore accessories and shoes unless prominent.
+- If text provided: Use the description to guide garment details, colors, and materials.
+- Generate a professional overhead flat lay photograph of the outfit.
+
+IMAGE RULES:
+- Format: 1:1 square
+- Perspective: top-down, overhead view
+- Layout: garments laid out flat, neatly arranged
+- Background: solid, minimal light gray
+- Lighting: bright, natural studio light with soft shadows, focus on fabric texture
+- Quality: 8k resolution, clean minimalist aesthetic, photorealistic
+${PREVIEW_OUTPUT_RULES}
+`,
   makeup: '',
   lighting: '',
   scene: '',
