@@ -1,12 +1,8 @@
 html, body, .scrollable {
   scrollbar-width: thin;
   scrollbar-color: rgba(128, 128, 128, 0.5) transparent;
-  scrollbar-gutter: stable both-edges;
-  margin-right: 0px;
-}
-
-html, body {
   scrollbar-gutter: stable;
+  margin-right: 0px;
 }
 
 html::-webkit-scrollbar,
@@ -37,4 +33,12 @@ body::-webkit-scrollbar-thumb:hover,
 
 .scrollable {
   overflow: auto;
+}
+
+/* react-remove-scroll-bar injects `body[data-scroll-locked] { margin-right: Xpx !important }`
+  to compensate for scrollbar width. Since we use scrollbar-gutter:stable the space is always
+   reserved, so this causes a rightward shift. Higher specificity beats their !important. */
+html body[data-scroll-locked] {
+  padding-right: 0 !important;
+  margin-right: 0 !important;
 }
