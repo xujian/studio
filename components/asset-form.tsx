@@ -92,8 +92,10 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   const [price, setPrice] = useState<string>(asset?.price != null ? String(asset.price) : '')
   const hasPrice = !!asset && asset.user_id == null
   const [suggesting, setSuggesting] = useState(false)
-  const [generating, setGenerating] = useState(false)
+  const [generatingPreview, setGeneratingPreview] = useState(false)
+  const [extracting, setExtracting] = useState(false)
   const [generated, setGenerated] = useState(false)
+  const [extractionPreview, setExtractionPreview] = useState('')
   const [previewError, setPreviewError] = useState('')
   const assetMode = assetModes[type]
 
@@ -135,36 +137,86 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   }
 
   const handleGeneratePreview = async () => {
-    if ((!content && !uploadedPath) || generating) return
-    setGenerating(true)
+    if (!content || generatingPreview) return
+    setGeneratingPreview(true)
     setPreviewError('')
     try {
       const res = await fetch('/api/assets/preview', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type,
-          content: content || undefined,
-          image: uploadedPath || undefined,
-        })
+        body: JSON.stringify({ type, content })
       })
-      if (res.ok) {
-        const data = await res.json()
-        console.log('preview//////////data', data)
-        const url = assetUrl(data.storagePath)
-        uploadRef.current?.setPreview(url, data.storagePath)
-        setUploadedPath(data.storagePath)
-        setGenerated(true)
-        if (data.title && !title) setTitle(data.title)
-        if (data.slug && !name) setName(data.slug)
-        if (data.description && !description) setDescription(data.description)
-        queryClient.invalidateQueries({ queryKey: ['profile'] })
-      } else {
+      if (!res.ok) {
         const data = await res.json()
         setPreviewError(data.error || 'Generation failed')
+        return
+      }
+      const data = await res.json()
+      uploadRef.current?.setPreview(assetUrl(data.storagePath), data.storagePath)
+      setUploadedPath(data.storagePath)
+      setGenerated(true)
+      if (data.title && !title) setTitle(data.title)
+      if (data.slug && !name) setName(data.slug)
+      if (data.description && !description) setDescription(data.description)
+      queryClient.invalidateQueries({ queryKey: ['profile'] })
+    } finally {
+      setGeneratingPreview(false)
+    }
+  }
+
+  const handleExtractFromImage = async () => {
+    if (!uploadedPath || extracting) return
+    setExtracting(true)
+    setPreviewError('')
+    try {
+      const res = await fetch('/api/assets/extract', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, image: uploadedPath })
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        setPreviewError(data.error || 'Extraction failed')
+        return
+      }
+
+      const reader = res.body!.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        buffer += decoder.decode(value, { stream: true })
+        const chunks = buffer.split('\n\n')
+        buffer = chunks.pop() ?? ''
+
+        for (const chunk of chunks) {
+          if (!chunk.startsWith('data: ')) continue
+          const event = JSON.parse(chunk.slice(6))
+          console.log('extractevent---------------', event)
+
+          if (event.type === 'error') {
+            setPreviewError(event.error)
+            return
+          }
+          if (event.type === 'crop') {
+            setExtractionPreview(assetUrl(event.storagePath))
+            setUploadedPath(event.storagePath)
+          }
+          if (event.type === 'final') {
+            setExtractionPreview(assetUrl(event.storagePath))
+            setUploadedPath(event.storagePath)
+            setGenerated(true)
+            if (event.title && !title) setTitle(event.title)
+            if (event.slug && !name) setName(event.slug)
+            if (event.description && !description) setDescription(event.description)
+            queryClient.invalidateQueries({ queryKey: ['profile'] })
+          }
+        }
       }
     } finally {
-      setGenerating(false)
+      setExtracting(false)
     }
   }
 
@@ -222,9 +274,10 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
     setDescription('')
     setContent('')
     setGenerated(false)
+    setExtractionPreview('')
   }
 
-  const canSuggest = (!!uploadedPath || !!content) && !suggesting
+  const canSuggest = (!!uploadedPath || !!content) && !suggesting && !generatingPreview && !extracting
   const isPending = createAsset.isPending || updateAsset.isPending
   const canSave = !!name && !isPending
 
@@ -257,17 +310,18 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
                   type="button"
                   size="xs"
                   onClick={handleGeneratePreview}
-                  disabled={generating}
+                  disabled={generatingPreview}
                   className="absolute bottom-1 right-1 gap-2 self-start">
-                  {generating ? (
+                  {generatingPreview ? (
                     <Loader2 className="size-3.5 animate-spin" />
                   ) : (
                     <Sparkles className="size-3.5" />
                   )}
                   Generate preview image
                 </CreditButton>)}
-              <div className={cn('error absolute left-0 w-full h-full rounded-2xl p-4 transition-top duration-300 backdrop-blur-md',
-                  previewError ? 'top-0' : 'top-full'
+              {generatingPreview && <div className="pulse absolute inset-0 rounded-2xl pointer-events-none" />}
+              <div className={cn('error absolute left-0 w-full h-1/2 rounded-xl p-4 transition-top duration-300 backdrop-blur-md',
+                  previewError ? 'top-1/2' : 'top-full'
                 )}>
                 <CloseButton onClick={() => setPreviewError('')} />
                 {previewError}
@@ -279,17 +333,19 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
           className="aspect-square"
           path={({ userId }) => `assets/${userId}/${type}`}
           initialPreview={asset?.path ? assetUrl(asset.path) : undefined}
-          placeholder={
+          value={extractionPreview || undefined}
+          placeholder={(
             runMode === 'text'
               ? `Upload preview image (optional)`
               : uploadPlaceholders[type]
-          }
+          )}
           onComplete={(path) => {
             if (uploadedPath && uploadedPath !== path) {
               createClient().storage.from('assets').remove([uploadedPath])
             }
             setUploadedPath(path)
             setGenerated(false)
+            setExtractionPreview('')
           }}>
           <Badge variant="ghost"
             className="absolute top-2 left-2 text-xs font-medium bg-neutral text-neutral-foreground z-1">
@@ -303,15 +359,15 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
                 cost={1}
                 type="button"
                 size="xs"
-                onClick={handleGeneratePreview}
-                disabled={generating}
-                className="bg-muted z-1 gap-2">
-                {generating ? (
+                onClick={handleExtractFromImage}
+                disabled={extracting}
+                className="z-1 gap-2">
+                {extracting ? (
                   <Loader2 className="size-3.5 animate-spin" />
                 ) : (
                   <Sparkles className="size-3.5" />
                 )}
-                Extract preview
+                Extract {type}
               </CreditButton>
             )}
             {assetMode === 'text-first' && (
@@ -337,6 +393,19 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
               ? 'Upload an image to use as reference for this asset. It can be used as a hint for AI generation or just for your own reference.'
               : 'Describe the asset in text. This can be used as a prompt for AI generation or just as a note for yourself.'}
           </Hint>
+          <div className={cn('absolute h-full w-full inset-0 pointer-events-none left-0 transition-top duration-300',
+            extracting
+              ? 'top-0'
+              : 'top-full'
+          )}>
+            <div className="pulse h-full w-full rounded-xl"></div>
+          </div>
+          <div className={cn('error absolute left-0 bottom-0 w-full h-1/2 rounded-xl p-4 transition-top duration-300 backdrop-blur-md',
+              previewError ? 'top-1/2' : 'top-full'
+            )}>
+            <CloseButton size="icon-lg" onClick={() => setPreviewError('')} />
+            {previewError}
+          </div>
         </Upload>
       </div>
       <Input

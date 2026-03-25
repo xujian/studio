@@ -1,23 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenAI } from '@google/genai'
 import sharp from 'sharp'
-import { createClient } from '@/lib/supabase/server'
-import { ASSET_PREVIEW_SYSTEM_PROMPT } from '@/lib/prompts'
-import { assetUrl } from '@/lib/utils'
-import { assetTypeNames, type AssetType } from '@/lib/types'
 import { z } from 'zod'
+import { ASSET_PREVIEW_SYSTEM_PROMPT } from '@/lib/prompts'
+import { createClient } from '@/lib/supabase/server'
+import { assetTypeNames, type AssetType } from '@/lib/types'
 
 const schema = z.object({
   type: z.enum(assetTypeNames as [AssetType, ...AssetType[]]),
-  content: z.string().optional(),
-  image: z.string().optional(),
-}).refine(data => data.content || data.image, {
-  message: 'Either content or image is required',
+  content: z.string().min(1),
 })
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
+  const {
+    data: { session }
+  } = await supabase.auth.getSession()
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -29,10 +27,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
 
-  const { type, content, image } = validation.data
+  const { type, content } = validation.data
   const systemPrompt = ASSET_PREVIEW_SYSTEM_PROMPT[type]
   if (!systemPrompt) {
-    return NextResponse.json({ error: 'Preview not supported for this asset type' }, { status: 400 })
+    return NextResponse.json(
+      { error: 'Preview not supported for this asset type' },
+      { status: 400 }
+    )
   }
 
   const { data: profile } = await supabase
@@ -46,25 +47,11 @@ export async function POST(request: NextRequest) {
 
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
 
-  // Build user parts: optional image + optional text
-  const userParts: Array<{ text: string } | { inlineData: { mimeType: string, data: string } }> = []
-  if (image) {
-    const imgRes = await fetch(assetUrl(image))
-    if (!imgRes.ok) {
-      return NextResponse.json({ error: 'Failed to fetch uploaded image' }, { status: 400 })
-    }
-    const imgBuffer = await imgRes.arrayBuffer()
-    const imgBase64 = Buffer.from(imgBuffer).toString('base64')
-    const imgMime = imgRes.headers.get('content-type') || 'image/jpeg'
-    userParts.push({ inlineData: { mimeType: imgMime, data: imgBase64 } })
-  }
-  userParts.push({ text: content || `Generate a preview image for this ${type} asset. You MUST also return the JSON text output as specified.` })
-
   let response: Awaited<ReturnType<typeof ai.models.generateContent>>
   try {
     response = await ai.models.generateContent({
       model: process.env.NANO_BANANA_MODEL!,
-      contents: [{ role: 'user', parts: userParts }],
+      contents: [{ role: 'user', parts: [{ text: content }] }],
       config: {
         systemInstruction: systemPrompt,
         responseModalities: ['TEXT', 'IMAGE'],
@@ -83,9 +70,7 @@ export async function POST(request: NextRequest) {
       imageBase64 = part.inlineData.data ?? ''
       mime = part.inlineData.mimeType || 'image/png'
     }
-    if (part.text) {
-      textResponse += part.text
-    }
+    if (part.text) textResponse += part.text
   }
   if (!imageBase64) {
     console.error('[assets/preview] no image in response')
@@ -95,12 +80,13 @@ export async function POST(request: NextRequest) {
   // Parse title, slug, description from text response
   let title = '', slug = '', description = ''
   try {
-    const parsed = JSON.parse(textResponse.replace(/```json\s*/i, '').replace(/```\s*/i, '').trim())
+    const parsed = JSON.parse(
+      textResponse.replace(/```json\s*/i, '').replace(/```\s*/i, '').trim()
+    )
     title = parsed.title || ''
     slug = parsed.slug || ''
     description = parsed.description || ''
   } catch {
-    // Fallback: try to extract from plain text lines
     const titleMatch = textResponse.match(/title:\s*(.+)/i)
     const slugMatch = textResponse.match(/slug:\s*(.+)/i)
     const descMatch = textResponse.match(/description:\s*(.+)/i)
@@ -125,18 +111,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
   }
 
-  // Delete the old uploaded image that was used as input
-  if (image) {
-    await supabase.storage.from('assets').remove([image])
-  }
-
   // Deduct credit after successful upload
-  await supabase.from('profiles').update({ credits: profile.credits - 1 }).eq('id', userId)
+  await supabase
+    .from('profiles')
+    .update({ credits: profile.credits - 1 })
+    .eq('id', userId)
   await supabase.from('transactions').insert({
     user_id: userId,
     type: 'generation_cost',
     amount: -1,
-    description: `Asset preview: ${type}`,
+    description: `Asset preview: ${type}`
   })
 
   return NextResponse.json({ storagePath, title, slug, description })

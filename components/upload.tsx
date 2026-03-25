@@ -6,7 +6,8 @@ import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { compressImage } from '@/lib/compress-image'
 import { useUpload, type UploadResult } from '@/hooks/use-upload'
 import { Button } from './button'
-import { Loader2, Upload as UploadIcon, X } from 'lucide-react'
+import { Command, Loader2, Upload as UploadIcon, X } from 'lucide-react'
+import { Kbd, KbdGroup } from './ui/kbd'
 
 export interface UploadHandle {
   /** Removes the uploaded file from storage and resets the component */
@@ -26,9 +27,11 @@ export type UploadProps = {
   path: PathOption
   onComplete: (storagePath: string) => void
   onError?: () => void
-  placeholder?: string
+  placeholder?: string | React.ReactNode
   className?: string
   initialPreview?: string
+  /** External preview URL that overrides the internal preview state */
+  value?: string
   children?: React.ReactNode
 } & React.ComponentProps<'div'>
 
@@ -40,6 +43,7 @@ export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
     placeholder = 'Upload image here',
     className,
     initialPreview,
+    value,
     children
   },
   ref
@@ -130,9 +134,9 @@ export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
           }
         }}
         className="absolute inset-0 flex items-center justify-center focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-        {preview ? (
+        {(value || preview) ? (
           <Image
-            src={preview}
+            src={value || preview!}
             alt="Upload preview"
             fill
             className="object-cover"
@@ -140,7 +144,22 @@ export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
         ) : (
           <div className="flex flex-col items-center gap-2 text-muted-foreground">
             <UploadIcon className="size-6" aria-hidden="true" />
-            <span className="text-xs">{placeholder}</span>
+            <p className="text-sm">{placeholder}</p>
+            <p>
+              <Button type="button"
+                size="xs"
+                variant="outline"
+                className="button"
+                >Browse files</Button>
+            </p>
+            <p>&nbsp;</p>
+            <p className="text-xs leading-4">Or Drag and Drop image here</p>
+            <div className="flex text-xs items-center gap-2">
+                <Kbd className="bg-background/60 border border-border/40 flex items-center">
+                  <Command />V
+                </Kbd>
+              to paste image here
+            </div>
           </div>
         )}
         {uploading && (
@@ -160,7 +179,7 @@ export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
         className="hidden"
         onChange={handleFileChange}
       />
-      {preview && !uploading && (
+      {(value || preview) && !uploading && (
         <Button
           type="button"
           size="icon-sm"
