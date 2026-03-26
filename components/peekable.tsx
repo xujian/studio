@@ -57,8 +57,7 @@ export function Peekable({
             height={200}
             className={cn('face rounded-md', sizes[size])}
           />
-          {title && <h4 className="truncate p-2 text-sm font-bold text-white">{title}</h4>}
-          {description && <p className="truncate p-2 text-xs">{description}</p>}
+          {title && <h4 className="truncate max-w-50 p-2 text-xs font-bold text-foreground">{title}</h4>}
         </div>
       )
     }

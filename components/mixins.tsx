@@ -10,7 +10,7 @@ import {
 } from '@/components/ui'
 import { assetTypes } from '@/lib/constants'
 import type { AssetType, Mixins } from '@/lib/types'
-import { cn } from '@/lib/utils'
+import { assetUrl, cn } from '@/lib/utils'
 import { useAssets } from '@/hooks/use-assets'
 import { MoreHorizontalIcon } from 'lucide-react'
 
@@ -84,7 +84,11 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
                     typeAssets.map(asset => (
                       <Peekable
                         key={asset.id}
-                        content={asset.path || asset.content}
+                        content={
+                          asset.path
+                            ? assetUrl(asset.path!)
+                            : asset.content
+                        }
                         title={asset.title}
                         description={asset.description}
                         side="right">
