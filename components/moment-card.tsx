@@ -23,7 +23,10 @@ export function MomentCard({ moment }: MomentCardProps) {
   const [current, setCurrent] = React.useState(0)
   const [count, setCount] = React.useState(0)
 
-  const hasMultiplePhotos = moment.photos.length > 1
+  const photos = [...moment.photos].sort((a, b) =>
+    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  )
+  const hasMultiplePhotos = photos.length > 1
 
   React.useEffect(() => {
     if (!api) return
@@ -38,13 +41,13 @@ export function MomentCard({ moment }: MomentCardProps) {
     if (!api) return
     api.reInit()
     setCount(api.scrollSnapList().length)
-  }, [api, moment.photos.length])
+  }, [api, photos.length])
 
   // Single photo - no carousel
   if (!hasMultiplePhotos) {
     return (
       <div className="relative aspect-9/16 w-full overflow-hidden rounded-2xl bg-muted">
-        <Photo data={moment.photos[0]} />
+        <Photo data={photos[0]} />
       </div>
     )
   }
@@ -57,7 +60,7 @@ export function MomentCard({ moment }: MomentCardProps) {
       onMouseLeave={() => setIsHovered(false)}>
       <Carousel setApi={setApi} opts={{ loop: false }}>
         <CarouselContent>
-          {moment.photos.map(photo => (
+          {photos.map(photo => (
             <CarouselItem key={photo.id}>
               <div className="relative aspect-9/16 w-full overflow-hidden rounded bg-muted">
                 <Photo data={photo} />
