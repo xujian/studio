@@ -68,19 +68,19 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   const queryClient = useQueryClient()
   const isEditing = !!asset
 
-  const [uploadedPath, setUploadedPath] = useState<string>('')
+  const [uploaded, setUploaded] = useState<string>('')
   const savedRef = useRef(false)
-  const uploadedPathRef = useRef('')
+  const uploadedRef = useRef('')
 
   useEffect(() => {
-    uploadedPathRef.current = uploadedPath
-  }, [uploadedPath])
+    uploadedRef.current = uploaded
+  }, [uploaded])
 
   // Cleanup newly-uploaded (unsaved) image on unmount
   useEffect(() => {
     return () => {
-      if (uploadedPathRef.current && !savedRef.current) {
-        createClient().storage.from('assets').remove([uploadedPathRef.current])
+      if (uploadedRef.current && !savedRef.current) {
+        createClient().storage.from('assets').remove([uploadedRef.current])
       }
     }
   }, [])
@@ -92,10 +92,10 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   const [price, setPrice] = useState<string>(asset?.price != null ? String(asset.price) : '')
   const hasPrice = !!asset && asset.user_id == null
   const [suggesting, setSuggesting] = useState(false)
-  const [generatingPreview, setGeneratingPreview] = useState(false)
+  const [previewing, setPreviewing] = useState(false)
   const [extracting, setExtracting] = useState(false)
   const [generated, setGenerated] = useState(false)
-  const [extractionPreview, setExtractionPreview] = useState('')
+  const [extracted, setExtracted] = useState('')
   const [previewError, setPreviewError] = useState('')
   const assetMode = assetModes[type]
 
@@ -114,7 +114,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   }
 
   const handleSuggest = async () => {
-    if (!uploadedPath && !content) return
+    if (!uploaded && !content) return
     setSuggesting(true)
     try {
       const res = await fetch('/api/assets/suggest', {
@@ -123,7 +123,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
         body: JSON.stringify({
           type,
           content: content || undefined,
-          storagePath: uploadedPath || undefined
+          storagePath: uploaded || undefined
         })
       })
       if (res.ok) {
@@ -136,9 +136,9 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
     }
   }
 
-  const handleGeneratePreview = async () => {
-    if (!content || generatingPreview) return
-    setGeneratingPreview(true)
+  const handlePreview = async () => {
+    if (!content || previewing) return
+    setPreviewing(true)
     setPreviewError('')
     try {
       const res = await fetch('/api/assets/preview', {
@@ -152,27 +152,26 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
         return
       }
       const data = await res.json()
-      uploadRef.current?.setPreview(assetUrl(data.storagePath), data.storagePath)
-      setUploadedPath(data.storagePath)
+      setUploaded(data.storagePath)
       setGenerated(true)
       if (data.title && !title) setTitle(data.title)
       if (data.slug && !name) setName(data.slug)
       if (data.description && !description) setDescription(data.description)
       queryClient.invalidateQueries({ queryKey: ['profile'] })
     } finally {
-      setGeneratingPreview(false)
+      setPreviewing(false)
     }
   }
 
-  const handleExtractFromImage = async () => {
-    if (!uploadedPath || extracting) return
+  const handleExtract = async () => {
+    if (!uploaded || extracting) return
     setExtracting(true)
     setPreviewError('')
     try {
       const res = await fetch('/api/assets/extract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, image: uploadedPath })
+        body: JSON.stringify({ type, image: uploaded })
       })
       if (!res.ok) {
         const data = await res.json()
@@ -200,13 +199,12 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
             setPreviewError(event.error)
             return
           }
-          if (event.type === 'crop') {
-            setExtractionPreview(assetUrl(event.storagePath))
-            setUploadedPath(event.storagePath)
+          if (event.type === 'cropped') {
+            setExtracted(event.dataUrl)
           }
-          if (event.type === 'final') {
-            setExtractionPreview(assetUrl(event.storagePath))
-            setUploadedPath(event.storagePath)
+          if (event.type === 'completed') {
+            setExtracted('')
+            setUploaded(event.storagePath)
             setGenerated(true)
             if (event.title && !title) setTitle(event.title)
             if (event.slug && !name) setName(event.slug)
@@ -222,7 +220,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
 
   const handleSave = () => {
     if (isEditing) {
-      const pathToSave = uploadedPath || asset.path || null
+      const pathToSave = uploaded || asset.path || null
       const parsedPrice = price !== '' ? parseInt(price, 10) : null
       updateAsset.mutate(
         {
@@ -238,7 +236,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
         {
           onSuccess: () => {
             // Delete old image from storage if it was replaced
-            if (uploadedPath && asset.path && uploadedPath !== asset.path) {
+            if (uploaded && asset.path && uploaded !== asset.path) {
               createClient().storage.from('assets').remove([asset.path])
             }
             savedRef.current = true
@@ -248,7 +246,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
       )
     } else {
       createAsset.mutate(
-        { name, title, description, content, type, path: uploadedPath },
+        { name, title, description, content, type, path: uploaded },
         {
           onSuccess: () => {
             savedRef.current = true
@@ -262,24 +260,30 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
 
   const handleCancel = async () => {
     savedRef.current = true
-    await uploadRef.current?.clear()
+    if (uploaded) {
+      await createClient().storage.from('assets').remove([uploaded])
+    }
     if (!isEditing) resetForm()
     onClose()
   }
 
   const resetForm = () => {
-    setUploadedPath('')
+    setUploaded('')
     setName('')
     setTitle('')
     setDescription('')
     setContent('')
     setGenerated(false)
-    setExtractionPreview('')
+    setExtracted('')
   }
 
-  const canSuggest = (!!uploadedPath || !!content) && !suggesting && !generatingPreview && !extracting
+  const canSuggest = (!!uploaded || !!content) && !suggesting && !previewing && !extracting
   const isPending = createAsset.isPending || updateAsset.isPending
   const canSave = !!name && !isPending
+
+  const preview = extracted
+    || (uploaded ? assetUrl(uploaded) : undefined)
+    || (asset?.path ? assetUrl(asset.path) : undefined)
 
   const handlePaste = (e: React.ClipboardEvent) => {
     const file = Array.from(e.clipboardData.items)
@@ -309,17 +313,17 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
                   cost={1}
                   type="button"
                   size="xs"
-                  onClick={handleGeneratePreview}
-                  disabled={generatingPreview}
+                  onClick={handlePreview}
+                  disabled={previewing}
                   className="absolute bottom-1 right-1 gap-2 self-start">
-                  {generatingPreview ? (
+                  {previewing ? (
                     <Loader2 className="size-3.5 animate-spin" />
                   ) : (
                     <Sparkles className="size-3.5" />
                   )}
                   Generate preview image
                 </CreditButton>)}
-              {generatingPreview && <div className="pulse absolute inset-0 rounded-2xl pointer-events-none" />}
+              {previewing && <div className="pulse absolute inset-0 rounded-2xl pointer-events-none" />}
               <div className={cn('error absolute left-0 w-full h-1/2 rounded-xl p-4 transition-top duration-300 backdrop-blur-md',
                   previewError ? 'top-1/2' : 'top-full'
                 )}>
@@ -332,20 +336,27 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
           ref={uploadRef}
           className="aspect-square"
           path={({ userId }) => `assets/${userId}/${type}`}
-          initialPreview={asset?.path ? assetUrl(asset.path) : undefined}
-          value={extractionPreview || undefined}
+          value={preview}
           placeholder={(
             runMode === 'text'
               ? `Upload preview image (optional)`
               : uploadPlaceholders[type]
           )}
           onComplete={(path) => {
-            if (uploadedPath && uploadedPath !== path) {
-              createClient().storage.from('assets').remove([uploadedPath])
+            if (uploaded && uploaded !== path) {
+              createClient().storage.from('assets').remove([uploaded])
             }
-            setUploadedPath(path)
+            setUploaded(path)
             setGenerated(false)
-            setExtractionPreview('')
+            setExtracted('')
+          }}
+          onClear={() => {
+            if (uploaded) {
+              createClient().storage.from('assets').remove([uploaded])
+            }
+            setUploaded('')
+            setExtracted('')
+            setGenerated(false)
           }}>
           <Badge variant="ghost"
             className="absolute top-2 left-2 text-xs font-medium bg-neutral text-neutral-foreground z-1">
@@ -354,12 +365,12 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
               : 'Reference image' }
           </Badge>
           <div className="absolute bottom-1 right-1 flex items-center gap-1">
-            {uploadedPath && !generated && (
+            {uploaded && !generated && (
               <CreditButton
                 cost={1}
                 type="button"
                 size="xs"
-                onClick={handleExtractFromImage}
+                onClick={handleExtract}
                 disabled={extracting}
                 className="z-1 gap-2">
                 {extracting ? (

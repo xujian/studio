@@ -2,6 +2,7 @@
 
 import { useMutation } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
+import { random } from '@/lib/utils'
 
 type PathOption =
   | string
@@ -23,12 +24,6 @@ export interface UploadResult {
   bucket: string
 }
 
-function randomHex(bytes = 8) {
-  const arr = new Uint8Array(bytes)
-  crypto.getRandomValues(arr)
-  return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('')
-}
-
 const defaultPath: PathOption = ({ userId }) => `uploads/${userId}`
 
 export const useUpload = ({ path = defaultPath }: UploadOptions = {}) => {
@@ -40,7 +35,7 @@ export const useUpload = ({ path = defaultPath }: UploadOptions = {}) => {
       if (!session) throw new Error('Not authenticated')
 
       const ext = file.name.split('.').pop() || 'jpg'
-      const filename = `${randomHex()}.${ext}`
+      const filename = `${random()}.${ext}`
 
       const fullPath = typeof path === 'function'
         ? `${path({ userId: session.user.id })}/${filename}`

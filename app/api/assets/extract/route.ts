@@ -6,7 +6,7 @@ import { cropFace } from '@/lib/crop'
 import { ASSET_PREVIEW_SYSTEM_PROMPT } from '@/lib/prompts'
 import { createClient } from '@/lib/supabase/server'
 import { assetTypeNames, type AssetType } from '@/lib/types'
-import { assetUrl } from '@/lib/utils'
+import { assetUrl, random } from '@/lib/utils'
 
 const schema = z.object({
   type: z.enum(assetTypeNames as [AssetType, ...AssetType[]]),
@@ -37,12 +37,6 @@ export async function POST(request: NextRequest) {
 
   const { type, image } = validation.data
   const systemPrompt = ASSET_PREVIEW_SYSTEM_PROMPT[type]
-  if (!systemPrompt) {
-    return NextResponse.json(
-      { error: 'Extraction not supported for this asset type' },
-      { status: 400 }
-    )
-  }
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -77,12 +71,9 @@ export async function POST(request: NextRequest) {
             controller.close()
             return
           }
-          await supabase.storage
-            .from('assets')
-            .upload(image, cropResult, { contentType: 'image/jpeg', upsert: true })
           imgBuffer = cropResult as Buffer<ArrayBuffer>
           imgMime = 'image/jpeg'
-          send(controller, { type: 'crop', storagePath: image })
+          send(controller, { type: 'cropped', dataUrl: `data:image/jpeg;base64,${cropResult.toString('base64')}` })
         }
 
         // Extract with Gemini
@@ -151,7 +142,7 @@ export async function POST(request: NextRequest) {
           .jpeg({ quality: 85 })
           .toBuffer()
 
-        const storagePath = `${userId}/${type}/${crypto.randomUUID()}.jpg`
+        const storagePath = `${userId}/${type}/${random()}.jpg`
         const { error: uploadError } = await supabase.storage
           .from('assets')
           .upload(storagePath, compressed, { contentType: 'image/jpeg', upsert: false })
@@ -177,7 +168,7 @@ export async function POST(request: NextRequest) {
           description: `Asset extract: ${type}`
         })
 
-        send(controller, { type: 'final', storagePath, title, slug, description })
+        send(controller, { type: 'completed', storagePath, title, slug, description })
         controller.close()
       } catch (err) {
         console.error('[assets/extract] unexpected error', err)

@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { ASSET_PREVIEW_SYSTEM_PROMPT } from '@/lib/prompts'
 import { createClient } from '@/lib/supabase/server'
 import { assetTypeNames, type AssetType } from '@/lib/types'
+import { random } from '@/lib/utils'
 
 const schema = z.object({
   type: z.enum(assetTypeNames as [AssetType, ...AssetType[]]),
@@ -102,7 +103,7 @@ export async function POST(request: NextRequest) {
     .jpeg({ quality: 85 })
     .toBuffer()
 
-  const storagePath = `${userId}/${type}/${crypto.randomUUID()}.jpg`
+  const storagePath = `${userId}/${type}/${random()}.jpg`
   const { error: uploadError } = await supabase.storage
     .from('assets')
     .upload(storagePath, compressed, { contentType: 'image/jpeg', upsert: false })
