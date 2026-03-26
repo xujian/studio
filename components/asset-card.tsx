@@ -89,7 +89,10 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
                   ? data.price != null
                     ? (<Price value={data.price} />)
                     : null
-                  : <Badge>Store</Badge>}
+                  : data.price != null
+                    ? (<Badge>Store</Badge>)
+                    : (<Badge>Public</Badge>)
+            }
           </div>
           <div className="absolute bottom-0 left-0 flex w-full flex-row-reverse gap-1 p-1 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
             {purchasable && (
