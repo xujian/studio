@@ -24,6 +24,13 @@ export type UploadProps = {
   className?: string
   /** Controlled image URL to display */
   value?: string
+  /*
+   * compress the image?
+   * image not compressed for "face"
+   **/
+  compress?: boolean
+  /** Called with the final file (after optional compression) before upload starts */
+  onBeforeUpload?: (file: File) => void
   children?: React.ReactNode
 } & React.ComponentProps<'div'>
 
@@ -36,6 +43,8 @@ export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
     placeholder = 'Upload image here',
     className,
     value,
+    compress = true,
+    onBeforeUpload,
     children
   },
   ref
@@ -48,7 +57,10 @@ export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
   const displayUrl = value || localPreview
 
   const processFile = async (file: File) => {
-    const compressed = await compressImage(file)
+    const compressed = compress
+      ? await compressImage(file)
+      : file
+    onBeforeUpload?.(compressed)
     setLocalPreview(URL.createObjectURL(compressed))
     upload(compressed, {
       onSuccess: ({ storagePath }) => {

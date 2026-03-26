@@ -71,6 +71,10 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   const [uploaded, setUploaded] = useState<string>('')
   const savedRef = useRef(false)
   const uploadedRef = useRef('')
+  // Stores the source image as a data URL for redo:
+  // - non-face: the compressed file from the initial upload (set via onFile)
+  // - face: the cropped result from the first extraction (set on "cropped" SSE event)
+  const originalImage = useRef('')
 
   useEffect(() => {
     uploadedRef.current = uploaded
@@ -111,6 +115,16 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
 
   const toggleWorkMode = () => {
     setRunMode(runMode === 'text' ? 'image' : 'text')
+  }
+
+  // Cache the uploaded file as base64 so we can redo extraction without re-fetching from storage.
+  // For face, sourceRef is later overwritten with the cropped result from the "cropped" SSE event.
+  const setOriginalImage = (file: File) => {
+    const reader = new FileReader()
+    reader.onload = e => { 
+      originalImage.current = (e.target?.result as string) ?? '' 
+    }
+    reader.readAsDataURL(file)
   }
 
   const handleSuggest = async () => {
@@ -168,10 +182,11 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
     setExtracting(true)
     setPreviewError('')
     try {
+      const body = { type, image: originalImage.current || uploaded }
       const res = await fetch('/api/assets/extract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, image: uploaded })
+        body: JSON.stringify(body)
       })
       if (!res.ok) {
         const data = await res.json()
@@ -201,9 +216,12 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
           }
           if (event.type === 'cropped') {
             setExtracted(event.dataUrl)
+            // Tag the data URL so the API knows it's pre-cropped and can skip the crop step on redo
+            originalImage.current = event.dataUrl.replace(';base64,', ';cropped;base64,')
           }
           if (event.type === 'completed') {
             setExtracted('')
+            createClient().storage.from('assets').remove([uploaded])
             setUploaded(event.storagePath)
             setGenerated(true)
             if (event.title && !title) setTitle(event.title)
@@ -269,6 +287,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
 
   const resetForm = () => {
     setUploaded('')
+    originalImage.current = ''
     setName('')
     setTitle('')
     setDescription('')
@@ -337,6 +356,8 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
           className="aspect-square"
           path={({ userId }) => `assets/${userId}/${type}`}
           value={preview}
+          compress={type !== 'face'}
+          onBeforeUpload={setOriginalImage}
           placeholder={(
             runMode === 'text'
               ? `Upload preview image (optional)`
@@ -354,6 +375,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
             if (uploaded) {
               createClient().storage.from('assets').remove([uploaded])
             }
+            originalImage.current = ''
             setUploaded('')
             setExtracted('')
             setGenerated(false)
@@ -365,7 +387,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
               : 'Reference image' }
           </Badge>
           <div className="absolute bottom-1 right-1 flex items-center gap-1">
-            {uploaded && !generated && (
+            {uploaded && (
               <CreditButton
                 cost={1}
                 type="button"
@@ -378,7 +400,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
                 ) : (
                   <Sparkles className="size-3.5" />
                 )}
-                Extract {type}
+                {generated ? `Re-extract ${type}` : `Extract ${type}`}
               </CreditButton>
             )}
             {assetMode === 'text-first' && (

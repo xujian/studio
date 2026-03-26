@@ -10,7 +10,7 @@ import { assetUrl, random } from '@/lib/utils'
 
 const schema = z.object({
   type: z.enum(assetTypeNames as [AssetType, ...AssetType[]]),
-  image: z.string().min(1),
+  image: z.string().min(1), // storage path OR data URL
 })
 
 const send = (controller: ReadableStreamDefaultController, event: object) => {
@@ -36,6 +36,9 @@ export async function POST(request: NextRequest) {
   }
 
   const { type, image } = validation.data
+  const isDataUrl = image.startsWith('data:')
+  const cropped = isDataUrl && image.includes(';cropped;')
+  // console.log('extract/route-------------type:', type, isDataUrl, image.length)
   const systemPrompt = ASSET_PREVIEW_SYSTEM_PROMPT[type]
 
   const { data: profile } = await supabase
@@ -47,33 +50,42 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Insufficient credits' }, { status: 402 })
   }
 
-  // Fetch image before streaming so we can return a plain HTTP error if it fails
-  const imgRes = await fetch(assetUrl(image))
-  if (!imgRes.ok) {
-    return NextResponse.json(
-      { error: 'Failed to fetch uploaded image' },
-      { status: 400 }
-    )
+  let imgBuffer: Buffer
+  let imgMime: string
+
+  if (isDataUrl) {
+    const [header, base64] = image.split(',')
+    imgMime = header.match(/data:([^;]+)/)?.[1] || 'image/jpeg'
+    imgBuffer = Buffer.from(base64, 'base64')
+  } else {
+    const imgRes = await fetch(assetUrl(image))
+    if (!imgRes.ok) {
+      return NextResponse.json({ error: 'Failed to fetch uploaded image' }, { status: 400 })
+    }
+    imgBuffer = Buffer.from(await imgRes.arrayBuffer())
+    imgMime = imgRes.headers.get('content-type') || 'image/jpeg'
   }
-  let imgBuffer: Buffer = Buffer.from(await imgRes.arrayBuffer())
-  let imgMime = imgRes.headers.get('content-type') || 'image/jpeg'
 
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
 
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        // Face: crop to head+shoulders and stream the intermediate result
         if (type === 'face') {
-          const cropResult = await cropFace(imgBuffer, imgMime, ai)
-          if (!Buffer.isBuffer(cropResult)) {
-            send(controller, { type: 'error', error: cropResult.error })
-            controller.close()
-            return
+          if (!cropped) {
+            const cropResult = await cropFace(imgBuffer, imgMime, ai)
+            if (!Buffer.isBuffer(cropResult)) {
+              send(controller, { type: 'error', error: cropResult.error })
+              controller.close()
+              return
+            }
+            imgBuffer = cropResult as Buffer<ArrayBuffer>
+            imgMime = 'image/jpeg'
+            send(controller, {
+              type: 'cropped',
+              dataUrl: `data:image/jpeg;base64,${cropResult.toString('base64')}`
+            })
           }
-          imgBuffer = cropResult as Buffer<ArrayBuffer>
-          imgMime = 'image/jpeg'
-          send(controller, { type: 'cropped', dataUrl: `data:image/jpeg;base64,${cropResult.toString('base64')}` })
         }
 
         // Extract with Gemini
@@ -152,9 +164,6 @@ export async function POST(request: NextRequest) {
           controller.close()
           return
         }
-
-        // Delete the original uploaded image
-        await supabase.storage.from('assets').remove([image])
 
         // Deduct credit after successful upload
         await supabase
