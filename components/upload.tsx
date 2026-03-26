@@ -84,10 +84,29 @@ export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
   const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault()
     setIsDragging(false)
+
     const file = e.dataTransfer.files?.[0]
-    console.log('handleDrop', file, e)
-    if (!file || !file.type.startsWith('image/')) return
-    await processFile(file)
+    if (file?.type.startsWith('image/')) {
+      await processFile(file)
+      return
+    }
+
+    // Dragging an image from a web page provides a URL, not a File
+    const url = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('URL')
+    if (!url) return
+    setLocalPreview(url)
+    try {
+      const res = await fetch(url)
+      const blob = await res.blob()
+      if (!blob.type.startsWith('image/')) {
+        setLocalPreview(null)
+        return
+      }
+      await processFile(new File([blob], 'dropped-image', { type: blob.type }))
+    } catch {
+      setLocalPreview(null)
+      onError?.()
+    }
   }
 
   const handleClear = (e: React.MouseEvent) => {
