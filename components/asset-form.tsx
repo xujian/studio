@@ -103,6 +103,8 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   const [previewError, setPreviewError] = useState('')
   const assetMode = assetModes[type]
 
+  const [cleared, setCleared] = useState(false)
+
   const [runMode, setRunMode] = useState<AssetRunMode>(
     assetMode === 'image-only'
       ? 'image'
@@ -238,7 +240,9 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
 
   const handleSave = () => {
     if (isEditing) {
-      const pathToSave = uploaded || asset.path || null
+      const pathToSave = uploaded
+        || (cleared ? null : asset.path)
+        || null
       const parsedPrice = price !== '' ? parseInt(price, 10) : null
       updateAsset.mutate(
         {
@@ -254,8 +258,10 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
         {
           onSuccess: () => {
             // Delete old image from storage if it was replaced
-            if (uploaded && asset.path && uploaded !== asset.path) {
-              createClient().storage.from('assets').remove([asset.path])
+            if (asset.path) {
+              if (pathToSave !== asset.path) {
+                createClient().storage.from('assets').remove([asset.path])
+              }
             }
             savedRef.current = true
             onClose()
@@ -294,6 +300,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
     setContent('')
     setGenerated(false)
     setExtracted('')
+    setCleared(false)
   }
 
   const canSuggest = (!!uploaded || !!content) && !suggesting && !previewing && !extracting
@@ -302,7 +309,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
 
   const preview = extracted
     || (uploaded ? assetUrl(uploaded) : undefined)
-    || (asset?.path ? assetUrl(asset.path) : undefined)
+    || (!cleared && asset?.path ? assetUrl(asset.path) : undefined)
 
   const handlePaste = (e: React.ClipboardEvent) => {
     const file = Array.from(e.clipboardData.items)
@@ -370,6 +377,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
             setUploaded(path)
             setGenerated(false)
             setExtracted('')
+            setCleared(false)
           }}
           onClear={() => {
             if (uploaded) {
@@ -379,6 +387,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
             setUploaded('')
             setExtracted('')
             setGenerated(false)
+            setCleared(true)
           }}>
           <Badge variant="ghost"
             className="absolute top-2 left-2 text-xs font-medium bg-neutral text-neutral-foreground z-1">

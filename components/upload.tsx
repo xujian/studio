@@ -122,6 +122,7 @@ export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
   }
 
   const handleClear = (e: React.MouseEvent) => {
+    console.log('Clearing image', onClear)
     e.stopPropagation()
     setLocalPreview(null)
     onClear?.()
