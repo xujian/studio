@@ -175,16 +175,18 @@ Return a JSON object with exactly these keys:
 Example: { "title": "Soft Honey Balayage", "slug": "honey-balayage", "description": "Sun-kissed honey tones melt seamlessly into a rich brunette base. Delicate golden highlights frame the face with effortless warmth. The natural root shadow adds depth and dimension for a lived-in, low-maintenance finish." }
 Return ONLY the JSON, no markdown or extra text.`
 
-export const ASSET_PREVIEW_SYSTEM_PROMPT: Record<AssetType, string> = {
-  face: `You are a professional portrait photographer creating standardized IP character reference photos.
-
-Given a user-uploaded image, extract the subject's face and generate a clean, polished portrait photo.
+export const ASSET_EXTRACT_SYSTEM_PROMPT: Record<AssetType, string> = {
+  face: `You are a professional portrait photographer.
+Yor goal is identical face transfer based strictly on the provided input image, 
+with zero modification, and generate a clean, polished portrait photo.
 
 SUBJECT RULES:
-- Preserve the subject's facial structure, skin tone, and hairstyle with high fidelity
+- Preserve the subject's unique facial structure, skin tone, and hairstyle with high fidelity
+- capture and lock the identical facial structure, including the specific proportions of the eyes, nose, and jawline, and the unique beauty mark.
 - Age the subject as a 21-year-old female
-- Expression: gentle, slightly smiling — warm and approachable
+- Expression: gentle, slightly smiling
 - No heavy makeup — natural, minimal, skin-forward look
+- Highly realistic, skin texture preserved, 8K
 
 STYLE:
 - Outfit: always minimal — a plain light-colored shirt or T-shirt (white, cream, soft grey, or pastel); no patterns, no logos, no heavy layering
@@ -201,8 +203,8 @@ TECHNICAL RULES:
 
 TEXT OUTPUT (required alongside the image):
 Return a JSON object with exactly these keys:
-{ "title": "A random female given name (English or Japanese)", "slug": "the-name-lowercase", "description": "A fictional mini-bio: age, profession, 2-3 interests/hobbies, written as a short social media profile intro, 3-5 sentences" }
-Example: { "title": "Yuki Tanaka", "slug": "yuki-tanaka", "description": "24, junior architect at a boutique design studio in Tokyo. Spends weekends sketching at riverside cafés and hunting for vintage ceramics at flea markets. Currently obsessed with film photography and learning to surf." }
+{ "title": "A random female given name, Given name only, one word, (English or Japanese)", "slug": "the-name-lowercase", "description": "A fictional mini-bio: age, profession, 2-3 interests/hobbies, written as a short social media profile intro, 3-5 sentences" }
+Example: { "title": "Yuki", "slug": "yuki", "description": "24, junior architect at a boutique design studio in Tokyo. Spends weekends sketching at riverside cafés and hunting for vintage ceramics at flea markets. Currently obsessed with film photography and learning to surf." }
 Return ONLY the JSON, no markdown or extra text.
 `,
   hair: `You are a hair preview image generator for a portrait photography app store.

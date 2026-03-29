@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenAI } from '@google/genai'
 import sharp from 'sharp'
 import { z } from 'zod'
-import { ASSET_PREVIEW_SYSTEM_PROMPT } from '@/lib/prompts'
+import { ASSET_EXTRACT_SYSTEM_PROMPT } from '@/lib/prompts'
 import { createClient } from '@/lib/supabase/server'
 import { assetTypeNames, type AssetType } from '@/lib/types'
 import { random } from '@/lib/utils'
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
   }
 
   const { type, content } = validation.data
-  const systemPrompt = ASSET_PREVIEW_SYSTEM_PROMPT[type]
+  const systemPrompt = ASSET_EXTRACT_SYSTEM_PROMPT[type]
   if (!systemPrompt) {
     return NextResponse.json(
       { error: 'Preview not supported for this asset type' },
