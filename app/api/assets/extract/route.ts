@@ -3,7 +3,7 @@ import { GoogleGenAI } from '@google/genai'
 import sharp from 'sharp'
 import { z } from 'zod'
 import { cropFace } from '@/lib/crop'
-import { ASSET_PREVIEW_SYSTEM_PROMPT } from '@/lib/prompts'
+import { ASSET_EXTRACT_SYSTEM_PROMPT } from '@/lib/prompts'
 import { createClient } from '@/lib/supabase/server'
 import { assetTypeNames, type AssetType } from '@/lib/types'
 import { assetUrl, random } from '@/lib/utils'
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
   const isDataUrl = image.startsWith('data:')
   const cropped = isDataUrl && image.includes(';cropped;')
   // console.log('extract/route-------------type:', type, isDataUrl, image.length)
-  const systemPrompt = ASSET_PREVIEW_SYSTEM_PROMPT[type]
+  const systemPrompt = ASSET_EXTRACT_SYSTEM_PROMPT[type]
 
   const { data: profile } = await supabase
     .from('profiles')
