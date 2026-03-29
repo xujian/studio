@@ -24,7 +24,9 @@ export const uploadUrl = (userId: string, filename: string) =>
   ].join('')
 
 export const assetUrl = (path: string) =>
-  `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/assets/${path.replace(/^\//, '')}`
+  path
+    ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/assets/${path.replace(/^\//, '')}`
+    : ''
 
 export const storageUrl = (path: string) =>
   [

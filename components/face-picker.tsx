@@ -87,7 +87,7 @@ export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
                             alt={face.name || 'Face asset'}
                             width={72}
                             height={72}
-                            className="face object-cover rounded-xl cursor-pointer border border-primary/80 hover:border-primary"
+                            className="face object-cover rounded-xl cursor-pointer bg-muted border border-primary/80 hover:border-primary"
                             sizes="72px"
                             aria-label={`Select face: ${face.name || 'Unnamed'}`}
                             onClick={() => onSelect?.(face.id!)}
