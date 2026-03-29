@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils'
 const tools = [
   { id: 'face' as AssetType, label: 'Face', icon: '/icons/face.png' },
   { id: 'hair' as AssetType, label: 'Hair', icon: '/icons/hair.png' },
+  { id: 'makeup' as AssetType, label: 'Makeup', icon: '/icons/makeup.png' },
   { id: 'outfit' as AssetType, label: 'Outfit', icon: '/icons/outfit.png' },
   { id: 'scene' as AssetType, label: 'Scene', icon: '/icons/scene.png' },
   { id: 'camera' as AssetType, label: 'Camera', icon: '/icons/camera.png' },
