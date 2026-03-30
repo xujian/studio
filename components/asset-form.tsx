@@ -7,10 +7,11 @@ import { CreditButton } from '@/components/credit-button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Upload, type UploadHandle } from '@/components/upload'
-import type { Asset, AssetRunMode, AssetType, AssetWorkMode } from '@/lib/types'
+import type { Asset, AssetRunMode, AssetType } from '@/lib/types'
 import { useCreateAsset } from '@/hooks/use-create-asset'
 import { useUpdateAsset } from '@/hooks/use-update-asset'
 import { assetUrl } from '@/lib/utils'
+import { assetModes } from '@/lib/assets-config'
 import { ArrowDown, ArrowDownUp, ArrowUp, Loader2, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge, Hint } from './ui'
@@ -39,16 +40,6 @@ const contentPlaceholders: Record<AssetType, string> = {
   mood: 'Describe the mood (e.g. vibrant and energetic)'
 }
 
-const assetModes: Record<AssetType, AssetWorkMode> = {
-  face: 'image-only',
-  hair: 'text-first',
-  outfit: 'text-first',
-  makeup: 'text-first',
-  scene: 'text-first',
-  lighting: 'text-only',
-  camera: 'text-only',
-  mood: 'text-only'
-}
 
 type AssetFormProps = {
   type: AssetType
@@ -101,6 +92,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   const [generated, setGenerated] = useState(false)
   const [extracted, setExtracted] = useState('')
   const [previewError, setPreviewError] = useState('')
+  const [extractError, setExtractError] = useState('')
   const assetMode = assetModes[type]
 
   const [cleared, setCleared] = useState(false)
@@ -182,7 +174,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   const handleExtract = async () => {
     if (!uploaded || extracting) return
     setExtracting(true)
-    setPreviewError('')
+    setExtractError('')
     try {
       const body = { type, image: originalImage.current || uploaded }
       const res = await fetch('/api/assets/extract', {
@@ -192,7 +184,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
       })
       if (!res.ok) {
         const data = await res.json()
-        setPreviewError(data.error || 'Extraction failed')
+        setExtractError(data.error || 'Extraction failed')
         return
       }
 
@@ -213,7 +205,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
           console.log('extractevent---------------', event)
 
           if (event.type === 'error') {
-            setPreviewError(event.error)
+            setExtractError(event.error)
             return
           }
           if (event.type === 'cropped') {
@@ -443,10 +435,10 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
             <div className="pulse h-full w-full rounded-xl"></div>
           </div>
           <div className={cn('error absolute left-0 bottom-0 w-full h-1/2 rounded-xl p-4 transition-top duration-300 backdrop-blur-md',
-              previewError ? 'top-1/2' : 'top-full'
+              extractError ? 'top-1/2' : 'top-full'
             )}>
-            <CloseButton size="icon-lg" onClick={() => setPreviewError('')} />
-            {previewError}
+            <CloseButton size="icon-lg" onClick={() => setExtractError('')} />
+            {extractError}
           </div>
         </Upload>
       </div>
