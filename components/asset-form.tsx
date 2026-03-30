@@ -160,6 +160,9 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
         return
       }
       const data = await res.json()
+      if (uploaded && uploaded !== data.storagePath) {
+        createClient().storage.from('assets').remove([uploaded])
+      }
       setUploaded(data.storagePath)
       setGenerated(true)
       if (data.title && !title) setTitle(data.title)
@@ -326,7 +329,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
             disabled={runMode === 'image'}
             className="overflow-hidden"
             rows={3}>
-              { content.length > 0 && !generated && (
+              { content.length > 0 && (
                 <CreditButton
                   cost={1}
                   type="button"
