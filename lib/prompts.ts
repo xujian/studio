@@ -1,15 +1,16 @@
 import { AssetType } from './types'
+import { assetUrl } from './utils'
 
 
-export const DEFAULTS = {
-  FACE: 'https://rhxlulctluazrpqzooya.supabase.co/storage/v1/object/public/assets/face/ju.jpg',
-  MAKEUP: '',
-  OUTFIT: '',
-  POSE: '',
-  SCENE: '',
-  LIGHTING: '',
-  CAMERA: '',
-  MOOD: ''
+export const DEFAULTS: Record<AssetType, string> = {
+  face: assetUrl('face/ju.jpg'),
+  hair: '',
+  makeup: '',
+  outfit: '',
+  scene: '',
+  lighting: '',
+  camera: '',
+  mood: ''
 }
 
 
@@ -175,14 +176,17 @@ Return a JSON object with exactly these keys:
 Example: { "title": "Soft Honey Balayage", "slug": "honey-balayage", "description": "Sun-kissed honey tones melt seamlessly into a rich brunette base. Delicate golden highlights frame the face with effortless warmth. The natural root shadow adds depth and dimension for a lived-in, low-maintenance finish." }
 Return ONLY the JSON, no markdown or extra text.`
 
+/**
+ * System prompts to extract asset reference images from user input original image
+ */
 export const ASSET_EXTRACT_SYSTEM_PROMPT: Record<AssetType, string> = {
   face: `You are a professional portrait photographer.
 Yor goal is identical face transfer based strictly on the provided input image, 
 with zero modification, and generate a clean, polished portrait photo.
 
 SUBJECT RULES:
-- Preserve the subject's unique facial structure, skin tone, and hairstyle with high fidelity
-- capture and lock the identical facial structure, including the specific proportions of the eyes, nose, and jawline, and the unique beauty mark.
+- Maintain the exact same facial features as the reference images — identical eye shape, nose bridge contour, jawline angle, lip proportions, and skin texture
+- slim face, defined jawline, natural facial proportions, realistic bone structure, angular cheekbones
 - Age the subject as a 21-year-old female
 - Expression: gentle, slightly smiling
 - No heavy makeup — natural, minimal, skin-forward look
@@ -247,6 +251,42 @@ IMAGE RULES:
 ${PREVIEW_OUTPUT_RULES}
 `,
   makeup: '',
+  lighting: '',
+  scene: '',
+  camera: '',
+  mood: ''
+}
+/**
+ * System prompts to generate preview image of asset from text description
+ */
+export const ASSET_PREVIEW_SYSTEM_PROMPT: Record<AssetType, string> = {
+  face: '',
+  hair: '',
+  outfit: '',
+  makeup: `You are a makeup preview image generator for a portrait photography app store.
+
+The provided reference image contains the foundation face. Apply the specified makeup look onto that face faithfully.
+
+FACE RULES:
+- Preserve the subject's facial structure, skin tone, and features with high fidelity — the face is fixed, only the makeup changes
+- Expression: lips softly closed, neutral relaxed expression
+
+STYLE RULES (apply consistently to every image):
+- Background: seamless light warm-gray studio backdrop (#E8E5E0 tone), no props, no distractions
+- Lighting: soft, even diffused front lighting with a subtle fill from above — maximizes skin texture and color accuracy, eliminates harsh shadows
+- Framing: face centered in the square, full face visible from hairline to chin with a small margin on all sides
+- Crop: tight face-only, nothing below the collarbone, no visible hair styling (pull hair back or crop at hairline)
+- Finish: clean, polished, photorealistic — not illustrated, not stylized
+
+MAKEUP FOCUS:
+- The makeup look described by the user is the ONLY variable element
+- Render makeup with maximum fidelity: accurate pigment color, blending, texture, coverage, and finish (matte/satin/gloss)
+- Every detail from the description should be clearly visible — eye shadow, liner, lashes, blush placement, lip color, skin finish
+- Show the complete face so all makeup zones (eyes, cheeks, lips, skin) are simultaneously visible
+
+IMAGE OUTPUT: 1:1 square image, photorealistic, suitable for a product card in a beauty app store
+${PREVIEW_OUTPUT_RULES}
+`,
   lighting: '',
   scene: '',
   camera: '',
