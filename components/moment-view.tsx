@@ -288,7 +288,7 @@ export function MomentView({
             )}
           </div>
           {nonFaceMixins.length > 0 && (
-            <div className="mixins grid grid-cols-2 gap-px overflow-hidden rounded border bg-foreground/10 @sm:grid-cols-3 @lg:grid-cols-4">
+            <div className="mixins max-w-80 grid grid-cols-2 gap-px overflow-hidden rounded border bg-foreground/10 @sm:grid-cols-3 @lg:grid-cols-4">
               {nonFaceMixins.map(([type, assetId]) => {
                 const assetType = assetTypes.find(t => t.type === type)
                 const displayName = assetType?.name || type
@@ -297,8 +297,8 @@ export function MomentView({
                 return (
                   <div
                     key={type}
-                    className="mixin-item relative flex h-20 items-center justify-center overflow-hidden bg-background/75">
-                    <Badge className="absolute top-1 left-1 z-10 bg-background/50">
+                    className="mixin-item relative flex h-20 items-center justify-center rounded overflow-hidden bg-background/75">
+                    <Badge className="absolute top-1 left-1 z-10 bg-background/50  text-foreground">
                       {displayName}
                     </Badge>
                     {asset?.path ? (
