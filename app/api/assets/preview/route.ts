@@ -4,12 +4,14 @@ import sharp from 'sharp'
 import { z } from 'zod'
 import { ASSET_PREVIEW_SYSTEM_PROMPT, DEFAULTS } from '@/lib/prompts'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { assetTypeNames, type AssetType } from '@/lib/types'
 import { random } from '@/lib/utils'
 
 const schema = z.object({
   type: z.enum(assetTypeNames as [AssetType, ...AssetType[]]),
   content: z.string().min(1),
+  user_id: z.string().nullable().optional(),
 })
 
 export async function POST(request: NextRequest) {
@@ -28,7 +30,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
 
-  const { type, content } = validation.data
+  const { type, content, user_id } = validation.data
   const systemPrompt = ASSET_PREVIEW_SYSTEM_PROMPT[type]
   if (!systemPrompt) {
     return NextResponse.json(
@@ -112,8 +114,13 @@ export async function POST(request: NextRequest) {
     .jpeg({ quality: 85 })
     .toBuffer()
 
-  const storagePath = `${userId}/${type}/${random()}.jpg`
-  const { error: uploadError } = await supabase.storage
+  const storagePath = user_id === null
+    ? `${type}/${random()}.jpg`
+    : `${userId}/${type}/${random()}.jpg`
+  const storageClient = user_id === null
+    ? createAdminClient()
+    : supabase
+  const { error: uploadError } = await storageClient.storage
     .from('assets')
     .upload(storagePath, compressed, { contentType: 'image/jpeg', upsert: false })
   if (uploadError) {

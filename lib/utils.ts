@@ -35,6 +35,13 @@ export const storageUrl = (path: string) =>
     `${path}`
   ].join('')
 
+export const removeAssetImage = (path: string) =>
+  fetch('/api/assets/image', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ path }),
+  })
+
 export const random = (bytes = 8) => {
   const arr = new Uint8Array(bytes)
   crypto.getRandomValues(arr)

@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/button'
 import { CreditButton } from '@/components/credit-button'
 import { Input } from '@/components/ui/input'
@@ -10,7 +9,7 @@ import { Upload, type UploadHandle } from '@/components/upload'
 import type { Asset, AssetRunMode, AssetType } from '@/lib/types'
 import { useCreateAsset } from '@/hooks/use-create-asset'
 import { useUpdateAsset } from '@/hooks/use-update-asset'
-import { assetUrl } from '@/lib/utils'
+import { assetUrl, removeAssetImage } from '@/lib/utils'
 import { assetModes } from '@/lib/assets-config'
 import { ArrowDown, ArrowDownUp, ArrowUp, Loader2, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -75,7 +74,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   useEffect(() => {
     return () => {
       if (uploadedRef.current && !savedRef.current) {
-        createClient().storage.from('assets').remove([uploadedRef.current])
+        removeAssetImage(uploadedRef.current)
       }
     }
   }, [])
@@ -152,7 +151,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
       const res = await fetch('/api/assets/preview', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, content })
+        body: JSON.stringify({ ...asset, type,content })
       })
       if (!res.ok) {
         const data = await res.json()
@@ -160,8 +159,9 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
         return
       }
       const data = await res.json()
+      // console.log('previewdata---------------', data.storagePath, uploaded)
       if (uploaded && uploaded !== data.storagePath) {
-        createClient().storage.from('assets').remove([uploaded])
+        removeAssetImage(uploaded)
       }
       setUploaded(data.storagePath)
       setGenerated(true)
@@ -179,7 +179,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
     setExtracting(true)
     setExtractError('')
     try {
-      const body = { type, image: originalImage.current || uploaded }
+      const body = { ...asset, type, image: originalImage.current || uploaded }
       const res = await fetch('/api/assets/extract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -218,7 +218,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
           }
           if (event.type === 'completed') {
             setExtracted('')
-            createClient().storage.from('assets').remove([uploaded])
+            removeAssetImage(uploaded)
             setUploaded(event.storagePath)
             setGenerated(true)
             if (event.title && !title) setTitle(event.title)
@@ -255,7 +255,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
             // Delete old image from storage if it was replaced
             if (asset.path) {
               if (pathToSave !== asset.path) {
-                createClient().storage.from('assets').remove([asset.path])
+                removeAssetImage(asset.path)
               }
             }
             savedRef.current = true
@@ -280,7 +280,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   const handleCancel = async () => {
     savedRef.current = true
     if (uploaded) {
-      await createClient().storage.from('assets').remove([uploaded])
+      await removeAssetImage(uploaded)
     }
     if (!isEditing) resetForm()
     onClose()
@@ -356,7 +356,9 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
         <Upload
           ref={uploadRef}
           className="aspect-square"
-          path={({ userId }) => `assets/${userId}/${type}`}
+          path={({ userId }) => asset?.user_id === null
+            ? `assets/${type}`
+            : `assets/${userId}/${type}`}
           value={preview}
           compress={type !== 'face'}
           onBeforeUpload={setOriginalImage}
@@ -367,7 +369,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
           )}
           onComplete={(path) => {
             if (uploaded && uploaded !== path) {
-              createClient().storage.from('assets').remove([uploaded])
+              removeAssetImage(uploaded)
             }
             setUploaded(path)
             setGenerated(false)
@@ -376,7 +378,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
           }}
           onClear={() => {
             if (uploaded) {
-              createClient().storage.from('assets').remove([uploaded])
+              removeAssetImage(uploaded)
             }
             originalImage.current = ''
             setUploaded('')

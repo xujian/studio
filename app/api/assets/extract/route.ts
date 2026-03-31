@@ -5,12 +5,14 @@ import { z } from 'zod'
 import { cropFace } from '@/lib/crop'
 import { ASSET_EXTRACT_SYSTEM_PROMPT } from '@/lib/prompts'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { assetTypeNames, type AssetType } from '@/lib/types'
 import { assetUrl, random } from '@/lib/utils'
 
 const schema = z.object({
   type: z.enum(assetTypeNames as [AssetType, ...AssetType[]]),
   image: z.string().min(1), // storage path OR data URL
+  user_id: z.string().nullable().optional(),
 })
 
 const send = (controller: ReadableStreamDefaultController, event: object) => {
@@ -35,7 +37,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
 
-  const { type, image } = validation.data
+  const { type, image, user_id } = validation.data
   const isDataUrl = image.startsWith('data:')
   const cropped = isDataUrl && image.includes(';cropped;')
   // console.log('extract/route-------------type:', type, isDataUrl, image.length)
@@ -154,8 +156,13 @@ export async function POST(request: NextRequest) {
           .jpeg({ quality: 85 })
           .toBuffer()
 
-        const storagePath = `${userId}/${type}/${random()}.jpg`
-        const { error: uploadError } = await supabase.storage
+        const storagePath = user_id === null
+          ? `${type}/${random()}.jpg`
+          : `${userId}/${type}/${random()}.jpg`
+        const storageClient = user_id === null
+          ? createAdminClient()
+          : supabase
+        const { error: uploadError } = await storageClient.storage
           .from('assets')
           .upload(storagePath, compressed, { contentType: 'image/jpeg', upsert: false })
         if (uploadError) {
