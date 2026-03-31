@@ -356,23 +356,22 @@ const filterAssets = (type?: AssetType) => {
           selected={mixins.face}
         />
       </div>
-      {/* Error display */}
       <div
         role="alert"
         aria-live="assertive"
         className={cn([
-          'error absolute glass flex items-center justify-between bottom-0 right-0 left-0 rounded-full',
-          'h-12 p-2 pl-4',
+          'error absolute flex items-center justify-between bottom-0 right-0 left-0 rounded-full',
+          'h-12 p-2 pl-4 backdrop-blur-md duration-500',
           error ? 'translate-y-0' : 'translate-y-full',
         ].join(' '))}>
         {error && error.message}
-        <Button className="absolute top-2 right-2 icon-button" aria-label="Dismiss error" onClick={clearError}>
+        <Button size="icon-lg" className="absolute top-1 right-1" aria-label="Dismiss error" onClick={clearError}>
           <X />
         </Button>
       </div>
       <div className={cn('pulse', isPending ? 'on' : 'off')} aria-live="polite">
         {isPending && <span className="sr-only">Generating portrait...</span>}
-        <Button className="absolute top-4 right-4 icon-button" tooltip="stop" aria-label="Stop generation">
+        <Button size="icon-lg" className="absolute top-1 right-1 icon-button" tooltip="stop" aria-label="Stop generation">
           <Square />
         </Button>
       </div>

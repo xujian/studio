@@ -11,7 +11,7 @@ import { useCreateAsset } from '@/hooks/use-create-asset'
 import { useUpdateAsset } from '@/hooks/use-update-asset'
 import { assetUrl, removeAssetImage } from '@/lib/utils'
 import { assetModes } from '@/lib/assets-config'
-import { ArrowDown, ArrowDownUp, ArrowUp, Loader2, Sparkles } from 'lucide-react'
+import { ArrowDown, ArrowUp, Loader2, OctagonAlert, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge, Hint } from './ui'
 import { useQueryClient } from '@tanstack/react-query'
@@ -353,7 +353,10 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
                   previewError ? 'top-1/2' : 'top-full'
                 )}>
                 <CloseButton onClick={() => setPreviewError('')} />
-                {previewError}
+                <div className="flex items-center h-full gap-2">
+                  <OctagonAlert />
+                  {previewError}
+                </div>
               </div>
             </Textarea>)
         }
@@ -451,7 +454,10 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
               extractError ? 'top-1/2' : 'top-full'
             )}>
             <CloseButton size="icon-lg" onClick={() => setExtractError('')} />
-            {extractError}
+            <div className="flex items-center h-full gap-2">
+              <OctagonAlert />
+              {extractError}
+            </div>
           </div>
         </Upload>
       </div>
