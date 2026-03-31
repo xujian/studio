@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenAI } from '@google/genai'
+import { extractError } from '@/lib/error'
 import sharp from 'sharp'
 import { z } from 'zod'
 import { cropFace } from '@/lib/crop'
@@ -110,7 +111,7 @@ export async function POST(request: NextRequest) {
           })
         } catch (err) {
           console.error('[assets/extract] generation failed', err)
-          send(controller, { type: 'error', error: 'Generation failed' })
+          send(controller, { type: 'error', error: extractError(err).message })
           controller.close()
           return
         }

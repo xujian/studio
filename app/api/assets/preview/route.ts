@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenAI } from '@google/genai'
+import { extractError } from '@/lib/error'
 import sharp from 'sharp'
 import { z } from 'zod'
 import { ASSET_PREVIEW_SYSTEM_PROMPT, DEFAULTS } from '@/lib/prompts'
@@ -72,7 +73,8 @@ export async function POST(request: NextRequest) {
     })
   } catch (err) {
     console.error('[assets/preview] generation failed', err)
-    return NextResponse.json({ error: 'Generation failed' }, { status: 500 })
+    const { message, retryable } = extractError(err)
+    return NextResponse.json({ error: message }, { status: retryable ? 503 : 500 })
   }
 
   const parts = response.candidates?.[0]?.content?.parts || []

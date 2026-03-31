@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAxiom, logger } from '@/lib/axiom/server'
+import { extractError } from '@/lib/error'
 import { engine, type GenerateParams } from '@/lib/engine'
 import { ratelimit } from '@/lib/ratelimit'
 import { createClient } from '@/lib/supabase/server'
@@ -202,13 +203,9 @@ export const POST = withAxiom(async function POST(request: NextRequest) {
 
 function halt (error: Error) {
   console.error('Engine API error:', error)
+  const { message, retryable } = extractError(error)
   return NextResponse.json(
-    {
-      error: 'Generation failed',
-      message: error instanceof Error
-        ? error.message
-        : 'Unknown error'
-    },
-    { status: 500 }
+    { error: message },
+    { status: retryable ? 503 : 500 }
   )
 }

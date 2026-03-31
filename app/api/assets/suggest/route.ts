@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenAI } from '@google/genai'
+import { extractError } from '@/lib/error'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 
@@ -73,6 +74,7 @@ export async function POST(request: NextRequest) {
     })
   } catch (err) {
     console.error('[assets/suggest]', err)
-    return NextResponse.json({ error: 'Suggestion failed' }, { status: 500 })
+    const { message, retryable } = extractError(err)
+    return NextResponse.json({ error: message }, { status: retryable ? 503 : 500 })
   }
 }
