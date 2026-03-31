@@ -88,8 +88,9 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   const [suggesting, setSuggesting] = useState(false)
   const [previewing, setPreviewing] = useState(false)
   const [extracting, setExtracting] = useState(false)
-  const [generated, setGenerated] = useState(false)
-  const [extracted, setExtracted] = useState('')
+  const [previewed, setPreviewed] = useState(false)
+  const [extracted, setExtracted] = useState(false)
+  const [cropped, setCropped] = useState('')
   const [previewError, setPreviewError] = useState('')
   const [extractError, setExtractError] = useState('')
   const assetMode = assetModes[type]
@@ -164,7 +165,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
         removeAssetImage(uploaded)
       }
       setUploaded(data.storagePath)
-      setGenerated(true)
+      setPreviewed(true)
       if (data.title && !title) setTitle(data.title)
       if (data.slug && !name) setName(data.slug)
       if (data.description && !description) setDescription(data.description)
@@ -212,15 +213,15 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
             return
           }
           if (event.type === 'cropped') {
-            setExtracted(event.dataUrl)
+            setCropped(event.dataUrl)
             // Tag the data URL so the API knows it's pre-cropped and can skip the crop step on redo
             originalImage.current = event.dataUrl.replace(';base64,', ';cropped;base64,')
           }
           if (event.type === 'completed') {
-            setExtracted('')
+            setCropped('')
+            setExtracted(true)
             removeAssetImage(uploaded)
             setUploaded(event.storagePath)
-            setGenerated(true)
             if (event.title && !title) setTitle(event.title)
             if (event.slug && !name) setName(event.slug)
             if (event.description && !description) setDescription(event.description)
@@ -293,8 +294,9 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
     setTitle('')
     setDescription('')
     setContent('')
-    setGenerated(false)
-    setExtracted('')
+    setPreviewed(false)
+    setExtracted(false)
+    setCropped('')
     setCleared(false)
   }
 
@@ -302,7 +304,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   const isPending = createAsset.isPending || updateAsset.isPending
   const canSave = !!name && !isPending
 
-  const preview = extracted
+  const preview = cropped
     || (uploaded ? assetUrl(uploaded) : undefined)
     || (!cleared && asset?.path ? assetUrl(asset.path) : undefined)
 
@@ -342,7 +344,9 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
                   ) : (
                     <Sparkles className="size-3.5" />
                   )}
-                  Generate preview image
+                  {previewed ?
+                    'Re-generate preview'
+                    : 'Generate preview'}
                 </CreditButton>)}
               {previewing && <div className="pulse absolute inset-0 rounded-2xl pointer-events-none" />}
               <div className={cn('error absolute left-0 w-full h-1/2 rounded-xl p-4 transition-top duration-300 backdrop-blur-md',
@@ -372,8 +376,9 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
               removeAssetImage(uploaded)
             }
             setUploaded(path)
-            setGenerated(false)
-            setExtracted('')
+            setPreviewed(false)
+            setExtracted(false)
+            setCropped('')
             setCleared(false)
           }}
           onClear={() => {
@@ -382,8 +387,9 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
             }
             originalImage.current = ''
             setUploaded('')
-            setExtracted('')
-            setGenerated(false)
+            setPreviewed(false)
+            setExtracted(false)
+            setCropped('')
             setCleared(true)
           }}>
           <Badge variant="ghost"
@@ -406,7 +412,9 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
                 ) : (
                   <Sparkles className="size-3.5" />
                 )}
-                {generated ? `Re-extract ${type}` : `Extract ${type}`}
+                {extracted
+                  ? `Re-extract ${type}`
+                  : `Extract ${type}`}
               </CreditButton>
             )}
             {assetMode === 'text-first' && (
