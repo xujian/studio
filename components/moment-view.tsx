@@ -51,6 +51,7 @@ export function MomentView({
   readOnly = false,
   author
 }: MomentViewProps) {
+  const [photos, setPhotos] = React.useState(moment.photos)
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
   const [shared, setShared] = React.useState(false)
@@ -76,11 +77,11 @@ export function MomentView({
   }, [moment.id, readOnly])
 
   // Find initial photo index
-  const initialIndex = moment.photos.findIndex(p => p.id === initialPhotoId)
+  const initialIndex = photos.findIndex(p => p.id === initialPhotoId)
 
-  const hasMultiplePhotos = moment.photos.length > 1
-  const clampedCurrent = Math.min(current, moment.photos.length - 1)
-  const currentPhoto = moment.photos[clampedCurrent]
+  const hasMultiplePhotos = photos.length > 1
+  const clampedCurrent = Math.min(current, photos.length - 1)
+  const currentPhoto = photos[clampedCurrent]
   const merged = {
     ...moment.mixins,
     ...currentPhoto?.mixins
@@ -94,13 +95,19 @@ export function MomentView({
   React.useEffect(() => {
     if (!api) return
     api.reInit()
+    // After re-init, clamp to a valid index (e.g. after photo deletion)
+    const maxIndex = photos.length - 1
+    const snap = api.selectedScrollSnap()
+    if (snap > maxIndex) {
+      api.scrollTo(Math.max(0, maxIndex), true)
+    }
     setCurrent(api.selectedScrollSnap())
     const onSelect = () => setCurrent(api.selectedScrollSnap())
     api.on('select', onSelect)
     return () => {
       api.off('select', onSelect)
     }
-  }, [api, moment.photos.length])
+  }, [api, photos.length])
   // Scroll to initial photo
   React.useEffect(() => {
     if (api && initialIndex >= 0) {
@@ -195,7 +202,7 @@ export function MomentView({
             }}
             className="carousel h-full w-full">
             <CarouselContent className="carousel-content h-full">
-              {moment.photos.map(photo => (
+              {photos.map(photo => (
                 <CarouselItem key={photo.id} className="h-full">
                   <motion.div layoutId={photo.id} {...dragProps}>
                     <Image
@@ -215,12 +222,12 @@ export function MomentView({
             <CarouselNext className="right-4" />
             {/* Dots indicator */}
             <div role="tablist" aria-label="Photo navigation" className="absolute right-0 bottom-20 left-0 z-20 flex justify-center gap-2">
-              {Array.from({ length: moment.photos.length }).map((_, index) => (
+              {Array.from({ length: photos.length }).map((_, index) => (
                 <button
                   key={index}
                   role="tab"
                   aria-selected={index === current}
-                  aria-label={`Photo ${index + 1} of ${moment.photos.length}`}
+                  aria-label={`Photo ${index + 1} of ${photos.length}`}
                   onClick={() => api?.scrollTo(index)}
                   className={cn(
                     'h-2 w-2 rounded-full transition-all duration-200 cursor-pointer',
@@ -232,9 +239,9 @@ export function MomentView({
           </Carousel>
         ) : (
           // Single photo - no carousel
-          <motion.div layoutId={moment.photos[0].id} {...dragProps}>
+          <motion.div layoutId={photos[0].id} {...dragProps}>
             <Image
-              src={photoUrl(moment.user_id, moment.id, moment.photos[0].id)}
+              src={photoUrl(moment.user_id, moment.id, photos[0].id)}
               alt={moment.title || 'Photo'}
               fill
               className="h-full w-full object-cover"
@@ -386,11 +393,19 @@ export function MomentView({
                     message="Delete this photo?"
                     isPending={deletePhoto.isPending}
                     action={() =>
-                      deletePhoto.mutate({
-                        userId: moment.user_id,
-                        momentId: moment.id,
-                        photoId: currentPhoto.id
-                      })
+                      deletePhoto.mutate(
+                        {
+                          userId: moment.user_id,
+                          momentId: moment.id,
+                          photoId: currentPhoto.id
+                        },
+                        {
+                          onSuccess: () =>
+                            setPhotos(prev =>
+                              prev.filter(p => p.id !== currentPhoto.id)
+                            )
+                        }
+                      )
                     }>
                       <div className="flex">
                         <Trash />
