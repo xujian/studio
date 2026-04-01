@@ -210,7 +210,7 @@ const filterAssets = (type?: AssetType) => {
 
   return (
     <div data-lenis-prevent-wheel className={cn(
-        'producer fixed bottom-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-2xl -translate-x-1/2',
+        'producer fixed bottom-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-4xl -translate-x-1/2',
         'glass animate-float-up rounded-3xl bg-accent/80',
         'transition-all duration-300 overflow-hidden',
         className
