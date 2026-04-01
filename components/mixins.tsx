@@ -8,7 +8,7 @@ import {
   PopoverTrigger,
   PopoverContent
 } from '@/components/ui'
-import { assets } from '@/lib/assets-config'
+import { assets as assetDefines } from '@/lib/assets-config'
 import type { AssetType, Mixins } from '@/lib/types'
 import { assetUrl, cn } from '@/lib/utils'
 import { useAssets } from '@/hooks/use-assets'
@@ -46,13 +46,13 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
 
   return (
     <ButtonGroup className="-mt-px h-7 rounded-none bg-foreground/10">
-      {assets
-        .filter(t => t.type !== 'face')
-        .map(asset => {
-          const typeAssets = assetsByType[asset.type] || []
-          const isSelected = asset.type in value
+      {assetDefines
+        .filter(t => t.id !== 'face')
+        .map(d => {
+          const typeAssets = assetsByType[d.id] || []
+          const isSelected = d.id in value
           return (
-            <Popover key={asset.type} modal={false}>
+            <Popover key={d.id} modal={false}>
               <PopoverTrigger asChild>
                 <Button
                   type="button"
@@ -61,7 +61,7 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
                     'tube group h-7 rounded-none px-2 text-xs',
                     isSelected ? 'on' : ''
                   )}>
-                  {asset.name}
+                  {d.id}
                 </Button>
               </PopoverTrigger>
               <PopoverContent
@@ -78,19 +78,19 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
                     </div>
                   ) : typeAssets.length === 0 ? (
                     <div className="p-2 text-xs text-muted-foreground">
-                      No {asset.name!.toLowerCase()} assets yet
+                      No {d.id} assets yet
                     </div>
                   ) : (
-                    typeAssets.map(asset => (
+                    typeAssets.map(a => (
                       <Peekable
-                        key={asset.id}
+                        key={a.id}
                         content={
-                          asset.path
-                            ? assetUrl(asset.path!)
-                            : asset.content
+                          a.path
+                            ? assetUrl(a.path!)
+                            : a.content
                         }
-                        title={asset.title}
-                        description={asset.description}
+                        title={a.title}
+                        description={a.description}
                         side="right">
                         <div>
                           {/** wrapper to fix the toggle's pressed state */}
@@ -98,12 +98,12 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
                             variant="outline"
                             size="sm"
                             className="mixin h-5 justify-start"
-                            pressed={value[asset.type] === asset.id}
+                            pressed={value[a.type] === a.id}
                             onPressedChange={() =>
-                              handleSelect(asset.type, asset.id!)
+                              handleSelect(a.type, a.id)
                             }>
                             <span className="truncate text-xs">
-                              {asset.name}
+                              {a.name}
                             </span>
                           </Toggle>
                         </div>
