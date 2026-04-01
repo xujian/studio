@@ -5,7 +5,7 @@ export const assetModes: Record<AssetType, AssetWorkMode> = {
   hair: 'text-first',
   outfit: 'text-first',
   makeup: 'text-only',
-  scene: 'text-first',
+  scene: 'text-only',
   lighting: 'text-only',
   camera: 'text-only',
   mood: 'text-only'
