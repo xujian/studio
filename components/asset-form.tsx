@@ -88,6 +88,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   const [suggesting, setSuggesting] = useState(false)
   const [previewing, setPreviewing] = useState(false)
   const [extracting, setExtracting] = useState(false)
+  const [analyzing, setAnalyzing] = useState(false)
   const [previewed, setPreviewed] = useState(false)
   const [extracted, setExtracted] = useState(false)
   const [cropped, setCropped] = useState('')
@@ -231,6 +232,33 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
       }
     } finally {
       setExtracting(false)
+    }
+  }
+
+  const handleAnalyze = async () => {
+    if (!preview || analyzing) return
+    setAnalyzing(true)
+    try {
+      const image = uploaded || (!cleared && asset?.path ? asset.path : '')
+      if (!image) return
+      const res = await fetch('/api/assets/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, image })
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        console.error('[analyze]', data.error)
+        return
+      }
+      const { content, title, slug, description } = await res.json()
+      console.log('analyze result:', { content, title, slug, description })
+      setContent(content)
+      setTitle(title)
+      setName(slug)
+      setDescription(description)
+    } finally {
+      setAnalyzing(false)
     }
   }
 
@@ -402,7 +430,24 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
               : 'Reference image' }
           </Badge>
           <div className="absolute bottom-1 right-1 flex items-center gap-1">
-            {uploaded && (
+            {uploaded && assetMode !== 'image-only' && (
+              <CreditButton
+                cost={1}
+                type="button"
+                size="xs"
+                tooltip="Analyze prompt from image"
+                onClick={handleAnalyze}
+                disabled={analyzing || extracting}
+                className="z-1 gap-2">
+                {analyzing ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <Sparkles className="size-3.5" />
+                )}
+                Analyze
+              </CreditButton>
+            )}
+            {uploaded && assetMode !== 'image-only' && (
               <CreditButton
                 cost={1}
                 type="button"
@@ -416,8 +461,8 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
                   <Sparkles className="size-3.5" />
                 )}
                 {extracted
-                  ? `Re-extract ${type}`
-                  : `Extract ${type}`}
+                  ? `Re-extract`
+                  : `Extract`}
               </CreditButton>
             )}
             {assetMode === 'text-first' && (
@@ -432,8 +477,8 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
                   : <ArrowDown className="size-4" />
                 }
                 { runMode === 'text'
-                  ? 'Use image as reference'
-                  : 'Input as text prompt' }
+                  ? 'Use this as reference image'
+                  : 'Use text as prompt' }
               </Button>)
             }
           </div>
