@@ -189,12 +189,8 @@ Return ONLY the JSON, no markdown or extra text.`
 
 
 const JAPANESE_STYLE_RULES = `
-	- Lighting: Embrace soft, natural light. Think of the gentle, diffused sunlight of a quiet afternoon. Use light to create a warm, welcoming atmosphere, with soft shadows that enhance the peaceful, calm vibe of the scene.
-	- Composition: Keep things clean and simple. Focus on minimalism – let the subject breathe in its environment, with enough space around it to evoke a sense of tranquility. Play with asymmetry to bring life and subtle energy to the composition without overwhelming the viewer.
-	- Colors: Subtle, muted tones are key. Soft pastels, warm neutrals, and earthy hues should dominate. Aim for a serene and calming palette, where the colors blend softly rather than contrast sharply.
-	- Textures & Details: Give attention to the finer details – the texture of the fabric, the grain of the wood, the light glinting off a surface. Capture those moments of tactile beauty, letting them add a sense of intimacy and realism to the scene.
-	- Atmosphere: The overall mood should be quiet and reflective. Whether it’s a simple moment or a quiet space, the aim is to evoke a feeling of calm and nostalgia, with a touch of everyday charm. Think of it as capturing the small, beautiful moments in life – the ones that go unnoticed but are full of warmth.
-	- Creativity Space: Feel free to experiment with light and shadows to tell a story, and don’t be afraid to add your own touches—like a fleeting cherry blossom petal or the soft curve of a teacup. Just make sure everything feels organic, like it could belong in a tranquil, thoughtful moment.
+STYLE RULES:
+in the style of classic Japanese photography color grading, soft muted tones with cool cyan-blue and gentle green undertones, low saturation, low contrast, high key bright and airy atmosphere, slight overexposure on highlights creating soft glowing whites, lifted shadows with retained details, creamy natural skin tones with translucent feel, subtle film grain and atmospheric haze, soft diffused natural window light or gentle backlighting, delicate color transitions, serene and healing mood, shot on 50mm lens with shallow depth of field, professional lifestyle photography, clean composition with generous negative space
 `
 
 /**
@@ -311,7 +307,7 @@ ${PREVIEW_OUTPUT_RULES}
 `,
   lighting: '',
   scene: `You are a Portrait Photographer.
-Your goal is to take a shot of a scene from a text description, preparing for portrait photography.
+Your goal is to generate a preview image of a scene from a text description, preparing for portrait photography.
 
 CONTENT RULES:
 - The final photo is not for just empty scenes, it's for female portrait photography.
@@ -320,7 +316,6 @@ CONTENT RULES:
 - Show the environment exactly as described: setting, architecture, props, surfaces, and atmosphere, with a focus on mood.
 - Capture the lighting conditions, time of day, and atmospheric effects described (e.g., golden hour warmth, overcast gray skies, neon-lit urban night, foggy mist, soft diffused daylight, etc.).
 
-STYLE RULES:
 ${JAPANESE_STYLE_RULES}
 
 IMAGE OUTPUT: 1:1 square image, photorealistic, suitable for a scene card in a photography app store.
@@ -338,9 +333,12 @@ ${PREVIEW_OUTPUT_RULES}
 export const ASSET_ANALYZE_PROMPT: Partial<Record<AssetType, string>> = {
   scene: `You are a portrait photography art director.
 Analyze this image and write a concise description of the scene for use as a photography prompt.
-Ignore any people or figures in the image.
-Focus on: location/setting, key environmental elements, time of day or light quality, and overall atmosphere.
-Be specific and evocative. Write 1-3 sentences. No bullet points. output JSON or plain text.
+
+RULES:
+- Ignore any people or figures in the image.
+- Focus on: location/setting, key environmental elements, time of day or light quality, and overall atmosphere.
+- Avoid using symmetrical camera angles.
+- Be specific and evocative. Write 1-3 sentences. No bullet points. output JSON or plain text.
 Example: "Sunlit Tokyo alley with lanterns and ivy-covered walls, warm golden-hour light filtering between buildings. The narrow cobblestone street creates a quiet, nostalgic atmosphere."
 
 ${JAPANESE_STYLE_RULES}
