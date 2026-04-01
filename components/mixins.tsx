@@ -8,7 +8,7 @@ import {
   PopoverTrigger,
   PopoverContent
 } from '@/components/ui'
-import { assetTypes } from '@/lib/constants'
+import { assets } from '@/lib/assets-config'
 import type { AssetType, Mixins } from '@/lib/types'
 import { assetUrl, cn } from '@/lib/utils'
 import { useAssets } from '@/hooks/use-assets'
@@ -46,13 +46,13 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
 
   return (
     <ButtonGroup className="-mt-px h-7 rounded-none bg-foreground/10">
-      {assetTypes
+      {assets
         .filter(t => t.type !== 'face')
-        .map(assetType => {
-          const typeAssets = assetsByType[assetType.type] || []
-          const isSelected = assetType.type in value
+        .map(asset => {
+          const typeAssets = assetsByType[asset.type] || []
+          const isSelected = asset.type in value
           return (
-            <Popover key={assetType.type} modal={false}>
+            <Popover key={asset.type} modal={false}>
               <PopoverTrigger asChild>
                 <Button
                   type="button"
@@ -61,14 +61,14 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
                     'tube group h-7 rounded-none px-2 text-xs',
                     isSelected ? 'on' : ''
                   )}>
-                  {assetType.name}
+                  {asset.name}
                 </Button>
               </PopoverTrigger>
               <PopoverContent
                 align="start"
                 side="top"
                 sideOffset={0}
-                className="draw-up rounded-top glass w-48 border-border p-2">
+                className="draw-up rounded-top glass w-48 border-border p-2 pr-0">
                 <div
                   data-lenis-prevent-wheel
                   className="flex max-h-60 flex-col items-start justify-start gap-1 overflow-y-auto">
@@ -78,7 +78,7 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
                     </div>
                   ) : typeAssets.length === 0 ? (
                     <div className="p-2 text-xs text-muted-foreground">
-                      No {assetType.name.toLowerCase()} assets yet
+                      No {asset.name!.toLowerCase()} assets yet
                     </div>
                   ) : (
                     typeAssets.map(asset => (
@@ -98,9 +98,9 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
                             variant="outline"
                             size="sm"
                             className="mixin h-5 justify-start"
-                            pressed={value[assetType.type] === asset.id}
+                            pressed={value[asset.type] === asset.id}
                             onPressedChange={() =>
-                              handleSelect(assetType.type, asset.id!)
+                              handleSelect(asset.type, asset.id!)
                             }>
                             <span className="truncate text-xs">
                               {asset.name}

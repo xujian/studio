@@ -1,14 +1,14 @@
 import type { User as SupabaseUser } from '@supabase/supabase-js'
 import { CamelCasedProperties } from 'type-fest'
-import { assetTypes } from './constants'
+import { assets } from './assets-config'
 import type { SubscriptionTier } from './constants'
 
-export const assetTypeNames = assetTypes.map(t => t.type)
+export const assetTypeNames = assets.map(t => t.id)
 
 /**
  * type of asset
  */
-export type AssetType = typeof assetTypeNames[number]
+export type AssetType = 'face' | 'makeup' | 'hair' | 'outfit' | 'scene' | 'lighting' | 'camera' | 'mood'
 
 export type AssetValue = {
   [k in AssetType]?: string

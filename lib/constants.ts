@@ -1,16 +1,5 @@
 import { Asset, Assets, AssetType } from './types'
 
-export const assetTypes = [
-  { name: 'Face', type: 'face' },
-  { name: 'Hair', type: 'hair' },
-  { name: 'Makeup', type: 'makeup' },
-  { name: 'Outfit', type: 'outfit' },
-  { name: 'Scene', type: 'scene' },
-  { name: 'Lighting', type: 'lighting' },
-  { name: 'Camera', type: 'camera' },
-  { name: 'Mood', type: 'mood' }
-] as const
-
 export const defaultAssets: Assets = {
   face: {
     type: 'face',

@@ -15,7 +15,7 @@ import {
 } from '@/components/ui'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui'
 import { useBus } from '@/lib/bus'
-import { assetTypes } from '@/lib/constants'
+import { assets } from '@/lib/assets-config'
 import type { MomentWithPhotos } from '@/lib/types'
 import { assetUrl, cn, photoUrl, uploadUrl } from '@/lib/utils'
 import { useMixins } from '@/hooks/use-mixins'
@@ -290,8 +290,8 @@ export function MomentView({
           {nonFaceMixins.length > 0 && (
             <div className="mixins max-w-80 grid grid-cols-2 gap-px overflow-hidden rounded border bg-foreground/10 @sm:grid-cols-3 @lg:grid-cols-4">
               {nonFaceMixins.map(([type, assetId]) => {
-                const assetType = assetTypes.find(t => t.type === type)
-                const displayName = assetType?.name || type
+                const assetType = assets.find(t => t.id === type)
+                const displayName = assetType?.id || type
                 const asset =
                   assetId && assetsMap ? assetsMap.get(assetId) : null
                 return (

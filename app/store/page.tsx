@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { AssetCard } from '@/components/asset-card'
-import { assetTypes } from '@/lib/constants'
+import { assets } from '@/lib/assets-config'
 import { createClient } from '@/lib/supabase/server'
 import type { AssetWithPurchaseInfo } from '@/lib/types'
 
@@ -29,7 +29,7 @@ export default async function StorePage() {
 
   const assets = (data || []) as AssetWithPurchaseInfo[]
 
-  const sections = assetTypes
+  const sections = assets
     .map(t => ({
       type: t.type,
       name: t.name,
