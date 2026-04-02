@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 270 480" fill="none">
+  <!-- Line art figure — neutral standing pose -->
+  <!-- Head -->
+  <circle cx="135" cy="80" r="32" stroke="white" stroke-width="2" opacity="0.85"/>
+  <!-- Neck -->
+  <line x1="135" y1="112" x2="135" y2="135" stroke="white" stroke-width="2" opacity="0.85"/>
+  <!-- Shoulders -->
+  <path d="M80 145 Q135 130 190 145" stroke="white" stroke-width="2" fill="none" opacity="0.85"/>
+  <!-- Torso -->
+  <path d="M80 145 L75 260 L135 270 L195 260 L190 145" stroke="white" stroke-width="2" fill="none" opacity="0.85"/>
+  <!-- Left arm -->
+  <path d="M80 145 L55 220 L60 280" stroke="white" stroke-width="2" fill="none" opacity="0.85"/>
+  <!-- Right arm -->
+  <path d="M190 145 L215 220 L210 280" stroke="white" stroke-width="2" fill="none" opacity="0.85"/>
+  <!-- Left leg -->
+  <path d="M105 270 L100 380 L95 460" stroke="white" stroke-width="2" fill="none" opacity="0.85"/>
+  <!-- Right leg -->
+  <path d="M165 270 L170 380 L175 460" stroke="white" stroke-width="2" fill="none" opacity="0.85"/>
+</svg>
