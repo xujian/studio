@@ -35,7 +35,7 @@ export default function StudioPage() {
     data?.pages
       .flatMap(page => page.moments)
       .filter(m => m.photos.length > 0) || []
-
+  
   return (
     <>
       <section className={activeAssets ? 'hidden' : 'moments flex w-full flex-col items-start justify-center px-4 pb-52 md:px-8 lg:px-16'}>

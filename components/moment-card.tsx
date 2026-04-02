@@ -1,94 +1,57 @@
 'use client'
 
 import * as React from 'react'
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-  type CarouselApi
-} from '@/components/ui'
-import { Photo } from '@/components/photo'
+import { Button } from '@/components/button'
+import { MomentCarousel } from '@/components/moment-carousel'
 import type { MomentWithPhotos } from '@/lib/types'
 import { cn } from '@/lib/utils'
+import { usePublishPost, useUnpublishPost } from '@/hooks/use-posts'
+import { Globe, GlobeX, Loader2 } from 'lucide-react'
 
-interface MomentCardProps {
+type MomentCardProps = {
   moment: MomentWithPhotos
 }
 
 export function MomentCard({ moment }: MomentCardProps) {
-  const [isHovered, setIsHovered] = React.useState(false)
-  const [api, setApi] = React.useState<CarouselApi>()
-  const [current, setCurrent] = React.useState(0)
-  const [count, setCount] = React.useState(0)
+  const [published, setPublished] = React.useState(!!moment.published)
+  const publishPost = usePublishPost()
+  const unpublishPost = useUnpublishPost()
 
-  const photos = [...moment.photos].sort((a, b) =>
-    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  )
-  const hasMultiplePhotos = photos.length > 1
+  const isPending = publishPost.isPending || unpublishPost.isPending
 
-  React.useEffect(() => {
-    if (!api) return
-    setCount(api.scrollSnapList().length)
-    setCurrent(api.selectedScrollSnap())
-    api.on('select', () => {
-      setCurrent(api.selectedScrollSnap())
-    })
-  }, [api])
-
-  React.useEffect(() => {
-    if (!api) return
-    api.reInit()
-    setCount(api.scrollSnapList().length)
-  }, [api, photos.length])
-
-  // Single photo - no carousel
-  if (!hasMultiplePhotos) {
-    return (
-      <div className="relative aspect-9/16 w-full overflow-hidden rounded-2xl bg-muted">
-        <Photo data={photos[0]} />
-      </div>
-    )
+  const togglePublish = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (published) {
+      unpublishPost.mutate(moment.id, { onSuccess: () => setPublished(false) })
+    } else {
+      publishPost.mutate(moment.id, { onSuccess: () => setPublished(true) })
+    }
   }
 
-  // Multiple photos - carousel
   return (
-    <div
-      className="relative overflow-hidden rounded-3xl"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}>
-      <Carousel setApi={setApi} opts={{ loop: false }}>
-        <CarouselContent>
-          {photos.map(photo => (
-            <CarouselItem key={photo.id}>
-              <div className="relative aspect-9/16 w-full overflow-hidden rounded bg-muted">
-                <Photo data={photo} />
-              </div>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <div
-          className={cn(
-            'absolute bottom-6 h-8 w-full transition-opacity duration-200',
-            isHovered ? 'opacity-100' : 'opacity-0 focus-within:opacity-100'
-          )}
-          onClick={(e) => { e.preventDefault(); e.stopPropagation() }}>
-          <CarouselPrevious className="left-2 bg-black!" aria-label="Previous photo" />
-          <CarouselNext className="right-2 bg-black!" aria-label="Next photo" />
-        </div>
-      </Carousel>
-      <div className="absolute right-0 bottom-2 left-0 z-10 flex justify-center gap-1.5">
-        {Array.from({ length: count }).map((_, index) => (
-          <div
-            key={index}
-            className={cn(
-              'h-1.5 w-1.5 rounded-full transition-all duration-200',
-              index === current ? 'w-3 bg-white' : 'bg-white/50'
-            )}
-          />
-        ))}
-      </div>
-    </div>
+    <MomentCarousel moment={moment}>
+      <Button
+        size="sm"
+        variant="ghost"
+        tooltip="Publish to Community"
+        className={cn(
+          'absolute top-2 right-2 z-20 rounded-full',
+          'bg-black/60 text-white opacity-0 transition-opacity',
+          'hover:bg-black/80 hover:text-white group-hover:opacity-100',
+          published ? 'bg-black' : 'bg-black/50'
+        )}
+        disabled={isPending}
+        onClick={togglePublish}
+        aria-label={published ? 'Unpublish moment' : 'Publish moment'}>
+        {isPending
+          ? <Loader2 className="size-4 animate-spin" />
+          : published
+            ? <GlobeX className="size-4" />
+            : <Globe className="size-4" />
+        }
+        {published ? 'Published' : 'Publish'}
+      </Button>
+    </MomentCarousel>
   )
 }

@@ -100,7 +100,7 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
                             className="mixin h-5 justify-start"
                             pressed={value[a.type] === a.id}
                             onPressedChange={() =>
-                              handleSelect(a.type, a.id)
+                              handleSelect(a.type, a.id!)
                             }>
                             <span className="truncate text-xs">
                               {a.name}

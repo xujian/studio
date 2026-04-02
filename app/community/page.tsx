@@ -51,21 +51,23 @@ export default async function CommunityPage() {
       {allPosts.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-20 text-center">
           <p className="text-muted-foreground">No posts yet</p>
-          <p className="text-sm text-muted-foreground/70">Share your moments from the Studio to see them here</p>
+          <p className="text-sm text-muted-foreground/70">Publish your moments from the Studio to see them here</p>
         </div>
       ) : (
         <div className="flex flex-col gap-10">
           {sections.map(section => (
             <section key={section.title} className="flex flex-col gap-4">
               <h2 className="my-0 text-lg font-semibold">{section.title}</h2>
-              <div role="list" aria-label={`${section.title} posts`} className="scrollbar-none -mx-4 flex gap-4 overflow-x-auto px-4 pb-4 md:-mx-8 md:px-8 lg:-mx-16 lg:px-16">
+              <div role="list"
+                aria-label={`${section.title} posts`}
+                className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
                 {section.posts.map(post => (
-                  <div key={post.id} className="w-48 shrink-0 md:w-56">
-                    <PostCard
-                      post={post}
-                      href={`/moments/${post.moment.id}?photo=${post.moment.photos[0]?.id}`}
-                    />
-                  </div>
+                  <PostCard
+                    key={post.id}
+                    className="w-48"
+                    post={post}
+                    href={`/moments/${post.moment.id}?photo=${post.moment.photos[0]?.id}`}
+                  />
                 ))}
               </div>
             </section>
