@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { AssetCard } from '@/components/asset-card'
-import { assets } from '@/lib/assets-config'
+import { assets as assetDefines } from '@/lib/assets-config'
 import { createClient } from '@/lib/supabase/server'
 import type { AssetWithPurchaseInfo } from '@/lib/types'
 
@@ -15,27 +15,20 @@ export const metadata: Metadata = {
 
 export default async function StorePage() {
   const supabase = await createClient()
-
   const {
     data: { session }
   } = await supabase.auth.getSession()
-
   const userId = session?.user?.id ?? '00000000-0000-0000-0000-000000000000'
-
   const { data } = await supabase.rpc('get_store_assets', {
     user_uuid: userId
   })
-
-
   const assets = (data || []) as AssetWithPurchaseInfo[]
-
-  const sections = assets
+  const sections = assetDefines
     .map(t => ({
-      type: t.type,
-      name: t.name,
-      assets: assets.filter(a => a.type === t.type)
+      type: t.id,
+      name: t.id,
+      assets: assets.filter(a => a.type === t.id)
     }))
-
   return (
     <section className="flex w-full flex-col px-4 pt-2 pb-16 md:px-8 lg:px-16">
       <h1 className="mb-8 text-2xl font-semibold">Store</h1>
