@@ -24,7 +24,7 @@ export const AssetPreview = ({ asset, ...props }: AssetPreviewProps) => {
               alt={asset.name || 'Asset'}
               fill
               className="object-cover bg-neutral"
-              sizes="max-width: 768px) 50vw, 25vw"
+              sizes="(max-width: 768px) 50vw, 25vw"
             />)
         : asset.type === 'camera'
           ? (<>
