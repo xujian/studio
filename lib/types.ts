@@ -62,6 +62,7 @@ export type Photo = {
 
 export type MomentWithPhotos = Moment & {
   photos: Photo[]
+  published?: boolean
 }
 
 /**

@@ -26,7 +26,8 @@ export const useMoments = () => {
         .select(
           `
           *,
-          photos(*)
+          photos(*),
+          posts(id)
         `
         )
         .order('created_at', { ascending: false })
@@ -39,6 +40,7 @@ export const useMoments = () => {
           ...photo,
           user_id: moment.user_id,
         })),
+        published: !!(moment.posts as { id: string } | null),
       })) as MomentWithPhotos[]
       const hasMore = moments.length === PAGE_SIZE
       return { moments, hasMore }

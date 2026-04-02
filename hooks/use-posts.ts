@@ -78,7 +78,7 @@ export const useLikePost = () => {
   })
 }
 
-export const useSharePost = () => {
+export const usePublishPost = () => {
   const queryClient = useQueryClient()
   const supabase = createClient()
 
@@ -101,7 +101,7 @@ export const useSharePost = () => {
   })
 }
 
-export const useUnsharePost = () => {
+export const useUnpublishPost = () => {
   const queryClient = useQueryClient()
   const supabase = createClient()
 

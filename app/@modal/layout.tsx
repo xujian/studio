@@ -12,7 +12,16 @@ export default function ModalLayout({
 }) {
   const router = useRouter()
   const pathname = usePathname()
-  const isOpen = !!pathname.match(/^\/moments\/[^/]+/)
+  const isFirstRender = React.useRef(true)
+  const [isOpen, setIsOpen] = React.useState(false)
+
+  React.useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+    setIsOpen(!!pathname.match(/^\/moments\/[^/]+/))
+  }, [pathname])
 
   const onClose = () => {
     if (document.startViewTransition) {

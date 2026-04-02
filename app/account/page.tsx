@@ -9,7 +9,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import type { Subscription } from '@/lib/types'
 import { SUBSCRIPTION_PLANS } from '@/lib/constants'
-import { Zap, CreditCard, Chrome, ArrowRight } from 'lucide-react'
+import { Zap, CreditCard, Globe2, ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export const metadata: Metadata = {
@@ -128,7 +128,7 @@ export default async function AccountPage() {
           <Card>
             <CardContent className="flex items-center gap-3">
               <div className="size-8 rounded-full bg-secondary flex items-center justify-center shrink-0">
-                <Chrome className="size-4" />
+                <Globe2 className="size-4" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium">Google</p>
