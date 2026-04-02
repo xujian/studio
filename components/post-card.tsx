@@ -23,11 +23,19 @@ export function PostCard({ post, href, className }: PostCardProps) {
   const router = useRouter()
   const like = useLikePost()
   const { moment, author } = post
+  const [liked, setLiked] = React.useState(post.liked)
+  const [likesCount, setLikesCount] = React.useState(post.likes_count)
 
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    like.mutate({ postId: post.id, liked: post.liked })
+    const next = !liked
+    setLiked(next)
+    setLikesCount(prev => next ? prev + 1 : prev - 1)
+    like.mutate(
+      { postId: post.id, liked },
+      { onError: () => { setLiked(liked); setLikesCount(post.likes_count) } }
+    )
   }
 
   return (
@@ -40,10 +48,10 @@ export function PostCard({ post, href, className }: PostCardProps) {
           size="icon"
           onClick={handleLike}
           disabled={like.isPending}
-          aria-label={post.liked ? `Unlike post (${post.likes_count} likes)` : `Like post (${post.likes_count} likes)`}
-          aria-pressed={post.liked}
+          aria-label={liked ? `Unlike post (${likesCount} likes)` : `Like post (${likesCount} likes)`}
+          aria-pressed={liked}
           className="absolute top-1 right-1 cursor-pointer opacity-0 transition-opacity group-hover:opacity-100 hover:text-red-400">
-          <Heart className={cn('size-4', post.liked && 'fill-red-500 text-red-500')} />
+          <Heart className={cn('size-4', liked && 'fill-red-500 text-red-500')} />
         </Button>
       </MomentCarousel>
     </div>

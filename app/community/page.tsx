@@ -35,7 +35,9 @@ export default async function CommunityPage() {
     .sort((a, b) => b.likes_count - a.likes_count)
     .filter(p => p.likes_count > 0)
 
+  const popularIds = new Set(popular.map(p => p.id))
   const recent = [...allPosts]
+    .filter(p => !popularIds.has(p.id))
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
   const sections = popular.length > 0
