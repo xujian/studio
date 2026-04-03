@@ -18,7 +18,7 @@ export function AssetsManager({ type, onClose }: AssetsManagerProps) {
   const [dialogOpen, setDialogOpen] = useState(false)
 
   const { data: assets = [] } = useAssets()
-  const filtered = assets.filter(a => a.type === type)
+  const filtered = assets.filter(a => a.type === type && a.name !== '')
   const label = type.charAt(0).toUpperCase() + type.slice(1)
 
   return (
