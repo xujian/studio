@@ -63,6 +63,9 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
         path: adHocTab === 'image' ? adHocPath || null : null,
       },
       {
+        onError: () => {
+          if (adHocTab === 'image' && adHocPath) removeAssetImage(adHocPath)
+        },
         onSuccess: (asset) => {
           handleSelect(type, asset.id!)
           setOpenType(null)
@@ -71,7 +74,7 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
           setAdHocTab('text')
           setAdHocContent('')
           setAdHocPath('')
-        }
+        },
       }
     )
   }
