@@ -18,21 +18,22 @@ The API route resolves asset IDs in mixins to full `Asset` records before callin
 
 A mixin can be **ad-hoc** — inline content entered directly by the user without selecting a saved asset.
 
-**Rule:** an ad-hoc asset is a regular `Asset` record with `name = "custom"`. No schema change required.
+**Rule:** an ad-hoc asset is a regular `Asset` record with `name = ""`. No schema change required.
 
-**Input UI:** a custom button at the end of the asset list in each Mixins popover. When clicked, it opens a panel where the user can type text or upload an image. Once saved, the ad-hoc asset appears as an item in the asset list and can be selected like any other asset — one asset per slot.
+**Input UI:** a "Quick text/image" button at the bottom of each mixin type popover. Clicking it swaps the asset list for an inline form with Text / Image tabs. On save, the asset is created, auto-selected, and the popover closes. If a saved ad-hoc asset exists for that slot, the button is replaced by a preview (thumbnail or text snippet); clicking the preview re-opens the form to replace it. An X button on the preview deletes the asset.
 
 **Flow on generate:**
-1. User opens a Mixins slot popover, clicks the custom button, enters content or uploads an image
-2. Asset is saved with `name = "custom"` and appears in the popover list
-3. User selects it — UUID is stored in `mixins` like any other asset
-4. The moment (and any retries) reference it normally
+1. User opens a Mixins slot popover, clicks "Quick text/image", enters text or uploads an image
+2. Asset is created with `name = ""`, auto-selected — UUID stored in `mixins` like any other asset
+3. The moment (and any retries) reference it normally
 
-**Identifying ad-hoc assets:** `asset.name === "custom"`
+**Identifying ad-hoc assets:** `asset.name === ""`
 
 **Visibility:**
-- Hidden in `AssetsManager` — not listed in the user's library
-- Shown in `MomentView` photo attributes with a `"custom"` label
+- Hidden in `AssetsManager` and in the mixin popover asset list
+- Preview shown in the popover in place of the trigger button (image thumbnail or text snippet)
+- Shown in `MomentView` photo attributes with an `"ad-hoc"` label (display label, not the name value)
+- Deleted from DB + storage when the user clicks X on the preview
 
 ## UI Flow
 
