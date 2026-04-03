@@ -14,6 +14,11 @@ import { assetUrl, cn } from '@/lib/utils'
 import { useAssets } from '@/hooks/use-assets'
 import { MoreHorizontalIcon } from 'lucide-react'
 import { AssetPreview } from './asset-preview'
+import { removeAssetImage } from '@/lib/utils'
+import { useCreateAsset } from '@/hooks/use-create-asset'
+import { Textarea } from '@/components/ui/textarea'
+import { Upload } from '@/components/upload'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 
 export type MixinsProps = {
   value?: Mixins
@@ -35,6 +40,8 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
     return grouped
   }, [assets])
 
+  const [openType, setOpenType] = React.useState<AssetType | null>(null)
+
   const handleSelect = (type: AssetType, assetId: string) => {
     const v = { ...value }
     if (v[type] === assetId) {
@@ -53,7 +60,13 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
           const typeAssets = assetsByType[d.id] || []
           const isSelected = d.id in value
           return (
-            <Popover key={d.id} modal={false}>
+            <Popover
+              key={d.id}
+              modal={false}
+              open={openType === d.id}
+              onOpenChange={(open) => {
+                setOpenType(open ? d.id as AssetType : null)
+              }}>
               <PopoverTrigger asChild>
                 <Button
                   type="button"
