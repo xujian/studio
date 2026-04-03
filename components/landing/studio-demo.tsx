@@ -56,9 +56,9 @@ export const StudioDemo = () => {
         <div
           onMouseEnter={() => setExpanded(true)}
           onMouseLeave={() => setExpanded(false)}
-          style={{ perspective: '1600px', cursor: 'pointer' }}>
+          style={{ perspective: 'none', cursor: 'pointer' }}>
           <div
-            className="transition-transform"
+            className="transition-transform duration-700"
             style={{
               transformStyle: 'preserve-3d',
               transform: expanded 
@@ -77,12 +77,12 @@ export const StudioDemo = () => {
                   style={{
                     gridArea: '1 / 1',
                     zIndex: i,
-                    transform: `translateZ(${z}px)`,
+                    transform: `translateZ(${z}px) ${expanded ? 'rotateZ(30deg)' : ''}`,
                     transition: `transform 0.65s cubic-bezier(0.85, 0, 0.15, 1) ${expanded ? expandDelay : collapseDelay}s`,
                     width: `${CARD_W}px`,
                     height: `${CARD_H}px`
                   }}
-                  className="absolute flex flex-col bg-muted p-4 rounded-2xl">
+                  className="absolute flex flex-col bg-muted p-4 rounded-2xl border-card border">
                   <div className={cn('absolute mb-3 flex items-center gap-2 transition-top',
                     expanded ? '-top-10' : 'top-3'
                     )}>
@@ -93,16 +93,16 @@ export const StudioDemo = () => {
                       {asset.label}
                     </span>
                   </div>
-                  <div className="flex flex-1 items-center justify-center overflow-hidden rounded-lg bg-black/15">
+                  <div className="flex flex-1 items-center justify-center overflow-hidden rounded-xl">
                     
                   </div>
                 </div>
               )
             })}
-            <div className="absolute rounded-2xl bg-cover overflow-hidden" style={{
+            <div className={`absolute rounded-2xl bg-cover overflow-hidden`} style={{
               width: `${CARD_W}px`,
               height: `${CARD_H}px`,
-              transform: `translateZ(${expanded ? (assets.length - 4) * Z_STEP : 7 * 2}px)`,
+              transform: `translateZ(${expanded ? (assets.length - 4) * Z_STEP : 7 * 2}px) ${expanded ? 'rotateZ(30deg)' : ''}`,
               transition: `transform 0.65s cubic-bezier(0.85, 0, 0.15, 1) ${expanded ? assets.length * 0.04 : (assets.length - 1 - 7) * 0.04}s`,
               gridArea: '1 / 1',
               zIndex: assets.length 
