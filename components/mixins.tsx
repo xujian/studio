@@ -10,11 +10,10 @@ import {
 } from '@/components/ui'
 import { assets as assetDefines } from '@/lib/assets-config'
 import type { AssetType, Mixins } from '@/lib/types'
-import { assetUrl, cn } from '@/lib/utils'
+import { assetUrl, cn, removeAssetImage } from '@/lib/utils'
 import { useAssets } from '@/hooks/use-assets'
 import { MoreHorizontalIcon } from 'lucide-react'
 import { AssetPreview } from './asset-preview'
-import { removeAssetImage } from '@/lib/utils'
 import { useCreateAsset } from '@/hooks/use-create-asset'
 import { Textarea } from '@/components/ui/textarea'
 import { Upload } from '@/components/upload'
@@ -67,7 +66,11 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
         onSuccess: (asset) => {
           handleSelect(type, asset.id!)
           setOpenType(null)
-          resetAdHoc()
+          // Reset state without deleting the image — it now belongs to the saved asset
+          setAdHocType(null)
+          setAdHocTab('text')
+          setAdHocContent('')
+          setAdHocPath('')
         }
       }
     )
