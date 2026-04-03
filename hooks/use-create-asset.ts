@@ -2,7 +2,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
-import type { AssetType } from '@/lib/types'
+import type { Asset, AssetType } from '@/lib/types'
 
 interface CreateAssetArgs {
   name: string
@@ -22,7 +22,7 @@ export const useCreateAsset = () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) throw new Error('Not authenticated')
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('assets')
         .insert({
           user_id: session.user.id,
@@ -33,8 +33,11 @@ export const useCreateAsset = () => {
           type,
           path: path || null
         })
+        .select()
+        .single()
 
       if (error) throw error
+      return data as Asset
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['assets'] })
