@@ -13,6 +13,7 @@ import type { AssetType, Mixins } from '@/lib/types'
 import { assetUrl, cn } from '@/lib/utils'
 import { useAssets } from '@/hooks/use-assets'
 import { MoreHorizontalIcon } from 'lucide-react'
+import { AssetPreview } from './asset-preview'
 
 export type MixinsProps = {
   value?: Mixins
@@ -87,11 +88,13 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
                         content={
                           a.path
                             ? assetUrl(a.path!)
-                            : a.content
+                            : () => (<AssetPreview asset={a} />)
                         }
                         title={a.title}
                         description={a.description}
-                        side="right">
+                        side="right"
+                        align="start"
+                        offset={100}>
                         <div>
                           {/** wrapper to fix the toggle's pressed state */}
                           <Toggle

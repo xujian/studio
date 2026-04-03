@@ -9,6 +9,7 @@ import {
 } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { Size } from '@/lib/types'
+import { isFunction } from 'util'
 
 const IMAGE_EXT_RE = /\.(jpg|jpeg|png|gif|webp|svg|avif|bmp)(\?.*)?$/i
 
@@ -18,12 +19,13 @@ function isImageUrl(value: string): boolean {
 
 interface PeekableProps {
   children: React.ReactNode
-  content: React.ReactNode
+  content: React.ReactNode | (() => React.ReactNode)
   title?: string
   description?: string
   size?: Size
   side?: 'top' | 'right' | 'bottom' | 'left'
   align?: 'start' | 'center' | 'end'
+  offset?: number,
   className?: string
 }
 
@@ -43,9 +45,17 @@ export function Peekable({
   description,
   side = 'top',
   align = 'start',
+  offset = 0,
   className,
 }: PeekableProps) {
   const preview = React.useMemo(() => {
+    if (typeof content === 'function') {
+      return (
+        <div className="w-60 h-60">
+          { content() }
+        </div>
+      )
+    }
     if (typeof content !== 'string') return content
     if (isImageUrl(content)) {
       return (
@@ -75,9 +85,9 @@ export function Peekable({
       <TooltipContent
         side={side}
         align={align}
-        sideOffset={0}
+        sideOffset={offset}
         className={cn(
-          'max-w-xs rounded overflow-hidden border p-0 bg-black shadow-lg',
+          'max-w-xs rounded-2xl overflow-hidden border p-0 bg-black shadow-lg',
           className,
         )}>
         {preview}

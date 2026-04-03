@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import type { Asset } from '@/lib/types'
 import { assetUrl, cn } from '@/lib/utils'
+import { assetPreviewModes } from '@/lib/assets-config'
 
 type AssetPreviewProps = {
   asset: Asset
@@ -15,7 +16,7 @@ export const AssetPreview = ({ asset, ...props }: AssetPreviewProps) => {
   return (
     <div {...props} className={cn(
       'asset-preview relative w-full aspect-square',
-      'rounded-3xl overflow-hidden',
+      'rounded-2xl overflow-hidden',
       props.className,
     )}>
       {asset.path
@@ -26,10 +27,10 @@ export const AssetPreview = ({ asset, ...props }: AssetPreviewProps) => {
               className="object-cover bg-neutral"
               sizes="(max-width: 768px) 50vw, 25vw"
             />)
-        : asset.type === 'camera'
+        : assetPreviewModes[asset.type] === 'svg'
           ? (<>
               <Image
-                src="/camera-preview-base.jpg"
+                src={`/asset-preview/${asset.type}/backdrop.jpg`}
                 alt=""
                 fill
                 className="object-cover"
@@ -37,7 +38,7 @@ export const AssetPreview = ({ asset, ...props }: AssetPreviewProps) => {
               />
               {!svgError
                 ? (<img
-                    src={`/camera-overlays/${asset.name}.svg`}
+                    src={`/asset-preview/${asset.type}/${asset.name}.svg`}
                     alt=""
                     className="absolute inset-0 w-full h-full object-cover"
                     onError={() => setSvgError(true)}
@@ -52,7 +53,7 @@ export const AssetPreview = ({ asset, ...props }: AssetPreviewProps) => {
             </div>)
       }
       {/* Scrim */}
-      <div className="absolute inset-x-0 bottom-0 h-24 rounded-b-3xl overflow-hidden bg-linear-to-t from-black/70 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-24 rounded-b-2xl overflow-hidden bg-linear-to-t from-black/70 to-transparent" />
     </div>
   )
 }
