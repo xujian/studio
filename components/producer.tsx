@@ -9,11 +9,13 @@ import { Button } from '@/components/button'
 import { createClient } from '@/lib/supabase/client'
 import type { AssetType, MomentWithPhotos } from '@/lib/types'
 import type { Mixins as MixinsType } from '@/lib/types'
+import type { LocalMixins, AdHocContent } from '@/lib/types'
 import { useBus, type MixinSelectPayload } from '@/lib/bus'
 import { cn } from '@/lib/utils'
 import { useAssets } from '@/hooks/use-assets'
 import { useEngine } from '@/hooks/use-engine'
 import { useUpload } from '@/hooks/use-upload'
+import { useCreateAsset } from '@/hooks/use-create-asset'
 import { compressImage } from '@/lib/compress-image'
 import { FacePicker } from '@/components/face-picker'
 import { Mixins } from '@/components/mixins'
@@ -31,7 +33,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
 
   const [momentId, setMomentId] = useState<string>(''),
     [prompt, setPrompt] = useState(''),
-    [mixins, setMixins] = useState<MixinsType>({}),
+    [mixins, setMixins] = useState<LocalMixins>({}),
     [reference, setReference] = useState<string>(''),
     [userId, setUserId] = useState(''),
     /**
@@ -92,13 +94,47 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
   // Data
   const { data: assets = [] } = useAssets()
   const { mutate: commit, isPending, error, reset: clearError } = useEngine()
+  const createAsset = useCreateAsset()
   const { upload, uploading, remove } = useUpload({
     path: () => `uploads/${userId}`
   })
 
+  const uploadFileAsync = (file: File): Promise<{ storagePath: string }> =>
+    new Promise((resolve, reject) => {
+      upload(file, {
+        onSuccess: resolve,
+        onError: () => reject(new Error('Upload failed')),
+      })
+    })
+
   // Handlers
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (couldNotSubmit) return
+
+    // Resolve any inline ad-hoc entries to real asset IDs before generation
+    const resolvedMixins: MixinsType = {}
+    for (const [type, entry] of Object.entries(mixins) as [AssetType, LocalMixins[AssetType]][]) {
+      if (!entry) continue
+      if (typeof entry === 'string') {
+        resolvedMixins[type] = entry
+      } else if ('content' in (entry as AdHocContent)) {
+        const asset = await createAsset.mutateAsync({
+          name: '',
+          type,
+          content: (entry as { content: string }).content,
+        })
+        resolvedMixins[type] = asset.id!
+      } else if ('dataUrl' in (entry as AdHocContent)) {
+        const dataUrl = (entry as { dataUrl: string }).dataUrl
+        const blob = await fetch(dataUrl).then(r => r.blob())
+        const ext = blob.type.split('/')[1] || 'jpg'
+        const file = new File([blob], `adhoc.${ext}`, { type: blob.type })
+        const { storagePath } = await uploadFileAsync(file)
+        const asset = await createAsset.mutateAsync({ name: '', type, path: storagePath })
+        resolvedMixins[type] = asset.id!
+      }
+    }
+
     commit(
       {
         prompt: mode === 'create'
@@ -106,15 +142,15 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
           : dirty
             ? prompt
             : '',
-        mixins,
+        mixins: resolvedMixins,
         reference,
-        momentId
+        momentId,
       },
       {
         onSuccess: moment => {
           setMomentId(moment.id)
           setMode('retry')
-          setDirty(false) // Reset after successful generation
+          setDirty(false)
           onGenerationComplete?.(moment)
         }
       }
