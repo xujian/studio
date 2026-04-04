@@ -114,7 +114,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
     setResolutionError(null)
 
     // Resolve any inline ad-hoc entries to real asset IDs before generation
-    let resolvedMixins: MixinsType = {}
+    const resolvedMixins: MixinsType = {}
     try {
       for (const [type, entry] of Object.entries(mixins) as [AssetType, LocalMixins[AssetType]][]) {
         if (!entry) continue
