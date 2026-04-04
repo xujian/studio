@@ -30,9 +30,10 @@ export function Dropzone({
 
   const processFile = async (file: File) => {
     const compressed = await compressImage(file)
-    const dataUrl = await new Promise<string>((resolve) => {
+    const dataUrl = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader()
       reader.onload = (e) => resolve(e.target!.result as string)
+      reader.onerror = () => reject(new Error('Failed to read file'))
       reader.readAsDataURL(compressed)
     })
     onFile(dataUrl)
