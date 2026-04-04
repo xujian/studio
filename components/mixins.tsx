@@ -24,7 +24,7 @@ import { compressImage } from '@/lib/compress-image'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 
 export interface MixinsHandle {
-  resolveAdhoc: () => Promise<{ [k in AssetType]?: string }>
+  resolve: () => Promise<{ [k in AssetType]?: string }>
 }
 
 export type MixinsProps = {
@@ -63,7 +63,7 @@ export const Mixins = React.forwardRef<MixinsHandle, MixinsProps>(function Mixin
   const { upload } = useUpload({ path: ({ userId: uid }) => `assets/${uid}/${uploadTypeRef.current}` })
 
   React.useImperativeHandle(ref, () => ({
-    resolveAdhoc: async () => {
+    resolve: async () => {
       const resolved: { [k in AssetType]?: string } = {}
       for (const [type, entry] of Object.entries(value) as [AssetType, string | AdhocAsset | undefined][]) {
         if (!entry) continue

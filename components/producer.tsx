@@ -104,7 +104,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
 
     let resolvedMixins: { [k in AssetType]?: string }
     try {
-      resolvedMixins = await mixinsRef.current!.resolveAdhoc()
+      resolvedMixins = await mixinsRef.current!.resolve()
     } catch {
       setResolutionError('Failed to save ad-hoc content. Please try again.')
       return
