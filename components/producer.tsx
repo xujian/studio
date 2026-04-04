@@ -7,9 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Textarea, Toggle, Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui'
 import { Button } from '@/components/button'
 import { createClient } from '@/lib/supabase/client'
-import type { AssetType, MomentWithPhotos } from '@/lib/types'
-import type { Mixins as MixinsType } from '@/lib/types'
-import type { LocalMixins, AdHocContent } from '@/lib/types'
+import type { AdhocAsset, AssetType, Mixins as MixinsType, MixinsWithAdhoc, MomentWithPhotos } from '@/lib/types'
 import { useBus, type MixinSelectPayload } from '@/lib/bus'
 import { cn } from '@/lib/utils'
 import { useAssets } from '@/hooks/use-assets'
@@ -33,7 +31,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
 
   const [momentId, setMomentId] = useState<string>(''),
     [prompt, setPrompt] = useState(''),
-    [mixins, setMixins] = useState<LocalMixins>({}),
+    [mixins, setMixins] = useState<MixinsWithAdhoc>({}),
     [reference, setReference] = useState<string>(''),
     [userId, setUserId] = useState(''),
     /**
@@ -114,22 +112,21 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
     setResolutionError(null)
 
     // Resolve any inline ad-hoc entries to real asset IDs before generation
-    const resolvedMixins: MixinsType = {}
+    const resolvedMixins: { [k in AssetType]?: string } = {}
     try {
-      for (const [type, entry] of Object.entries(mixins) as [AssetType, LocalMixins[AssetType]][]) {
+      for (const [type, entry] of Object.entries(mixins) as [AssetType, string | AdhocAsset | undefined][]) {
         if (!entry) continue
         if (typeof entry === 'string') {
           resolvedMixins[type] = entry
-        } else if ('content' in (entry as AdHocContent)) {
+        } else if ('content' in entry) {
           const asset = await createAsset.mutateAsync({
             name: '',
             type,
             content: (entry as { content: string }).content,
           })
           resolvedMixins[type] = asset.id!
-        } else if ('dataUrl' in (entry as AdHocContent)) {
-          const dataUrl = (entry as { dataUrl: string }).dataUrl
-          const blob = await fetch(dataUrl).then(r => r.blob())
+        } else if ('path' in entry && entry.path) {
+          const blob = await fetch(entry.path).then(r => r.blob())
           const ext = blob.type.split('/')[1] || 'jpg'
           const file = new File([blob], `adhoc.${ext}`, { type: blob.type })
           const { storagePath } = await uploadFileAsync(file)

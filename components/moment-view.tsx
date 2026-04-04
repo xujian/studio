@@ -143,7 +143,7 @@ export function MomentView({
                 alt="face"
                 src={
                   merged?.face
-                    ? assetUrl(assetsMap?.get(merged.face)?.path ?? '') ||
+                    ? assetUrl(assetsMap?.get(merged.face as string)?.path ?? '') ||
                       '/face.png'
                     : '/face.png'
                 }
@@ -174,7 +174,7 @@ export function MomentView({
                 const assetType = assets.find(t => t.id === type)
                 const displayName = assetType?.id || type
                 const asset =
-                  assetId && assetsMap ? assetsMap.get(assetId) : null
+                  assetId && assetsMap ? assetsMap.get(assetId as string) : null
                 return (
                   <div
                     key={type}

@@ -103,7 +103,7 @@ export const POST = withAxiom(async function POST(request: NextRequest) {
         const diff: Record<string, string> = {}
         for (const [key, value] of Object.entries(mixins)) {
           if (value !== undefined && value !== moment.mixins?.[key as AssetType]) {
-            diff[key] = value
+            diff[key] = value as string
           }
         }
         // Only save if there are differences

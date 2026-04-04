@@ -81,22 +81,22 @@ export type Asset = {
   created_at?: string
 }
 
+export type AdhocAsset = Asset & {
+  name: ''
+}
+
 export type Assets = {
   [k in AssetType]?: Asset
 }
 
 export type AssetMap = Map<string, Asset>
 
-export type Mixins = {
-  [k in AssetType]?: string
+export type MixinsWithAdhoc = {
+  [k in AssetType]?: string | AdhocAsset
 }
 
-/** Inline ad-hoc content held in UI state before being persisted at generate time */
-export type AdHocContent = { content: string } | { dataUrl: string }
-
-/** UI-layer mixins type — supports both saved asset IDs and inline ad-hoc content */
-export type LocalMixins = {
-  [k in AssetType]?: string | AdHocContent
+export type Mixins = {
+  [k in AssetType]?: string
 }
 
 /**
