@@ -63,7 +63,8 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
 
   const handleSelect = (type: AssetType, assetId: string) => {
     const v = { ...value }
-    if (v[type] === assetId) {
+    const current = v[type]
+    if (typeof current === 'string' && current === assetId) {
       delete v[type]
     } else {
       v[type] = assetId
