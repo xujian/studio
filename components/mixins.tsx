@@ -14,7 +14,7 @@ import { assets as assetDefines } from '@/lib/assets-config'
 import type { AdhocAsset, AssetType, MixinsWithAdhoc } from '@/lib/types'
 import { assetUrl, cn } from '@/lib/utils'
 import { useAssets } from '@/hooks/use-assets'
-import { useUpload } from '@/hooks/use-upload'
+import { useUploadAsset } from '@/hooks/use-upload-asset'
 import { useCreateAsset } from '@/hooks/use-create-asset'
 import { ArrowLeft, ArrowUpCircle, Check, MoreHorizontalIcon, X } from 'lucide-react'
 import { AssetPreview } from './asset-preview'
@@ -36,14 +36,6 @@ export const Mixins = React.forwardRef<MixinsHandle, MixinsProps>(function Mixin
   { value = {}, onChange },
   ref
 ) {
-  const [userId, setUserId] = React.useState('')
-  React.useEffect(() => {
-    import('@/lib/supabase/client').then(({ createClient }) => {
-      createClient().auth.getSession().then(({ data }) => {
-        if (data.session) setUserId(data.session.user.id)
-      })
-    })
-  }, [])
   const { data: assets = [], isLoading } = useAssets()
 
   // Group assets by type
@@ -59,8 +51,7 @@ export const Mixins = React.forwardRef<MixinsHandle, MixinsProps>(function Mixin
   }, [assets])
 
   const createAsset = useCreateAsset()
-  const uploadTypeRef = React.useRef<AssetType>('outfit')
-  const { upload } = useUpload({ path: ({ userId: uid }) => `assets/${uid}/${uploadTypeRef.current}` })
+  const { upload: uploadAsset } = useUploadAsset()
 
   React.useImperativeHandle(ref, () => ({
     resolve: async () => {
@@ -76,10 +67,7 @@ export const Mixins = React.forwardRef<MixinsHandle, MixinsProps>(function Mixin
           const blob = await fetch(entry.path).then(r => r.blob())
           const ext = blob.type.split('/')[1] || 'jpg'
           const file = new File([blob], `adhoc.${ext}`, { type: blob.type })
-          uploadTypeRef.current = type
-          const storagePath = await new Promise<string>((resolve, reject) => {
-            upload(file, { onSuccess: ({ storagePath }) => resolve(storagePath), onError: () => reject(new Error('Upload failed')) })
-          })
+          const storagePath = await uploadAsset(file, type)
           const asset = await createAsset.mutateAsync({ name: '', type, path: storagePath })
           resolved[type] = asset.id!
         }
