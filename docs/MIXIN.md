@@ -23,11 +23,18 @@ A mixin can be **ad-hoc** — inline content entered directly by the user withou
 **Input UI:** a "Quick text/image" button at the bottom of each mixin type popover. Clicking it swaps the asset list for an inline form with Text / Image tabs. On save, the asset is created, auto-selected, and the popover closes. If a saved ad-hoc asset exists for that slot, the button is replaced by a preview (thumbnail or text snippet); clicking the preview re-opens the form to replace it. An X button on the preview deletes the asset.
 
 **Flow on generate:**
-1. User opens a Mixins slot popover, clicks "Quick text/image", enters text or uploads an image
-2. Asset is created with `name = ""`, auto-selected — UUID stored in `mixins` like any other asset
-3. The moment (and any retries) reference it normally
+1. User opens a Mixins slot popover, clicks "Quick text/image", enters text or drops an image
+2. Clicks "Done" — content stored in UI state as `LocalMixins` only. No DB write, no storage upload yet.
+3. User clicks Generate — `Producer.handleGenerate()` resolves inline entries to real asset IDs:
+   - `{ content }` → inserts an Asset row, gets ID
+   - `{ dataUrl }` → uploads image to storage, inserts Asset row, gets ID
+4. Resolved `Mixins` (string IDs only) passed to engine and stored in moment/photo
 
 **Identifying ad-hoc assets:** `asset.name === ""`
+
+**`LocalMixins` type** (UI layer only — never stored in DB):
+`type LocalMixins = { [k in AssetType]?: string | AdHocContent }`
+`<Mixins>` and `<Producer>` use `LocalMixins` internally. The DB always stores `Mixins` (string IDs only).
 
 **Visibility:**
 - Hidden in `AssetsManager` and in the mixin popover asset list
