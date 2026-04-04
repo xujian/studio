@@ -396,7 +396,7 @@ const filterAssets = (type?: AssetType) => {
         <FacePicker
           faces={filterAssets('face')}
           onSelect={handleFaceSelect}
-          selected={mixins.face}
+          selected={mixins.face as string | undefined}
         />
       </div>
       <div

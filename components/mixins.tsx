@@ -53,6 +53,8 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
   }
 
   const doneAdhoc = (type: AssetType) => {
+    if (adhocTab === 'text' && !adhocContent.trim()) return
+    if (adhocTab === 'image' && !adhocDataUrl) return
     const entry: AdHocContent = adhocTab === 'text'
       ? { content: adhocContent }
       : { dataUrl: adhocDataUrl }
