@@ -10,13 +10,14 @@ import {
 } from '@/components/ui'
 import Image from 'next/image'
 import { assets as assetDefines } from '@/lib/assets-config'
-import type { AssetType, Mixins, AdHocContent, LocalMixins } from '@/lib/types'
+import type { AssetType, AdHocContent, LocalMixins } from '@/lib/types'
 import { assetUrl, cn } from '@/lib/utils'
 import { useAssets } from '@/hooks/use-assets'
-import { ArrowLeft, ArrowUpCircle, Check, MoreHorizontalIcon, X } from 'lucide-react'
+import { ArrowLeft, ArrowUpCircle, MoreHorizontalIcon, X } from 'lucide-react'
 import { AssetPreview } from './asset-preview'
 import { Textarea } from '@/components/ui/textarea'
 import { Dropzone } from '@/components/dropzone'
+import { compressImage } from '@/lib/compress-image'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 
 export type MixinsProps = {
@@ -190,7 +191,16 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
                 <TabsContent value="image">
                   <Dropzone
                     value={adhocDataUrl || undefined}
-                    onFile={setAdhocDataUrl}
+                    onFile={async (file) => {
+                      const compressed = await compressImage(file)
+                      const dataUrl = await new Promise<string>((resolve, reject) => {
+                        const reader = new FileReader()
+                        reader.onload = (e) => resolve(e.target!.result as string)
+                        reader.onerror = () => reject(new Error('Failed to read file'))
+                        reader.readAsDataURL(compressed)
+                      })
+                      setAdhocDataUrl(dataUrl)
+                    }}
                     onClear={() => setAdhocDataUrl('')}
                     className="aspect-video w-full h-50 rounded-md!" />
                 </TabsContent>

@@ -2,16 +2,18 @@
 
 import Image from 'next/image'
 import * as React from 'react'
-import { compressImage } from '@/lib/compress-image'
-import { Upload as UploadIcon, X } from 'lucide-react'
+import { Loader2, Upload as UploadIcon, X } from 'lucide-react'
 import { Button } from './button'
+import { cn } from '@/lib/utils'
 
 export type DropzoneProps = {
-  /** Called with base64 data URL after file is picked and compressed */
-  onFile: (dataUrl: string) => void
+  /** Called with the raw File when user picks or drops an image */
+  onFile: (file: File) => void | Promise<void>
   onClear?: () => void
-  /** Controlled preview — pass the data URL to display */
+  /** Controlled preview — a URL or data URL to display */
   value?: string
+  /** Show loading spinner overlay */
+  uploading?: boolean
   placeholder?: string
   className?: string
 } & Omit<React.ComponentProps<'div'>, 'onDrop'>
@@ -20,6 +22,7 @@ export function Dropzone({
   onFile,
   onClear,
   value,
+  uploading,
   placeholder = 'Upload image here',
   className,
   ...props
@@ -28,21 +31,10 @@ export function Dropzone({
   const [isDragging, setIsDragging] = React.useState(false)
   const inputId = React.useId()
 
-  const processFile = async (file: File) => {
-    const compressed = await compressImage(file)
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = (e) => resolve(e.target!.result as string)
-      reader.onerror = () => reject(new Error('Failed to read file'))
-      reader.readAsDataURL(compressed)
-    })
-    onFile(dataUrl)
-  }
-
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    await processFile(file)
+    await onFile(file)
     e.target.value = ''
   }
 
@@ -60,9 +52,23 @@ export function Dropzone({
   const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault()
     setIsDragging(false)
+
     const file = e.dataTransfer.files?.[0]
     if (file?.type.startsWith('image/')) {
-      await processFile(file)
+      await onFile(file)
+      return
+    }
+
+    // Dragging an image from a web page provides a URL, not a File
+    const url = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('URL')
+    if (!url) return
+    try {
+      const res = await fetch(url)
+      const blob = await res.blob()
+      if (!blob.type.startsWith('image/')) return
+      await onFile(new File([blob], 'dropped-image', { type: blob.type }))
+    } catch {
+      // silently ignore failed URL fetches
     }
   }
 
@@ -73,7 +79,11 @@ export function Dropzone({
 
   return (
     <div
-      className={`relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-dashed bg-muted transition-colors hover:border-foreground/30 ${isDragging ? 'border-foreground/60 bg-muted/80' : 'border-border'} ${className ?? ''}`}
+      className={cn(
+        'relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-dashed bg-muted transition-colors hover:border-foreground/30',
+        isDragging ? 'border-foreground/60 bg-muted/80' : 'border-border',
+        className
+      )}
       onDragOver={handleDragOver}
       onDragEnter={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -95,6 +105,13 @@ export function Dropzone({
           : (<div className="flex flex-col items-center gap-2 text-muted-foreground">
               <UploadIcon className="size-6" aria-hidden="true" />
               <p className="text-sm">{placeholder}</p>
+              <p>
+                <Button type="button" size="xs" variant="outline" className="button">
+                  Browse files
+                </Button>
+              </p>
+              <p>&nbsp;</p>
+              <p className="text-xs leading-3">Or Drag and Drop image here</p>
             </div>)
         }
       </label>
@@ -106,7 +123,15 @@ export function Dropzone({
         className="hidden"
         onChange={handleFileChange}
       />
-      {value && (
+      {uploading && (
+        <div
+          className="absolute inset-0 flex items-center justify-center bg-background/60"
+          aria-live="polite">
+          <Loader2 className="size-6 animate-spin" />
+          <span className="sr-only">Uploading...</span>
+        </div>
+      )}
+      {value && !uploading && (
         <Button
           type="button"
           size="icon-sm"
