@@ -94,6 +94,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
   // Data
   const { data: assets = [] } = useAssets()
   const { mutate: commit, isPending, error, reset: clearError } = useEngine()
+  const [resolutionError, setResolutionError] = React.useState<string | null>(null)
   const createAsset = useCreateAsset()
   const { upload, uploading, remove } = useUpload({
     path: () => `uploads/${userId}`
@@ -110,29 +111,35 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
   // Handlers
   const handleGenerate = async () => {
     if (couldNotSubmit) return
+    setResolutionError(null)
 
     // Resolve any inline ad-hoc entries to real asset IDs before generation
-    const resolvedMixins: MixinsType = {}
-    for (const [type, entry] of Object.entries(mixins) as [AssetType, LocalMixins[AssetType]][]) {
-      if (!entry) continue
-      if (typeof entry === 'string') {
-        resolvedMixins[type] = entry
-      } else if ('content' in (entry as AdHocContent)) {
-        const asset = await createAsset.mutateAsync({
-          name: '',
-          type,
-          content: (entry as { content: string }).content,
-        })
-        resolvedMixins[type] = asset.id!
-      } else if ('dataUrl' in (entry as AdHocContent)) {
-        const dataUrl = (entry as { dataUrl: string }).dataUrl
-        const blob = await fetch(dataUrl).then(r => r.blob())
-        const ext = blob.type.split('/')[1] || 'jpg'
-        const file = new File([blob], `adhoc.${ext}`, { type: blob.type })
-        const { storagePath } = await uploadFileAsync(file)
-        const asset = await createAsset.mutateAsync({ name: '', type, path: storagePath })
-        resolvedMixins[type] = asset.id!
+    let resolvedMixins: MixinsType = {}
+    try {
+      for (const [type, entry] of Object.entries(mixins) as [AssetType, LocalMixins[AssetType]][]) {
+        if (!entry) continue
+        if (typeof entry === 'string') {
+          resolvedMixins[type] = entry
+        } else if ('content' in (entry as AdHocContent)) {
+          const asset = await createAsset.mutateAsync({
+            name: '',
+            type,
+            content: (entry as { content: string }).content,
+          })
+          resolvedMixins[type] = asset.id!
+        } else if ('dataUrl' in (entry as AdHocContent)) {
+          const dataUrl = (entry as { dataUrl: string }).dataUrl
+          const blob = await fetch(dataUrl).then(r => r.blob())
+          const ext = blob.type.split('/')[1] || 'jpg'
+          const file = new File([blob], `adhoc.${ext}`, { type: blob.type })
+          const { storagePath } = await uploadFileAsync(file)
+          const asset = await createAsset.mutateAsync({ name: '', type, path: storagePath })
+          resolvedMixins[type] = asset.id!
+        }
       }
+    } catch {
+      setResolutionError('Failed to save ad-hoc content. Please try again.')
+      return
     }
 
     commit(
@@ -398,10 +405,13 @@ const filterAssets = (type?: AssetType) => {
         className={cn([
           'error absolute flex items-center justify-between bottom-0 right-0 left-0 rounded-full',
           'h-12 p-2 pl-4 backdrop-blur-md duration-500',
-          error ? 'translate-y-0' : 'translate-y-full',
+          error || resolutionError ? 'translate-y-0' : 'translate-y-full',
         ].join(' '))}>
-        {error && error.message}
-        <Button size="icon-lg" className="absolute top-1 right-1" aria-label="Dismiss error" onClick={clearError}>
+        {resolutionError
+          ? <p className="text-xs text-destructive">{resolutionError}</p>
+          : error && error.message
+        }
+        <Button size="icon-lg" className="absolute top-1 right-1" aria-label="Dismiss error" onClick={() => { clearError(); setResolutionError(null) }}>
           <X />
         </Button>
       </div>
