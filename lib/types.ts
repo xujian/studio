@@ -91,6 +91,14 @@ export type Mixins = {
   [k in AssetType]?: string
 }
 
+/** Inline ad-hoc content held in UI state before being persisted at generate time */
+export type AdHocContent = { content: string } | { dataUrl: string }
+
+/** UI-layer mixins type — supports both saved asset IDs and inline ad-hoc content */
+export type LocalMixins = {
+  [k in AssetType]?: string | AdHocContent
+}
+
 /**
  * Community post with moment, author, and like info
  */
