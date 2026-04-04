@@ -7,25 +7,43 @@ import {
   Popover,
   PopoverTrigger,
   PopoverContent,
+  Badge,
 } from '@/components/ui'
 import Image from 'next/image'
 import { assets as assetDefines } from '@/lib/assets-config'
-import type { AssetType, AdHocContent, LocalMixins } from '@/lib/types'
+import type { AdhocAsset, AssetType, MixinsWithAdhoc } from '@/lib/types'
 import { assetUrl, cn } from '@/lib/utils'
 import { useAssets } from '@/hooks/use-assets'
-import { ArrowLeft, ArrowUpCircle, MoreHorizontalIcon, X } from 'lucide-react'
+import { useUpload } from '@/hooks/use-upload'
+import { useCreateAsset } from '@/hooks/use-create-asset'
+import { ArrowLeft, ArrowUpCircle, Check, MoreHorizontalIcon, X } from 'lucide-react'
 import { AssetPreview } from './asset-preview'
 import { Textarea } from '@/components/ui/textarea'
 import { Dropzone } from '@/components/dropzone'
 import { compressImage } from '@/lib/compress-image'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 
-export type MixinsProps = {
-  value?: LocalMixins
-  onChange?: (value: LocalMixins) => void
+export interface MixinsHandle {
+  resolveAdhoc: () => Promise<{ [k in AssetType]?: string }>
 }
 
-export function Mixins({ value = {}, onChange }: MixinsProps) {
+export type MixinsProps = {
+  value?: MixinsWithAdhoc
+  onChange?: (value: MixinsWithAdhoc) => void
+}
+
+export const Mixins = React.forwardRef<MixinsHandle, MixinsProps>(function Mixins(
+  { value = {}, onChange },
+  ref
+) {
+  const [userId, setUserId] = React.useState('')
+  React.useEffect(() => {
+    import('@/lib/supabase/client').then(({ createClient }) => {
+      createClient().auth.getSession().then(({ data }) => {
+        if (data.session) setUserId(data.session.user.id)
+      })
+    })
+  }, [])
   const { data: assets = [], isLoading } = useAssets()
 
   // Group assets by type
@@ -40,32 +58,67 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
     return grouped
   }, [assets])
 
+  const createAsset = useCreateAsset()
+  const uploadTypeRef = React.useRef<AssetType>('outfit')
+  const { upload } = useUpload({ path: ({ userId: uid }) => `assets/${uid}/${uploadTypeRef.current}` })
+
+  React.useImperativeHandle(ref, () => ({
+    resolveAdhoc: async () => {
+      const resolved: { [k in AssetType]?: string } = {}
+      for (const [type, entry] of Object.entries(value) as [AssetType, string | AdhocAsset | undefined][]) {
+        if (!entry) continue
+        if (typeof entry === 'string') {
+          resolved[type] = entry
+        } else if ('content' in entry && entry.content) {
+          const asset = await createAsset.mutateAsync({ name: '', type, content: entry.content })
+          resolved[type] = asset.id!
+        } else if ('path' in entry && entry.path) {
+          const blob = await fetch(entry.path).then(r => r.blob())
+          const ext = blob.type.split('/')[1] || 'jpg'
+          const file = new File([blob], `adhoc.${ext}`, { type: blob.type })
+          uploadTypeRef.current = type
+          const storagePath = await new Promise<string>((resolve, reject) => {
+            upload(file, { onSuccess: ({ storagePath }) => resolve(storagePath), onError: () => reject(new Error('Upload failed')) })
+          })
+          const asset = await createAsset.mutateAsync({ name: '', type, path: storagePath })
+          resolved[type] = asset.id!
+        }
+      }
+      return resolved
+    }
+  }))
+
   const [openType, setOpenType] = React.useState<AssetType | null>(null)
-  const [adhocType, setAdhocType] = React.useState<AssetType | null>(null)
+  /**controls display ad-hoc form in one of the panel */
+  const [adhocing, setAdhocing] = React.useState<AssetType | null>(null)
   const [adhocTab, setAdhocTab] = React.useState<'text' | 'image'>('text')
   const [adhocContent, setAdhocContent] = React.useState('')
-  const [adhocDataUrl, setAdhocDataUrl] = React.useState('')
+  const [adhocPath, setAdhocPath] = React.useState('')
+  /**
+   * keep track of ad-hoc items (before generation)
+   */
+  const [adhocItems, setAdhocItems] = React.useState<{[key in AssetType]?: AdhocAsset}>({})
 
-  const resetAdhoc = () => {
-    setAdhocType(null)
-    setAdhocTab('text')
+  const saveAdhoc = (type: AssetType) => {
+    const item = {
+      name: '',
+      type,
+      [adhocTab === 'text' ? 'content' : 'path']: adhocTab === 'text'
+        ? adhocContent
+        : adhocPath
+    }
+    setAdhocItems({
+      ...adhocItems,
+      [type]: item
+    })
+    onChange?.({ ...value, [type]: item})
+    setAdhocing(null)
     setAdhocContent('')
-    setAdhocDataUrl('')
+    setAdhocPath('')
   }
 
-  const doneAdhoc = (type: AssetType) => {
-    if (adhocTab === 'text' && !adhocContent.trim()) return
-    if (adhocTab === 'image' && !adhocDataUrl) return
-    const entry: AdHocContent = adhocTab === 'text'
-      ? { content: adhocContent }
-      : { dataUrl: adhocDataUrl }
-    onChange?.({ ...value, [type]: entry })
-    setOpenType(null)
-    resetAdhoc()
-  }
-
-  const handleSelect = (type: AssetType, assetId: string) => {
-    const v = { ...value }
+  const handleSelect = (type: AssetType, assetId: string | AdhocAsset) => {
+    const v = { ...value } as MixinsWithAdhoc
     const current = v[type]
     if (typeof current === 'string' && current === assetId) {
       delete v[type]
@@ -82,14 +135,18 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
         .map(d => {
           const typeAssets = (assetsByType[d.id] || []).filter(a => a.name !== '')
           const isSelected = d.id in value
+          const v = adhocItems[d.id as AssetType],
+            adhocItem = v
+              && typeof v === 'object'
+              && v.name === ''
+              ? v
+              : null
+          console.log('adhocItem', adhocItem)
 
-          const adHocEntry = value[d.id as AssetType]
-          const adHocValue = adHocEntry && typeof adHocEntry === 'object' ? adHocEntry as AdHocContent : null
-
-          const renderAdhoc = () => (
-            <div
+          const renderAdhocItem = () => adhocItem
+            ? (<div
               className="relative w-30 h-30 cursor-pointer"
-              onClick={() => setAdhocType(d.id as AssetType)}>
+              onClick={() => handleSelect(d.id as AssetType, adhocItem)}>
               <Button
                 type="button"
                 onClick={(e) => {
@@ -100,26 +157,31 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
                 className="absolute h-6 w-6 px-0! py-0 right-1 bottom-1 z-10 bg-foreground hover:bg-foreground/70 text-background">
                 <X />
               </Button>
-              {'dataUrl' in adHocValue!
+              { value[d.id] === adhocItems[d.id] && (
+                <Badge className="absolute top-1 left-1 bg-secondary border border-primary text-primary-foreground">
+                  <Check className="text-secondary-foreground" />
+                </Badge>
+              )}
+              {adhocItem.path
                 ? (<Image
-                    src={adHocValue!.dataUrl}
+                    src={adhocItem.path}
                     width={120}
                     height={120}
                     className="size-28 object-cover rounded-sm border border-border!"
                     alt="ad-hoc" />)
                 : <div className="line-clamp-2 px-1 py-1 text-left text-xs rounded-md text-muted-foreground">
-                    {(adHocValue as { content: string }).content}
+                    {adhocItem.content}
                   </div>
               }
-            </div>
-          )
+            </div>)
+          : null
 
           const renderAdhocTrigger = () => (<Button
               type="button"
               variant="outline"
               size="icon-sm"
               className="mt-1 h-5 w-32 justify-start text-xs text-muted-foreground"
-              onClick={() => setAdhocType(d.id as AssetType)}>
+              onClick={() => setAdhocing(d.id as AssetType)}>
               <ArrowUpCircle />
               Quick text/image
             </Button>)
@@ -161,8 +223,8 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
                         </div>
                       </Peekable>))
               }
-              {adHocValue
-                ? renderAdhoc()
+              {adhocItem
+                ? renderAdhocItem()
                 : renderAdhocTrigger()}
             </div>),
           adhocForm = (
@@ -182,15 +244,15 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
                 <TabsContent value="text">
                   <Textarea
                     autoFocus
+                    value={adhocContent}
                     rows={4}
                     placeholder={`Describe the ${d.id}...`}
-                    value={adhocContent}
                     onChange={e => setAdhocContent(e.target.value)}
                     className="text-xs h-50 rounded-md bg-muted border-none focus-within:ring-0 focus-within:border-input" />
                 </TabsContent>
                 <TabsContent value="image">
                   <Dropzone
-                    value={adhocDataUrl || undefined}
+                    value={adhocPath}
                     onFile={async (file) => {
                       const compressed = await compressImage(file)
                       const dataUrl = await new Promise<string>((resolve, reject) => {
@@ -199,9 +261,9 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
                         reader.onerror = () => reject(new Error('Failed to read file'))
                         reader.readAsDataURL(compressed)
                       })
-                      setAdhocDataUrl(dataUrl)
+                      setAdhocPath(dataUrl)
                     }}
-                    onClear={() => setAdhocDataUrl('')}
+                    onClear={() => setAdhocPath('')}
                     className="aspect-video w-full h-50 rounded-md!" />
                 </TabsContent>
               </Tabs>
@@ -209,7 +271,7 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
                 <Button
                   size="icon-sm"
                   className="flex h-5 items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-                  onClick={resetAdhoc}>
+                  onClick={() => setAdhocing(null)}>
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
                 <Button
@@ -217,11 +279,10 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
                   size="xs"
                   className="h-5 flex-1"
                   disabled={
-                    (adhocTab === 'text' && !adhocContent.trim()) ||
-                    (adhocTab === 'image' && !adhocDataUrl)
+                    adhocItem?.path === '' && adhocItem?.content === ''
                   }
-                  onClick={() => doneAdhoc(d.id as AssetType)}>
-                  Done
+                  onClick={() => saveAdhoc(d.id)}>
+                  Save
                 </Button>
               </div>
             </div>)
@@ -232,7 +293,6 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
               modal={false}
               open={openType === d.id}
               onOpenChange={(open) => {
-                if (!open) resetAdhoc()
                 setOpenType(open ? d.id as AssetType : null)
               }}>
               <PopoverTrigger asChild>
@@ -251,7 +311,7 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
                 side="top"
                 sideOffset={0}
                 className="draw-up rounded-top glass w-48 border-border p-1 pr-0 ob-4">
-                {adhocType === d.id
+                {adhocing === d.id
                   ? adhocForm
                   : items
                 }
@@ -271,4 +331,4 @@ export function Mixins({ value = {}, onChange }: MixinsProps) {
       </Popover>
     </ButtonGroup>
   )
-}
+})

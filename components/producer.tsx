@@ -7,16 +7,15 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Textarea, Toggle, Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui'
 import { Button } from '@/components/button'
 import { createClient } from '@/lib/supabase/client'
-import type { AdhocAsset, AssetType, Mixins as MixinsType, MixinsWithAdhoc, MomentWithPhotos } from '@/lib/types'
+import type { AssetType, MixinsWithAdhoc, MomentWithPhotos } from '@/lib/types'
 import { useBus, type MixinSelectPayload } from '@/lib/bus'
 import { cn } from '@/lib/utils'
 import { useAssets } from '@/hooks/use-assets'
 import { useEngine } from '@/hooks/use-engine'
 import { useUpload } from '@/hooks/use-upload'
-import { useCreateAsset } from '@/hooks/use-create-asset'
 import { compressImage } from '@/lib/compress-image'
 import { FacePicker } from '@/components/face-picker'
-import { Mixins } from '@/components/mixins'
+import { Mixins, type MixinsHandle } from '@/components/mixins'
 import { Loader2, ArrowUp, Plus, GripHorizontal, X, Square, RotateCcw } from 'lucide-react'
 
 interface ProducerProps {
@@ -26,6 +25,7 @@ interface ProducerProps {
 
 export function Producer({ className, onGenerationComplete }: ProducerProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const mixinsRef = useRef<MixinsHandle>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -93,47 +93,18 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
   const { data: assets = [] } = useAssets()
   const { mutate: commit, isPending, error, reset: clearError } = useEngine()
   const [resolutionError, setResolutionError] = React.useState<string | null>(null)
-  const createAsset = useCreateAsset()
   const { upload, uploading, remove } = useUpload({
     path: () => `uploads/${userId}`
   })
-
-  const uploadFileAsync = (file: File): Promise<{ storagePath: string }> =>
-    new Promise((resolve, reject) => {
-      upload(file, {
-        onSuccess: resolve,
-        onError: () => reject(new Error('Upload failed')),
-      })
-    })
 
   // Handlers
   const handleGenerate = async () => {
     if (couldNotSubmit) return
     setResolutionError(null)
 
-    // Resolve any inline ad-hoc entries to real asset IDs before generation
-    const resolvedMixins: { [k in AssetType]?: string } = {}
+    let resolvedMixins: { [k in AssetType]?: string }
     try {
-      for (const [type, entry] of Object.entries(mixins) as [AssetType, string | AdhocAsset | undefined][]) {
-        if (!entry) continue
-        if (typeof entry === 'string') {
-          resolvedMixins[type] = entry
-        } else if ('content' in entry) {
-          const asset = await createAsset.mutateAsync({
-            name: '',
-            type,
-            content: (entry as { content: string }).content,
-          })
-          resolvedMixins[type] = asset.id!
-        } else if ('path' in entry && entry.path) {
-          const blob = await fetch(entry.path).then(r => r.blob())
-          const ext = blob.type.split('/')[1] || 'jpg'
-          const file = new File([blob], `adhoc.${ext}`, { type: blob.type })
-          const { storagePath } = await uploadFileAsync(file)
-          const asset = await createAsset.mutateAsync({ name: '', type, path: storagePath })
-          resolvedMixins[type] = asset.id!
-        }
-      }
+      resolvedMixins = await mixinsRef.current!.resolveAdhoc()
     } catch {
       setResolutionError('Failed to save ad-hoc content. Please try again.')
       return
@@ -260,7 +231,7 @@ const filterAssets = (type?: AssetType) => {
           expanded ? 'max-h-14 opacity-100' : 'max-h-0 opacity-0'
         )}>
         <div className="flex px-8">
-          <Mixins value={mixins} onChange={setMixins} />
+          <Mixins ref={mixinsRef} value={mixins} onChange={setMixins} />
         </div>
       </div>
       <div className="relative -m-px overflow-hidden rounded-3xl border border-foreground/50 bg-background/20 p-1">
