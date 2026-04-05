@@ -137,13 +137,20 @@ export const POST = withAxiom(async function POST(request: NextRequest) {
     const imageBuffer = Buffer.from(image, 'base64')
     const photoId = crypto.randomUUID()
     const storagePath = `${userId}/${momentId}/${photoId}.jpg`
-    // 7. Upload to Supabase Storage
-    const { error: uploadError } = await supabase.storage
-      .from('photos')
-      .upload(storagePath, imageBuffer, {
-        contentType: 'image/jpeg',
-        upsert: false
-      })
+    // 7. Upload to Supabase Storage (retry up to 3 times on transient network errors)
+    let uploadError = null
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      const { error } = await supabase.storage
+        .from('photos')
+        .upload(storagePath, imageBuffer, {
+          contentType: 'image/jpeg',
+          upsert: false
+        })
+      if (!error) { uploadError = null; break }
+      uploadError = error
+      logger.warn('storage.upload.retry', { request_id: requestId, attempt, error: error.message })
+      if (attempt < 3) await new Promise(r => setTimeout(r, attempt * 1000))
+    }
     if (uploadError) {
       logger.error('storage.upload.failed', { request_id: requestId, error: uploadError.message })
       return halt(new Error(`Storage upload failed: ${uploadError.message}`))
