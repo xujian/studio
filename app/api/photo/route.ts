@@ -163,6 +163,7 @@ export const POST = withAxiom(async function POST(request: NextRequest) {
         })
       if (momentError) {
         logger.error('moment.create.failed', { request_id: requestId, error: momentError.message })
+        await supabase.storage.from('photos').remove([storagePath])
         return halt(new Error(`Failed to create moment: ${momentError.message}`))
       }
     }
@@ -175,6 +176,7 @@ export const POST = withAxiom(async function POST(request: NextRequest) {
     })
     if (photoError) {
       logger.error('photo.insert.failed', { request_id: requestId, error: photoError.message })
+      await supabase.storage.from('photos').remove([storagePath])
       return halt(new Error(`Failed to insert photo: ${photoError.message}`))
     }
     // 10. Fetch complete moment with photos
