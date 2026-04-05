@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Textarea, Toggle, Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui'
 import { Button } from '@/components/button'
 import { createClient } from '@/lib/supabase/client'
-import type { AssetType, MixinsWithAdhoc, MomentWithPhotos } from '@/lib/types'
+import type { AssetType, MixinsWithAdhoc, MomentWithPhotos, Mixins as PureMixins } from '@/lib/types'
 import { useBus, type MixinSelectPayload } from '@/lib/bus'
 import { cn } from '@/lib/utils'
 import { useAssets } from '@/hooks/use-assets'
@@ -97,19 +97,31 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
     path: () => `uploads/${userId}`
   })
 
+  const hasAdhocMixins = () => Object.values(mixins).some(v => 
+    typeof v === 'object' && v.id === undefined)
+
   // Handlers
   const handleGenerate = async () => {
     if (couldNotSubmit) return
     setResolutionError(null)
-
-    let resolvedMixins: { [k in AssetType]?: string }
-    try {
-      resolvedMixins = await mixinsRef.current!.resolve()
-    } catch {
-      setResolutionError('Failed to save ad-hoc content. Please try again.')
-      return
+    // console.log('mixins', mixins)
+    let finalMixins: PureMixins = Object.fromEntries(
+      Object.entries(mixins).filter(([_, v]) => typeof v === 'string')
+    )
+    console.log('finalMixins', finalMixins, hasAdhocMixins())
+    if (hasAdhocMixins()) {
+      try {
+        let resolvedMixins = await mixinsRef.current!.resolve()
+        finalMixins = {
+          ...finalMixins,
+          ...resolvedMixins
+        }
+        // console.log('finalMixins2', finalMixins)
+      } catch {
+        setResolutionError('Failed to save ad-hoc content. Please try again.')
+        return
+      }
     }
-
     commit(
       {
         prompt: mode === 'create'
@@ -117,7 +129,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
           : dirty
             ? prompt
             : '',
-        mixins: resolvedMixins,
+        mixins: finalMixins,
         reference,
         momentId,
       },

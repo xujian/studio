@@ -58,20 +58,33 @@ export const Mixins = React.forwardRef<MixinsHandle, MixinsProps>(function Mixin
       const resolved: { [k in AssetType]?: string } = {}
       for (const [type, entry] of Object.entries(value) as [AssetType, string | AdhocAsset | undefined][]) {
         if (!entry) continue
-        if (typeof entry === 'string') {
-          resolved[type] = entry
-        } else if ('content' in entry && entry.content) {
-          const asset = await createAsset.mutateAsync({ name: '', type, content: entry.content })
-          resolved[type] = asset.id!
-        } else if ('path' in entry && entry.path) {
-          const blob = await fetch(entry.path).then(r => r.blob())
-          const ext = blob.type.split('/')[1] || 'jpg'
-          const file = new File([blob], `adhoc.${ext}`, { type: blob.type })
-          const storagePath = await uploadAsset(file, type)
-          const asset = await createAsset.mutateAsync({ name: '', type, path: storagePath })
-          resolved[type] = asset.id!
+        if (typeof entry === 'object') {
+          if ('content' in entry && entry.content) {
+            const asset = await createAsset.mutateAsync({ name: '', type, content: entry.content })
+            setAdhocItems({
+              ...adhocItems,
+              [type]: asset
+            })
+            resolved[type] = asset.id!
+          } else if ('path' in entry && entry.path) {
+            const blob = await fetch(entry.path).then(r => r.blob())
+            const ext = blob.type.split('/')[1] || 'jpg'
+            const file = new File([blob], `adhoc.${ext}`, { type: blob.type })
+            const storagePath = await uploadAsset(file, type)
+            const asset = await createAsset.mutateAsync({ name: '', type, path: storagePath })
+            setAdhocItems({
+              ...adhocItems,
+              [type]: asset
+            })
+            resolved[type] = asset.id!
+          }
         }
       }
+      // return only ad-hoc mixins
+      onChange?.({
+        ...value,
+        ...resolved
+      })
       return resolved
     }
   }))
@@ -87,6 +100,10 @@ export const Mixins = React.forwardRef<MixinsHandle, MixinsProps>(function Mixin
    */
   const [adhocItems, setAdhocItems] = React.useState<{[key in AssetType]?: AdhocAsset}>({})
 
+  /**
+   * when save button clicked
+   * @param type 
+   */
   const saveAdhoc = (type: AssetType) => {
     const item = {
       name: '',
@@ -105,14 +122,15 @@ export const Mixins = React.forwardRef<MixinsHandle, MixinsProps>(function Mixin
     setAdhocPath('')
   }
 
-  const handleSelect = (type: AssetType, assetId: string | AdhocAsset) => {
+  const handleSelect = (type: AssetType, asset: string | AdhocAsset) => {
     const v = { ...value } as MixinsWithAdhoc
     const current = v[type]
-    if (typeof current === 'string' && current === assetId) {
+    if (typeof current === 'string' && current === asset) {
       delete v[type]
     } else {
-      v[type] = assetId
+      v[type] = asset
     }
+    // console.log('----handleSelect', type, asset, v)
     onChange?.(v)
   }
 
@@ -129,12 +147,16 @@ export const Mixins = React.forwardRef<MixinsHandle, MixinsProps>(function Mixin
               && v.name === ''
               ? v
               : null
-          console.log('adhocItem', adhocItem)
 
           const renderAdhocItem = () => adhocItem
             ? (<div
               className="relative w-30 h-30 cursor-pointer"
-              onClick={() => handleSelect(d.id as AssetType, adhocItem)}>
+              onClick={() => handleSelect(
+                d.id as AssetType, 
+                adhocItem.id
+                  ? adhocItem.id
+                  : adhocItem
+              )}>
               <Button
                 type="button"
                 onClick={(e) => {
@@ -145,14 +167,16 @@ export const Mixins = React.forwardRef<MixinsHandle, MixinsProps>(function Mixin
                 className="absolute h-6 w-6 px-0! py-0 right-1 bottom-1 z-10 bg-foreground hover:bg-foreground/70 text-background">
                 <X />
               </Button>
-              { value[d.id] === adhocItems[d.id] && (
+              { (value[d.id] === adhocItem || value[d.id] === adhocItem.id) && (
                 <Badge className="absolute top-1 left-1 bg-secondary border border-primary text-primary-foreground">
                   <Check className="text-secondary-foreground" />
                 </Badge>
               )}
               {adhocItem.path
                 ? (<Image
-                    src={adhocItem.path}
+                    src={adhocItem.path.startsWith('data:')
+                      ? adhocItem.path
+                      : assetUrl(adhocItem.path)}
                     width={120}
                     height={120}
                     className="size-28 object-cover rounded-sm border border-border!"
