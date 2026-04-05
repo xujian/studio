@@ -22,6 +22,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Dropzone } from '@/components/dropzone'
 import { compressImage } from '@/lib/compress-image'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { useSingleAsset } from '@/hooks/use-asset'
 
 export interface MixinsHandle {
   resolve: () => Promise<{ [k in AssetType]?: string }>
@@ -36,7 +37,8 @@ export const Mixins = React.forwardRef<MixinsHandle, MixinsProps>(function Mixin
   { value = {}, onChange },
   ref
 ) {
-  const { data: assets = [], isLoading } = useAssets()
+  const { data: assets = [], isLoading } = useAssets(),
+    { fetch: fetchAsset } = useSingleAsset()
 
   // Group assets by type
   const assetsByType = React.useMemo(() => {
@@ -134,12 +136,37 @@ export const Mixins = React.forwardRef<MixinsHandle, MixinsProps>(function Mixin
     onChange?.(v)
   }
 
+  // recalled ad-hoc mixins
+  // When user redo an photo that has an ad-hoc asset, 
+  // and all the mixins added to the producer, the ad-hoc assets, like a scene asset, 
+  // should be recalled and display as a image at the end of  the <Mixins> items
+  const recallAdhocMixins = async () => {
+    Object.entries(value).map(async ([type, id]) => {
+      const assetOfThisType = assetsByType[type] || []
+      if (!assetOfThisType.find(item => item.id === id)) {
+        const recalled = await fetchAsset(id as string)
+        if (recalled) {
+          setAdhocItems({
+            ...adhocItems,
+            [type]: recalled
+          })
+        }
+      }
+    })  
+  }
+
+  React.useEffect(() => {
+    recallAdhocMixins()
+  }, [value])
+
+
   return (
     <ButtonGroup className="-mt-px h-7 rounded-none bg-foreground/10">
       {assetDefines
         .filter(t => t.id !== 'face')
         .map(d => {
           const typeAssets = (assetsByType[d.id] || []).filter(a => a.name !== '')
+          // console.log('----typeAssets', d.id, typeAssets)
           const isSelected = d.id in value
           const v = adhocItems[d.id as AssetType],
             adhocItem = v
@@ -172,14 +199,17 @@ export const Mixins = React.forwardRef<MixinsHandle, MixinsProps>(function Mixin
                   <Check className="text-secondary-foreground" />
                 </Badge>
               )}
+              <Badge className="absolute top-1 right-1 bg-primary/70 border border-secondary! text-primary-foreground">
+                ad-hoc
+              </Badge>
               {adhocItem.path
                 ? (<Image
                     src={adhocItem.path.startsWith('data:')
                       ? adhocItem.path
                       : assetUrl(adhocItem.path)}
-                    width={120}
-                    height={120}
-                    className="size-28 object-cover rounded-sm border border-border!"
+                    width={240}
+                    height={240}
+                    className="size-30 object-cover rounded-sm border border-border!"
                     alt="ad-hoc" />)
                 : <div className="line-clamp-2 px-1 py-1 text-left text-xs rounded-md text-muted-foreground">
                     {adhocItem.content}

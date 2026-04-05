@@ -474,10 +474,13 @@ AS $$
     (p.id IS NOT NULL) AS is_purchased
   FROM public.assets a
   LEFT JOIN public.purchases p ON p.asset_id = a.id AND p.buyer_id = user_uuid
-  WHERE a.user_id = user_uuid
-     OR p.id IS NOT NULL
-     OR (a.user_id IS NULL AND a.price IS NULL)
-     OR (a.user_id IS NULL AND (SELECT super FROM public.profiles WHERE id = user_uuid))
+  WHERE a.name != ''
+    AND (
+      a.user_id = user_uuid
+      OR p.id IS NOT NULL
+      OR (a.user_id IS NULL AND a.price IS NULL)
+      OR (a.user_id IS NULL AND (SELECT super FROM public.profiles WHERE id = user_uuid))
+    )
   ORDER BY a.created_at DESC;
 $$;
 
