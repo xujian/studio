@@ -43,10 +43,21 @@ export const useUpload = ({ path = defaultPath }: UploadOptions = {}) => {
       const slashIdx = fullPath.indexOf('/')
       const bucket = fullPath.slice(0, slashIdx)
       const storagePath = fullPath.slice(slashIdx + 1)
-      const { error } = await supabase.storage
-        .from(bucket)
-        .upload(storagePath, file, { contentType: file.type, upsert: false })
-      if (error) throw error
+
+      const formData = new FormData()
+      formData.append('file', file, filename)
+      formData.append('bucket', bucket)
+      formData.append('storagePath', storagePath)
+
+      const res = await fetch('/api/assets/image', {
+        method: 'POST',
+        body: formData
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Upload failed')
+      }
+
       return { filename, storagePath, bucket }
     },
   })

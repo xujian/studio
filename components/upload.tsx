@@ -39,6 +39,7 @@ export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
     value,
     compress = true,
     onBeforeUpload,
+    children,
     ...rest
   },
   ref
@@ -62,17 +63,20 @@ export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
   useImperativeHandle(ref, () => ({ upload: processFile }))
 
   return (
-    <Dropzone
-      onFile={processFile}
-      value={value || localPreview || undefined}
-      onClear={() => {
-        setLocalPreview(null)
-        onClear?.()
-      }}
-      uploading={uploading}
-      placeholder={placeholder}
-      className={className}
-      {...rest}
-    />
+    <div className="relative w-full overflow-hidden">
+      <Dropzone
+        onFile={processFile}
+        value={value || localPreview || undefined}
+        onClear={() => {
+          setLocalPreview(null)
+          onClear?.()
+        }}
+        uploading={uploading}
+        placeholder={placeholder}
+        className={className}
+        {...rest}
+      />
+      {children}
+    </div>
   )
 })
