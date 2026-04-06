@@ -142,19 +142,19 @@ export function MomentCarousel({
           ))}
         </CarouselContent>
         <div
-          className="absolute bottom-1 h-8 w-full opacity-0 transition-opacity duration-200 group-hover:opacity-100 focus-within:opacity-100"
+          className="absolute bottom-1 h-8 w-full z-11 opacity-0 transition-opacity duration-200 group-hover:opacity-100 focus-within:opacity-100"
           onClick={e => {
             e.preventDefault()
             e.stopPropagation()
           }}>
           <CarouselPrevious
             size="icon-lg"
-            className="left-1 bg-black!"
+            className="left-1 border-0 bg-secondary! hover:bg-black!"
             aria-label="Previous photo"
           />
           <CarouselNext
             size="icon-lg"
-            className="right-1 bg-black!"
+            className="right-1 border-0 bg-secondary! hover:bg-black!"
             aria-label="Next photo"
           />
         </div>
