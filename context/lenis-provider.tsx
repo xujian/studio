@@ -23,7 +23,13 @@ export const LenisProvider = ({ children }: { children: React.ReactNode }) => {
   }, [])
 
   useEffect(() => {
-    lenisRef.current?.scrollTo(0, { immediate: true })
+    const isModal = !!pathname.match(/^\/moments\/[^/]+/)
+    if (isModal) {
+      lenisRef.current?.stop()
+    } else {
+      lenisRef.current?.start()
+      lenisRef.current?.scrollTo(0, { immediate: true })
+    }
   }, [pathname])
 
   return <>{children}</>
