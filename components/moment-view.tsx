@@ -130,6 +130,7 @@ export function MomentView({
           photo={initialPhotoId}
           onChange={(photo) => setCurrentPhoto(photo)}
           onClose={onClose}
+          sizes="(min-width: 1280px) 400px, 50vw"
         />
       </div>
       <div className="attributes flex-1">
@@ -188,7 +189,7 @@ export function MomentView({
                             src={assetUrl(asset.path)}
                             fill
                             className="object-cover"
-                            sizes="120px"
+                            sizes="(min-width: 1280px) 25vw, (min-width: 768px) 33vw, 50vw"
                           />)
                       : (<p className="text-xs">
                             {asset?.name || displayName}

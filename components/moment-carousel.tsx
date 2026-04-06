@@ -22,6 +22,7 @@ type MomentCarouselProps = {
   onClose?: () => void
   children?: React.ReactNode
   className?: string
+  sizes?: string
 }
 
 export function MomentCarousel({
@@ -30,7 +31,8 @@ export function MomentCarousel({
   onChange,
   onClose,
   children,
-  className
+  className,
+  sizes = '(min-width: 1280px) 16vw, (min-width: 768px) 25vw, 50vw'
 }: MomentCarouselProps) {
   const [api, setApi] = React.useState<CarouselApi>()
   const [current, setCurrent] = React.useState(0)
@@ -105,7 +107,7 @@ export function MomentCarousel({
         fill
         loading="lazy"
         className="object-cover"
-        sizes="(min-width: 1280px) 16vw, (min-width: 768px) 25vw, 50vw"
+        sizes={sizes}
       />
     </motion.div>
   )
