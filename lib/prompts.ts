@@ -7,7 +7,7 @@ export const DEFAULTS: Record<AssetType, string> = {
   hair: '',
   makeup: '',
   outfit: '',
-  scene: '',
+  scene: assetUrl('/scene/99a02fad88dd87d8.jpg'),
   lighting: '',
   camera: '',
   mood: ''
@@ -322,7 +322,24 @@ IMAGE OUTPUT: 1:1 square image, photorealistic, suitable for a scene card in a p
 ${PREVIEW_OUTPUT_RULES}
 `,
   camera: '',
-  mood: ''
+  mood: `You goal is to generate an image to demonstrate the **MOOD** from the text content. 
+Combine the text content and the base prompt to a final prompt to generate a image as the preview image for the specified mood.
+So user can see how the mood can effect their portrait.
+
+BASE PROMPT:
+portrait of a woman standing by the sea, leaning against the railing, holding flower in hand. 
+centered composition, neutral background, 85mm lens, shallow depth of field.
+
+REFERENCES:
+- Use the first image as the subject.
+- Use the second image as the scene, remove the original figures.
+- Outfit: Loose oversized white shirt
+
+STYLE RULES:
+- Ultra-realistic photograph
+- Japanese Portrait Style: emphasizes minimalism, soft lighting, and muted, cool-toned colors
+- aspect ratio: 1:1
+- cinematic, high detail, natural skin texture, professional photography`
 }
 
 /**

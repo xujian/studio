@@ -23,7 +23,7 @@ export const assetPreviewModes: Record<AssetType, AssetPreviewMode> = {
   scene: 'image',
   lighting: 'svg',
   camera: 'svg',
-  mood: 'svg'
+  mood: 'image'
 }
 
 export type AssetConfig = {

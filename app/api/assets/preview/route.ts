@@ -52,19 +52,40 @@ export async function POST(request: NextRequest) {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
 
   const userParts: { text?: string; inlineData?: { mimeType: string; data: string } }[] = []
-  if (type === 'makeup') {
+  if (['makeup', 'mood'].includes(type)) {
     const faceRes = await fetch(DEFAULTS.face)
     const faceBuffer = await faceRes.arrayBuffer()
     const mimeType = faceRes.headers.get('content-type') || 'image/jpeg'
-    userParts.push({ inlineData: { mimeType, data: Buffer.from(faceBuffer).toString('base64') } })
+    userParts.push({
+      inlineData: {
+        mimeType,
+        data: Buffer.from(faceBuffer).toString('base64')
+      }
+    })
   }
-  userParts.push({ text: content })
+  if (['mood'].includes(type)) {
+    const sceneRes = await fetch(DEFAULTS.scene)
+    const sceneBuffer = await sceneRes.arrayBuffer()
+    const mimeType = sceneRes.headers.get('content-type') || 'image/jpeg'
+    userParts.push({
+      inlineData: {
+        mimeType,
+        data: Buffer.from(sceneBuffer).toString('base64')
+      }
+    })
+  }
+  userParts.push({
+    text: content
+  })
 
   let response: Awaited<ReturnType<typeof ai.models.generateContent>>
   try {
     response = await ai.models.generateContent({
       model: process.env.NANO_BANANA_MODEL!,
-      contents: [{ role: 'user', parts: userParts }],
+      contents: [{
+        role: 'user',
+        parts: userParts
+      }],
       config: {
         systemInstruction: systemPrompt,
         responseModalities: ['TEXT', 'IMAGE'],
