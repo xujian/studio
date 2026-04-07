@@ -89,8 +89,8 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   const [previewing, setPreviewing] = useState(false)
   const [extracting, setExtracting] = useState(false)
   const [analyzing, setAnalyzing] = useState(false)
-  const [previewed, setPreviewed] = useState(false)
-  const [extracted, setExtracted] = useState(false)
+  const [previewed, setPreviewed] = useState('')
+  const [extracted, setExtracted] = useState('')
   const [cropped, setCropped] = useState('')
   const [previewError, setPreviewError] = useState('')
   const [extractError, setExtractError] = useState('')
@@ -162,11 +162,10 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
       }
       const data = await res.json()
       // console.log('previewdata---------------', data.storagePath, uploaded)
-      if (uploaded && uploaded !== data.storagePath) {
-        removeAssetImage(uploaded)
+      if (attached) {
+        removeAssetImage(attached)
       }
-      setUploaded(data.storagePath)
-      setPreviewed(true)
+      setPreviewed(data.storagePath)
       if (data.title && !title) setTitle(data.title)
       if (data.slug && !name) setName(data.slug)
       if (data.description && !description) setDescription(data.description)
@@ -220,9 +219,10 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
           }
           if (event.type === 'completed') {
             setCropped('')
-            setExtracted(true)
-            removeAssetImage(uploaded)
-            setUploaded(event.storagePath)
+            if (attached) {
+              removeAssetImage(attached)
+            }
+            setExtracted(event.dataUrl)
             if (event.title && !title) setTitle(event.title)
             if (event.slug && !name) setName(event.slug)
             if (event.description && !description) setDescription(event.description)
@@ -236,7 +236,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   }
 
   const handleAnalyze = async () => {
-    if (!preview || analyzing) return
+    if (!uploaded || analyzing) return
     setAnalyzing(true)
     try {
       const image = uploaded || (!cleared && asset?.path ? asset.path : '')
@@ -264,10 +264,13 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
 
   const handleSave = () => {
     if (isEditing) {
-      const pathToSave = uploaded
-        || (cleared ? null : asset.path)
-        || null
       const parsedPrice = price !== '' ? parseInt(price, 10) : null
+      const pathToSave = attached
+        ? attached
+        : cleared
+          ? ''
+          : asset.path
+
       updateAsset.mutate(
         {
           id: asset.id!,
@@ -282,8 +285,11 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
         {
           onSuccess: () => {
             // Delete old image from storage if it was replaced
-            if (asset.path) {
-              if (pathToSave !== asset.path) {
+            if (attached && asset.path) {
+              removeAssetImage(asset.path)
+            }
+            if (cleared) {
+              if (asset.path) {
                 removeAssetImage(asset.path)
               }
             }
@@ -308,8 +314,8 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
 
   const handleCancel = async () => {
     savedRef.current = true
-    if (uploaded) {
-      await removeAssetImage(uploaded)
+    if (displaying) {
+      await removeAssetImage(displaying)
     }
     if (!isEditing) resetForm()
     onClose()
@@ -322,8 +328,8 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
     setTitle('')
     setDescription('')
     setContent('')
-    setPreviewed(false)
-    setExtracted(false)
+    setPreviewed('')
+    setExtracted('')
     setCropped('')
     setCleared(false)
   }
@@ -332,9 +338,20 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   const isPending = createAsset.isPending || updateAsset.isPending
   const canSave = !!name && !isPending
 
-  const preview = cropped
-    || (uploaded ? assetUrl(uploaded) : undefined)
-    || (!cleared && asset?.path ? assetUrl(asset.path) : undefined)
+  /**
+   * image saved to storage but not saved to DB
+   */
+  const attached =
+    uploaded || previewed || extracted
+
+  /**
+   * image displaying in the upload
+   */
+  const displaying = cropped
+    || attached
+    || (!cleared && asset?.path
+        ? asset.path
+        : undefined)
 
   const handlePaste = (e: React.ClipboardEvent) => {
     const file = Array.from(e.clipboardData.items)
@@ -394,7 +411,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
           path={({ userId }) => asset?.user_id === null
             ? `assets/${type}`
             : `assets/${userId}/${type}`}
-          value={preview}
+          value={displaying ? assetUrl(displaying) : ''}
           compress={type !== 'face'}
           onBeforeUpload={setOriginalImage}
           placeholder={(
@@ -403,30 +420,30 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
               : uploadPlaceholders[type]
           )}
           onComplete={(path) => {
-            if (uploaded && uploaded !== path) {
+            if (uploaded) {
               removeAssetImage(uploaded)
             }
             setUploaded(path)
-            setPreviewed(false)
-            setExtracted(false)
+            setPreviewed('')
+            setExtracted('')
             setCropped('')
             setCleared(false)
           }}
           onClear={() => {
-            if (uploaded) {
-              removeAssetImage(uploaded)
+            if (attached) {
+              removeAssetImage(attached)
             }
             originalImage.current = ''
             setUploaded('')
-            setPreviewed(false)
-            setExtracted(false)
+            setPreviewed('')
+            setExtracted('')
             setCropped('')
             setCleared(true)
           }}>
           <Badge variant="ghost"
             className="absolute top-2 left-2 text-xs font-medium bg-neutral text-neutral-foreground z-1">
             { runMode === 'text'
-              ? 'Preview (optional)'
+              ? 'Preview'
               : 'Reference image' }
           </Badge>
           <div className="absolute bottom-1 right-1 flex items-center gap-1">
