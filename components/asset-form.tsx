@@ -290,7 +290,14 @@ export const AssetForm = forwardRef<AssetFormHandle, AssetFormProps>(function As
       )
     } else {
       createAsset.mutate(
-        { name, title, description, content, type, path: uploaded },
+        {
+          name,
+          title,
+          description,
+          content,
+          type,
+          path: attached
+        },
         {
           onSuccess: () => {
             savedRef.current = true
