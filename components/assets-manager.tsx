@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { AssetCard } from '@/components/asset-card'
-import { AssetForm } from '@/components/asset-form'
+import { AssetForm, AssetFormHandle } from '@/components/asset-form'
 import { Sidepane } from '@/components/sidepane'
 import { Button } from '@/components/button'
 import type { AssetType } from '@/lib/types'
@@ -20,6 +20,12 @@ export function AssetsManager({ type, onClose }: AssetsManagerProps) {
   const { data: assets = [] } = useAssets()
   const filtered = assets.filter(a => a.type === type && a.name !== '')
   const label = type.charAt(0).toUpperCase() + type.slice(1)
+
+  const form = useRef<AssetFormHandle>(null) 
+
+  const onAssetFormClose = async () => {
+    return await form.current!.allowDismiss()
+  }
 
   return (
     <div className="w-full">
@@ -62,8 +68,10 @@ export function AssetsManager({ type, onClose }: AssetsManagerProps) {
 
       <Sidepane open={dialogOpen}
         onOpenChange={setDialogOpen}
+        onBeforeClose={onAssetFormClose}
         title={`Create a new ${label} Mixin`}>
         <AssetForm
+          ref={form}
           type={type}
           onClose={() => setDialogOpen(false)} />
       </Sidepane>

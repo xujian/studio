@@ -14,6 +14,7 @@ export interface UploadHandle {
 type PathOption = string | ((opts: { userId: string }) => string)
 
 export type UploadProps = {
+  bucket: string,
   path: PathOption
   onComplete: (storagePath: string) => void
   onClear?: () => void
@@ -30,6 +31,7 @@ export type UploadProps = {
 
 export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
   {
+    bucket,
     path,
     onComplete,
     onClear,
@@ -44,7 +46,7 @@ export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
   },
   ref
 ) {
-  const { upload, uploading } = useUpload({ path })
+  const { upload, uploading } = useUpload({ bucket, path })
   const [localPreview, setLocalPreview] = useState<string | null>(null)
 
   const processFile = async (file: File) => {
@@ -52,7 +54,7 @@ export const Upload = forwardRef<UploadHandle, UploadProps>(function Upload(
     onBeforeUpload?.(compressed)
     setLocalPreview(URL.createObjectURL(compressed))
     upload(compressed, {
-      onSuccess: ({ storagePath }) => onComplete(storagePath),
+      onSuccess: ({ path }) => onComplete(path),
       onError: () => {
         setLocalPreview(null)
         onError?.()

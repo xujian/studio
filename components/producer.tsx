@@ -94,7 +94,8 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
   const { mutate: commit, isPending, error, reset: clearError } = useEngine()
   const [resolutionError, setResolutionError] = React.useState<string | null>(null)
   const { upload, uploading, remove } = useUpload({
-    path: () => `uploads/${userId}`
+    bucket: 'uploads',
+    path: () => userId
   })
 
   const hasAdhocMixins = () => Object.values(mixins).some(v => 

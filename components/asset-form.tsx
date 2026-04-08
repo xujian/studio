@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { Button } from '@/components/button'
 import { CreditButton } from '@/components/credit-button'
 import { Input } from '@/components/ui/input'
@@ -40,6 +40,11 @@ const contentPlaceholders: Record<AssetType, string> = {
 }
 
 
+export type AssetFormHandle = {
+  cleanup: () => Promise<boolean>
+  allowDismiss: () => Promise<boolean>
+}
+
 type AssetFormProps = {
   type: AssetType
   asset?: Asset
@@ -51,7 +56,7 @@ type AssetFormProps = {
  * @param
  * @returns 
  */
-export function AssetForm({ type, asset, onClose }: AssetFormProps) {
+export const AssetForm = forwardRef<AssetFormHandle, AssetFormProps>(function AssetForm({ type, asset, onClose }: AssetFormProps, ref) {
   const uploadRef = useRef<UploadHandle>(null)
   const createAsset = useCreateAsset()
   const updateAsset = useUpdateAsset()
@@ -60,24 +65,10 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
 
   const [uploaded, setUploaded] = useState<string>('')
   const savedRef = useRef(false)
-  const uploadedRef = useRef('')
   // Stores the source image as a data URL for redo:
   // - non-face: the compressed file from the initial upload (set via onFile)
   // - face: the cropped result from the first extraction (set on "cropped" SSE event)
   const originalImage = useRef('')
-
-  useEffect(() => {
-    uploadedRef.current = uploaded
-  }, [uploaded])
-
-  // Cleanup newly-uploaded (unsaved) image on unmount
-  useEffect(() => {
-    return () => {
-      if (uploadedRef.current && !savedRef.current) {
-        removeAssetImage(uploadedRef.current)
-      }
-    }
-  }, [])
 
   const [name, setName] = useState(asset?.name ?? '')
   const [title, setTitle] = useState(asset?.title ?? '')
@@ -206,8 +197,6 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
         for (const chunk of chunks) {
           if (!chunk.startsWith('data: ')) continue
           const event = JSON.parse(chunk.slice(6))
-          console.log('extractevent---------------', event)
-
           if (event.type === 'error') {
             setExtractError(event.error)
             return
@@ -252,7 +241,6 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
         return
       }
       const { content, title, slug, description } = await res.json()
-      console.log('analyze result:', { content, title, slug, description })
       setContent(content)
       setTitle(title)
       setName(slug)
@@ -313,10 +301,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
   }
 
   const handleCancel = async () => {
-    savedRef.current = true
-    if (displaying) {
-      await removeAssetImage(displaying)
-    }
+    cleanupIfNotSave()
     if (!isEditing) resetForm()
     onClose()
   }
@@ -363,6 +348,41 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
     }
   }
 
+  const cleanupState = () => {
+    setPreviewed('')
+    setExtracted('')
+    setCropped('')
+  }
+
+  const cleanupIfNotSave = async () => {
+    if (savedRef.current === false) {
+      if (attached) {
+        const result = await removeAssetImage(attached)
+        return result === true
+      }
+    }
+    return Promise.resolve(true)
+  }
+
+  const allowDismiss = async () => {
+    if (attached) {
+      return false
+    }
+    if (previewing || extracting || analyzing) {
+      return false
+    }
+    return true
+  }
+
+  useImperativeHandle(ref, () => ({ cleanup: cleanupIfNotSave, allowDismiss }))
+
+  // Cleanup newly-uploaded (unsaved) image on unmount
+  useEffect(() => {
+    return () => {
+      cleanupIfNotSave()
+    }
+  }, [])
+
   return (
     <div className="asset-create flex min-h-full flex-col gap-2 p-2" onPaste={handlePaste}>
       <div className={cn('flex flex-col items-center gap-2',
@@ -406,6 +426,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
             </Textarea>)
         }
         <Upload
+          bucket="assets"
           ref={uploadRef}
           className="aspect-square"
           path={({ userId }) => asset?.user_id === null
@@ -423,10 +444,8 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
             if (uploaded) {
               removeAssetImage(uploaded)
             }
+            cleanupState()
             setUploaded(path)
-            setPreviewed('')
-            setExtracted('')
-            setCropped('')
             setCleared(false)
           }}
           onClear={() => {
@@ -434,10 +453,7 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
               removeAssetImage(attached)
             }
             originalImage.current = ''
-            setUploaded('')
-            setPreviewed('')
-            setExtracted('')
-            setCropped('')
+            cleanupState()
             setCleared(true)
           }}>
           <Badge variant="ghost"
@@ -586,4 +602,4 @@ export function AssetForm({ type, asset, onClose }: AssetFormProps) {
       </div>
     </div>
   )
-}
+})

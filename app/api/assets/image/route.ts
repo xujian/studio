@@ -14,27 +14,27 @@ export async function POST(request: NextRequest) {
   const formData = await request.formData()
   const file = formData.get('file') as File | null
   const bucket = formData.get('bucket') as string | null
-  const storagePath = formData.get('storagePath') as string | null
+  const path = formData.get('path') as string | null
 
-  if (!file || !bucket || !storagePath) {
+  if (!file || !bucket || !path) {
     return NextResponse.json({ error: 'Missing file, bucket, or storagePath' }, { status: 400 })
   }
 
   // Validate ownership: user-prefixed paths must belong to the session user
-  if (UUID_PREFIX_RE.test(storagePath) && !storagePath.startsWith(session.user.id + '/')) {
+  if (UUID_PREFIX_RE.test(path) && !path.startsWith(session.user.id + '/')) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
   const buffer = Buffer.from(await file.arrayBuffer())
-  const { error } = await createAdminClient().storage
+  const { error, data } = await createAdminClient().storage
     .from(bucket)
-    .upload(storagePath, buffer, { contentType: file.type, upsert: false })
+    .upload(path, buffer, { contentType: file.type, upsert: false })
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return NextResponse.json({ storagePath })
+  return NextResponse.json({ path: data.fullPath })
 }
 
 export async function DELETE(request: NextRequest) {

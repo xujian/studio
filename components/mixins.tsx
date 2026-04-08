@@ -14,7 +14,7 @@ import { assets as assetDefines } from '@/lib/assets-config'
 import type { AdhocAsset, AssetType, MixinsWithAdhoc } from '@/lib/types'
 import { assetUrl, cn } from '@/lib/utils'
 import { useAssets } from '@/hooks/use-assets'
-import { useUploadAsset } from '@/hooks/use-upload-asset'
+import { useUpload } from '@/hooks/use-upload'
 import { useCreateAsset } from '@/hooks/use-create-asset'
 import { ArrowLeft, ArrowUpCircle, Check, MoreHorizontalIcon, X } from 'lucide-react'
 import { AssetPreview } from './asset-preview'
@@ -53,7 +53,10 @@ export const Mixins = React.forwardRef<MixinsHandle, MixinsProps>(function Mixin
   }, [assets])
 
   const createAsset = useCreateAsset()
-  const { upload: uploadAsset } = useUploadAsset()
+  const { upload } = useUpload({
+    bucket: 'assets',
+    path: ({userId}) => `${userId}`
+  })
 
   React.useImperativeHandle(ref, () => ({
     resolve: async () => {
@@ -72,13 +75,16 @@ export const Mixins = React.forwardRef<MixinsHandle, MixinsProps>(function Mixin
             const blob = await fetch(entry.path).then(r => r.blob())
             const ext = blob.type.split('/')[1] || 'jpg'
             const file = new File([blob], `adhoc.${ext}`, { type: blob.type })
-            const storagePath = await uploadAsset(file, type)
-            const asset = await createAsset.mutateAsync({ name: '', type, path: storagePath })
-            setAdhocItems({
-              ...adhocItems,
-              [type]: asset
+            upload({file, dir: type}, {
+              onSuccess: async ({path}) => {
+                const asset = await createAsset.mutateAsync({ name: '', type, path })
+                setAdhocItems({
+                  ...adhocItems,
+                  [type]: asset
+                })
+                resolved[type] = asset.id!
+              }
             })
-            resolved[type] = asset.id!
           }
         }
       }

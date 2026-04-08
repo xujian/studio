@@ -9,6 +9,7 @@ import { X } from 'lucide-react'
 type SidepaneProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
+  onBeforeClose?: () => (boolean | Promise<boolean>)
   title?: string
   children: React.ReactNode
   className?: string
@@ -17,12 +18,23 @@ type SidepaneProps = {
 export function Sidepane({
   open,
   onOpenChange,
+  onBeforeClose,
   title,
   children,
   className
 }: SidepaneProps) {
+  const handleOpenChange = async (next: boolean) => {
+    if (!next && onBeforeClose) {
+      const result = await onBeforeClose()
+      if (result === false) {
+        return
+      }
+    }
+    onOpenChange(next)
+  }
+
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetPortal>
         <SheetOverlay className="bg-black/40" />
         <DialogPrimitive.Content
