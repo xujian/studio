@@ -9,10 +9,11 @@ import { Button } from '@/components/button'
 import { createClient } from '@/lib/supabase/client'
 import type { AssetType, MixinsWithAdhoc, MomentWithPhotos, Mixins as PureMixins } from '@/lib/types'
 import { useBus, type MixinSelectPayload } from '@/lib/bus'
-import { cn } from '@/lib/utils'
+import { cn, uploadUrl } from '@/lib/utils'
 import { useAssets } from '@/hooks/use-assets'
 import { useEngine } from '@/hooks/use-engine'
 import { useUpload } from '@/hooks/use-upload'
+import { useDnd } from '@/hooks/use-dnd'
 import { compressImage } from '@/lib/compress-image'
 import { FacePicker } from '@/components/face-picker'
 import { Mixins, type MixinsHandle } from '@/components/mixins'
@@ -109,7 +110,6 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
     let finalMixins: PureMixins = Object.fromEntries(
       Object.entries(mixins).filter(([_, v]) => typeof v === 'string')
     )
-    console.log('finalMixins', finalMixins, hasAdhocMixins())
     if (hasAdhocMixins()) {
       try {
         let resolvedMixins = await mixinsRef.current!.resolve()
@@ -161,15 +161,24 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
    */
   const couldNotSubmit = reference === '' && prompt === ''
 
-  const handleReferenceUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+  const onFile = async (file: File) => {
     upload(file, {
-      onSuccess: ({ filename }) => setReference(filename),
+      onSuccess: ({ filename }) => {
+        setReference(filename)
+        
+      },
       onSettled: () => {
         if (fileInputRef.current) fileInputRef.current.value = ''
       },
     })
+  }
+
+  const { dropping, ...dndProps } = useDnd({ onFile })
+
+  const handleReferenceUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    onFile(file)
   }
 
   const handleReferenceClear = () => {
@@ -226,7 +235,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
     e.stopPropagation()
   }
 
-const filterAssets = (type?: AssetType) => {
+  const filterAssets = (type?: AssetType) => {
     if (!type) return assets
     return assets.filter(asset => asset.type === type)
   }
@@ -269,7 +278,7 @@ const filterAssets = (type?: AssetType) => {
                     <Image
                       className="h-full w-full object-cover"
                       alt="reference"
-                      src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/uploads/${userId}/${reference}`}
+                      src={uploadUrl(userId, reference)}
                       fill
                       sizes="100px"
                     />
@@ -288,9 +297,10 @@ const filterAssets = (type?: AssetType) => {
                     variant="outline"
                     size="icon-lg"
                     tooltip="Upload reference image"
-                    className="button"
+                    className={cn("button", dropping && "dropping")}
                     disabled={isPending || uploading}
-                    onClick={() => fileInputRef.current?.click()}>
+                    onClick={() => fileInputRef.current?.click()}
+                    {...dndProps}>
                     {uploading
                       ? (<Loader2 className="h-4 w-4 animate-spin" />)
                       : (<Plus />)}

@@ -31,14 +31,13 @@ export type UploadPayload = {
   dir: string,
 }
 
-const defaultPath: PathOption = ({ userId }) => `uploads/${userId}`
+const defaultPath: PathOption = ({ userId }) => `${userId}`
 
-export const useUpload = ({ bucket = '', path = defaultPath }: UploadOptions = {}) => {
+export const useUpload = ({ bucket = 'uploads', path = defaultPath }: UploadOptions = {}) => {
   const supabase = createClient()
 
   const { mutate, isPending } = useMutation({
     mutationFn: async (payload: File | UploadPayload): Promise<UploadResult> => {
-
       let file: File | null = null,
         dir = ''
       if ('dir' in payload) {
@@ -47,13 +46,10 @@ export const useUpload = ({ bucket = '', path = defaultPath }: UploadOptions = {
       } else {
         file = payload
       }
-
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) throw new Error('Not authenticated')
-
       file = await toJpg(file)
       const filename = `${random()}.jpg`
-
       const fullPath = [
         typeof path === 'function'
           ? path({ userId: session.user.id })
@@ -61,14 +57,10 @@ export const useUpload = ({ bucket = '', path = defaultPath }: UploadOptions = {
         ...dir ? [dir] : [],
         filename
       ].join('/')
-      const slashIdx = fullPath.indexOf('/')
-      const p = fullPath.slice(slashIdx + 1)
-
       const formData = new FormData()
       formData.append('file', file, filename)
       formData.append('bucket', bucket)
-      formData.append('path', p)
-
+      formData.append('path', fullPath)
       const res = await fetch('/api/assets/image', {
         method: 'POST',
         body: formData
@@ -77,8 +69,7 @@ export const useUpload = ({ bucket = '', path = defaultPath }: UploadOptions = {
         const data = await res.json()
         throw new Error(data.error || 'Upload failed')
       }
-
-      return { filename, path: p, bucket }
+      return { filename, path: fullPath, bucket }
     }
   })
 
