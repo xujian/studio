@@ -5,6 +5,7 @@ import * as React from 'react'
 import { Loader2, Upload as UploadIcon, X } from 'lucide-react'
 import { Button } from './button'
 import { cn } from '@/lib/utils'
+import { useDnd } from '@/hooks/use-dnd'
 
 export type DropzoneProps = {
   /** Called with the raw File when user picks or drops an image */
@@ -28,48 +29,14 @@ export function Dropzone({
   ...props
 }: DropzoneProps) {
   const fileInputRef = React.useRef<HTMLInputElement>(null)
-  const [isDragging, setIsDragging] = React.useState(false)
   const inputId = React.useId()
+  const { dropping, ...dndProps } = useDnd({ onFile })
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     await onFile(file)
     e.target.value = ''
-  }
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(true)
-  }
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-      setIsDragging(false)
-    }
-  }
-
-  const handleDrop = async (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-
-    const file = e.dataTransfer.files?.[0]
-    if (file?.type.startsWith('image/')) {
-      await onFile(file)
-      return
-    }
-
-    // Dragging an image from a web page provides a URL, not a File
-    const url = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('URL')
-    if (!url) return
-    try {
-      const res = await fetch(url)
-      const blob = await res.blob()
-      if (!blob.type.startsWith('image/')) return
-      await onFile(new File([blob], 'dropped-image', { type: blob.type }))
-    } catch {
-      // silently ignore failed URL fetches
-    }
   }
 
   const handleClear = (e: React.MouseEvent) => {
@@ -81,13 +48,10 @@ export function Dropzone({
     <div
       className={cn(
         'relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-dashed bg-muted transition-colors hover:border-foreground/30',
-        isDragging ? 'border-foreground/60 bg-muted/80' : 'border-border',
+        dropping ? 'border-foreground/60 bg-muted/80' : 'border-border',
         className
       )}
-      onDragOver={handleDragOver}
-      onDragEnter={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
+      {...dndProps}
       {...props}>
       <label
         htmlFor={inputId}
