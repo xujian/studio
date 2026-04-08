@@ -1,6 +1,6 @@
 'use client'
 
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/button'
 import { CreditButton } from '@/components/credit-button'
 import { Input } from '@/components/ui/input'
@@ -161,7 +161,9 @@ export const AssetForm = forwardRef<AssetFormHandle, AssetFormProps>(function As
       if (data.slug && !name) setName(data.slug)
       if (data.description && !description) setDescription(data.description)
       queryClient.invalidateQueries({ queryKey: ['profile'] })
-    } finally {
+      setPreviewing(false)
+    } catch (error) {
+      console.error('[preview]', error)
       setPreviewing(false)
     }
   }
@@ -326,17 +328,20 @@ export const AssetForm = forwardRef<AssetFormHandle, AssetFormProps>(function As
   /**
    * image saved to storage but not saved to DB
    */
-  const attached =
-    uploaded || previewed || extracted
+  const attached = useMemo(() => {
+    return uploaded || previewed || extracted
+  }, [uploaded, previewed, extracted])
 
   /**
    * image displaying in the upload
    */
-  const displaying = cropped
-    || attached
-    || (!cleared && asset?.path
-        ? asset.path
-        : undefined)
+  const displaying = useMemo(() => {
+    return cropped
+      || attached
+      || (!cleared && asset?.path
+          ? asset.path
+          : undefined)
+  }, [cropped, attached, cleared, asset?.path])
 
   const handlePaste = (e: React.ClipboardEvent) => {
     const file = Array.from(e.clipboardData.items)
@@ -349,9 +354,11 @@ export const AssetForm = forwardRef<AssetFormHandle, AssetFormProps>(function As
   }
 
   const cleanupState = () => {
+    setUploaded('')
     setPreviewed('')
     setExtracted('')
     setCropped('')
+    // console.log('cleanupState', attached)
   }
 
   const cleanupIfNotSave = async () => {
@@ -365,13 +372,14 @@ export const AssetForm = forwardRef<AssetFormHandle, AssetFormProps>(function As
   }
 
   const allowDismiss = async () => {
+    // console.log('allowDismiss', 'attached', attached, 'previewing', previewing, 'extracting', extracting, 'analyzing', analyzing)
     if (attached) {
-      return false
+      return Promise.resolve(false)
     }
     if (previewing || extracting || analyzing) {
-      return false
+      return Promise.resolve(false)
     }
-    return true
+    return Promise.resolve(true)
   }
 
   useImperativeHandle(ref, () => ({ cleanup: cleanupIfNotSave, allowDismiss }))
@@ -414,7 +422,7 @@ export const AssetForm = forwardRef<AssetFormHandle, AssetFormProps>(function As
                     : 'Generate preview'}
                 </CreditButton>)}
               {previewing && <div className="pulse absolute inset-0 rounded-2xl pointer-events-none" />}
-              <div className={cn('error absolute left-0 w-full h-1/2 rounded-xl p-4 transition-top duration-300 backdrop-blur-md',
+              <div className={cn('error absolute z-20 left-0 w-full h-1/2 rounded-xl p-4 transition-top duration-300 backdrop-blur-md',
                   previewError ? 'top-1/2' : 'top-full'
                 )}>
                 <CloseButton onClick={() => setPreviewError('')} />
@@ -430,8 +438,8 @@ export const AssetForm = forwardRef<AssetFormHandle, AssetFormProps>(function As
           ref={uploadRef}
           className="aspect-square"
           path={({ userId }) => asset?.user_id === null
-            ? `assets/${type}`
-            : `assets/${userId}/${type}`}
+            ? `${type}`
+            : `${userId}/${type}`}
           value={displaying ? assetUrl(displaying) : ''}
           compress={type !== 'face'}
           onBeforeUpload={setOriginalImage}

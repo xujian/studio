@@ -21,17 +21,17 @@ import { ConfirmButton } from './confirm-button'
 
 interface AssetCardProps {
   data: Asset
-  hasPrice?: boolean
+  hasPrice?: boolean,
+  onEdit?: (data: AssetWithPurchaseInfo) => void,
+  onDetail?: (data: AssetWithPurchaseInfo) => void,
+  onBuy?: (data: AssetWithPurchaseInfo) => void
 }
 
-export function AssetCard({ data, hasPrice }: AssetCardProps) {
+export function AssetCard({ data, hasPrice, onDetail, onEdit, onBuy }: AssetCardProps) {
   const $bus = useBus()
   const deleteAsset = useDeleteAsset()
   const removePurchase = useRemovePurchase()
   const promoteAsset = usePromoteAsset()
-  const [modalOpen, setModalOpen] = useState(false)
-  const [sheetOpen, setSheetOpen] = useState(false)
-  const [editOpen, setEditOpen] = useState(false)
   const isDeleting = deleteAsset.isPending || removePurchase.isPending
   const {
     isPublic,
@@ -43,7 +43,6 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
     canEdit,
     canPromote
   } = useAssetStatus(data as AssetWithPurchaseInfo)
-  const handleBuy = () => setModalOpen(true)
 
   const handleUse = (asset: AssetWithPurchaseInfo) => {
     $bus.emit('mixin:select', { type: asset.type, assetId: asset.id! })
@@ -66,13 +65,14 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
         onKeyDown={e => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault()
-            setSheetOpen(true)
+            onDetail?.(data as AssetWithPurchaseInfo)
           }
         }}>
         <CardContent className="relative aspect-square w-full overflow-hidden rounded-3xl bg-neutral p-0">
           <AssetPreview
             asset={data}
-            onClick={() => setSheetOpen(true)} />
+            onClick={() => 
+              onDetail?.(data as AssetWithPurchaseInfo)} />
           <div className="absolute top-2 right-2">
             {isPurchased
               ? (<Badge
@@ -102,7 +102,7 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
                 className="flex-1"
                 onClick={e => {
                   e.stopPropagation()
-                  handleBuy()
+                  onBuy?.(data as AssetWithPurchaseInfo)
                 }}>
                 BUY
               </CreditButton>
@@ -124,8 +124,7 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
                 variant="outline"
                 onClick={e => {
                   e.stopPropagation()
-                  setSheetOpen(false)
-                  setEditOpen(true)
+                  onEdit?.(data as AssetWithPurchaseInfo)
                 }}>
                 EDIT
               </Button>
@@ -159,59 +158,6 @@ export function AssetCard({ data, hasPrice }: AssetCardProps) {
           </CardTitle>
         </CardFooter>
       </Card>
-
-      <Sidepane
-        open={editOpen}
-        onOpenChange={setEditOpen}
-        title={`Edit ${data.title || data.name}`}
-        className="sm:max-w-sm">
-        <AssetForm
-          type={data.type}
-          asset={data}
-          onClose={() => setEditOpen(false)}
-        />
-      </Sidepane>
-
-      <PurchaseModal
-        asset={data as AssetWithPurchaseInfo}
-        open={modalOpen}
-        onOpenChange={setModalOpen}
-      />
-      <Sidepane
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-        className="sm:max-w-sm">
-        <AssetDetail
-          asset={data as AssetWithPurchaseInfo}
-          hasPrice={hasPrice}
-          isDeleting={isDeleting}
-          onBuy={() => {
-            setSheetOpen(false)
-            setModalOpen(true)
-          }}
-          onUse={() => handleUse(data as AssetWithPurchaseInfo)}
-          onEdit={() => {
-            setSheetOpen(false)
-            setEditOpen(true)
-          }}
-          onPromote={() => {
-            promoteAsset.mutate(data.id!)
-            setSheetOpen(false)
-          }}
-          onDelete={() => {
-            if ((data as AssetWithPurchaseInfo).is_purchased) {
-              removePurchase.mutate(data.id!, {
-                onSuccess: () => setSheetOpen(false)
-              })
-            } else {
-              deleteAsset.mutate(
-                { id: data.id!, path: data.path },
-                { onSuccess: () => setSheetOpen(false) }
-              )
-            }
-          }}
-        />
-      </Sidepane>
     </>
   )
 }
