@@ -153,6 +153,12 @@
     transform: translate3d(0, 100%, 0);
   }
 
+  .google-signin-button {
+    iframe {
+      width: 100%;
+    }
+  }
+
   @keyframes wave-flow {
     0%, 100% {
       background-position: 0% 0%, 0% 0%, 100% 100%;

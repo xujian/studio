@@ -26,7 +26,7 @@ export const CommunityShowcase = () => {
         <p className="mb-3 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
           Made with Kanojo Studio
         </p>
-        <h2 className="font-playfair text-3xl font-bold md:text-4xl">
+        <h2 className="text-3xl font-bold md:text-4xl">
           See what&apos;s possible.
         </h2>
       </div>

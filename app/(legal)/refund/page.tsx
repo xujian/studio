@@ -18,7 +18,7 @@ export default function RefundPage() {
         <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">
           Kanojo Studio
         </p>
-        <h1 className="font-playfair text-5xl sm:text-6xl font-bold mb-6">
+        <h1 className="text-5xl sm:text-6xl font-bold mb-6">
           Refund Policy
         </h1>
         <p className="text-muted-foreground">Last updated: {LAST_UPDATED}</p>

@@ -60,7 +60,7 @@ export const Features = () => {
               {s.label}
             </p>
             <h2
-              className="font-playfair leading-tight font-bold"
+              className="leading-tight font-bold"
               style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)' }}>
               {s.headline}
             </h2>

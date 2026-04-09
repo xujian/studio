@@ -40,7 +40,7 @@ export const Pricing = () => {
         <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
           Simple pricing
         </p>
-        <h2 className="font-playfair text-3xl md:text-4xl font-bold">
+        <h2 className="text-3xl md:text-4xl font-bold">
           Start free. Upgrade when you&apos;re ready.
         </h2>
       </div>

@@ -63,7 +63,7 @@ export default async function MagazinePostPage({ params }: Props) {
             className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
             {formattedDate}
           </time>
-          <h1 className="font-playfair mt-4 mb-6 text-4xl leading-tight font-bold sm:text-5xl">
+          <h1 className="mt-4 mb-6 text-4xl leading-tight font-bold sm:text-5xl">
             {post.title}
           </h1>
           {post.excerpt && (

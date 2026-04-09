@@ -17,7 +17,6 @@ export default function LoginPage() {
           text: 'continue_with',
           size: 'large',
           shape: 'circle',
-          width: '100%',
         })
       }
     }
@@ -26,7 +25,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className={cn('w-full max-w-md', 'elevation-3 animate-float-up')}>
-        <CardContent className="space-y-8 p-8">
+        <CardContent className="space-y-8 p-8 rounded-4xl">
           <div className="text-center">
             <h1
               className={cn(

@@ -1,8 +1,5 @@
 @layer utilities {
 
-  .font-playfair {
-    font-family: var(--font-playfair), Georgia, serif;
-  }
 
   h1 {
     @apply my-4 text-4xl font-bold leading-tight;
@@ -131,7 +128,6 @@ br::selection {
 }
 
 .prose-article > .mdx-p:first-child::first-letter {
-  font-family: var(--font-playfair), Georgia, serif;
   float: left;
   font-size: 4.5rem;
   line-height: 0.8;

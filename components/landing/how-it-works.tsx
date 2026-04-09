@@ -29,7 +29,7 @@ export const HowItWorks = () => {
         <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">
           How it works
         </p>
-        <h2 className="font-playfair text-3xl md:text-4xl font-bold">
+        <h2 className="text-3xl md:text-4xl font-bold">
           Three steps to your perfect portrait.
         </h2>
       </div>

@@ -19,7 +19,7 @@ export default function MagazinePage() {
         <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">
           Kanojo Studio
         </p>
-        <h1 className="font-playfair text-6xl sm:text-7xl font-bold">Magazine</h1>
+        <h1 className="text-6xl sm:text-7xl font-bold">Magazine</h1>
         <p className="mt-5 text-muted-foreground italic text-lg max-w-md mx-auto">
           Essays on light, beauty, and the art of the portrait.
         </p>
@@ -58,7 +58,7 @@ export default function MagazinePage() {
                     day: 'numeric',
                   })}
                 </time>
-                <h2 className="font-playfair text-4xl sm:text-5xl font-bold mt-3 mb-4 leading-tight group-hover:opacity-70 transition-opacity">
+                <h2 className="text-4xl sm:text-5xl font-bold mt-3 mb-4 leading-tight group-hover:opacity-70 transition-opacity">
                   {hero.title}
                 </h2>
                 <p className="text-muted-foreground italic text-lg leading-relaxed">
@@ -100,7 +100,7 @@ export default function MagazinePage() {
                         day: 'numeric',
                       })}
                     </time>
-                    <h2 className="font-playfair text-2xl font-bold mt-2 mb-3 leading-snug group-hover:opacity-70 transition-opacity">
+                    <h2 className="text-2xl font-bold mt-2 mb-3 leading-snug group-hover:opacity-70 transition-opacity">
                       {post.title}
                     </h2>
                     <p className="text-muted-foreground italic text-sm leading-relaxed">
