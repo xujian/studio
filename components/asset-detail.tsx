@@ -14,7 +14,7 @@ type AssetDetailProps = {
   isDeleting?: boolean
   onBuy: () => void
   onUse: () => void
-  onDelete: () => void
+  onDelete?: () => void
   onEdit?: () => void
   onPromote?: () => void
 }
@@ -85,12 +85,12 @@ export const AssetDetail = ({
               {isDeleting ? <Loader2 className="size-4 animate-spin" /> : 'Delete'}
             </Button>
           )}
-          {canEdit && (
+          {canEdit && onEdit && (
             <Button variant="outline" size="sm" className="button" onClick={onEdit}>
               Edit
             </Button>
           )}
-          {canPromote && (
+          {canPromote && onPromote && (
             <Button variant="outline" size="sm" className="button" onClick={onPromote}>
               Promote
             </Button>

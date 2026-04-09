@@ -118,7 +118,7 @@ export function AssetCard({ data, hasPrice, onDetail, onEdit, onBuy }: AssetCard
                 USE
               </Button>
             )}
-            {canEdit && (
+            {canEdit && onEdit && (
               <Button
                 size="xs"
                 variant="outline"

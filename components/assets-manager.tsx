@@ -94,7 +94,6 @@ export function AssetsManager({ type, onClose }: AssetsManagerProps) {
           </button>
         </div>
       </div>
-
       <Sidepane open={formPaneOpen}
         onOpenChange={setFormPaneOpen}
         onBeforeClose={onAssetFormClose}
