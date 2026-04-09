@@ -16,21 +16,21 @@ const SECTIONS = [
     headline: 'Photographs that feel like something.',
     sub: 'Soft morning light. Bold confidence. Melancholic dusk. Set the mood — the portrait builds itself.',
     flip: true,
-    image: 'feature-moods.jpg'
+    image: 'feature-moods.png'
   },
   {
     label: 'Scene Worlds',
     headline: 'Not a backdrop. A world.',
     sub: 'A rainy Parisian café. A Tokyo street after midnight. A sunlit bedroom at dawn. She steps inside.',
     flip: false,
-    image: 'feature-scenes.jpg'
+    image: 'feature-scenes.png'
   },
   {
     label: 'Looks',
     headline: 'A complete look. One tap.',
     sub: 'Hair, outfit, lighting, scene — curated to work as one. Browse by feel, not by category.',
     flip: true,
-    image: 'feature-looks.jpg'
+    image: 'feature-looks.png'
   },
   {
     label: 'The Shoot',

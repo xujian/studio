@@ -68,7 +68,7 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/logo.svg" type="image/svg+xml" />
       </head>
-      <body className={cn(inter.variable, inter.className, "min-h-screen antialiased")}>
+      <body className={cn(inter.variable, inter.className, "min-h-screen antialiased striped")}>
         <Providers>
           <GoogleOneTap />
           <Header />

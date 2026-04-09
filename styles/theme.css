@@ -2,6 +2,7 @@
   --tube: rgba(255, 234, 0, 0.804);
   --glow: rgba(45,255,196,0.31);
   --edge: 4px;
+  --striped: #ffffff06
 }
 
 .tube.on {
@@ -12,4 +13,18 @@
 
 .glow.on {
   box-shadow:0px 0px 7px 1px var(--glow);
+}
+
+.lines {
+  background-color: transparent;
+  opacity: 1;
+  background-size: 16px 16px;
+  background-image:  repeating-linear-gradient(to right, var(--striped), var(--striped) 0.8px, transparent 0.8px, transparent);
+}
+
+.striped {
+  background-color: transparent;
+  opacity: 1;
+  background-image: linear-gradient(to right, var(--striped), var(--striped) 6px, transparent 6px, transparent);
+  background-size: 12px 100%;
 }

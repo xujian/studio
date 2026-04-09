@@ -8,15 +8,15 @@ export const Hero = () => {
   return (
     <section
       aria-label="Hero"
-      className="hero relative left-1/2 h-[60vh] w-screen max-w-480 -translate-x-1/2 overflow-hidden">
+      className="hero relative flex flex-col left-1/2 h-[calc(100vh-8rem)] w-screen max-w-480 -translate-x-1/2">
       {/* <div className="absolute w-full inset-0 h-full bg-cover bg-center" style={{
         backgroundImage: `url(${storageUrl('landing/hero.jpg')})`
       }}/> */}
-      <div className="absolute inset-0 grid grid-cols-5 gap-2 px-2">
+      <div className="felx-1 h-4/5 grid grid-cols-5 gap-1 px-2">
         {PORTRAITS.map((name, index) => (
           <div
             key={name}
-            className="relative overflow-hidden rounded-xl">
+            className="relative overflow-hidden rounded-4xl">
             <Image
               src={storageUrl(`landing/${name}.jpg`)}
               alt={`AI-generated portrait photo ${index + 1}`}
@@ -28,20 +28,22 @@ export const Hero = () => {
           </div>
         ))}
       </div>
-      {/* Gradient overlay for text readability */}
-      <div className="absolute inset-0 bg-linear-to-b from-black/0 via-black/55 to-black/0" />
-
-      {/* Content */}
-      <div className="relative z-10 flex h-full flex-col items-center justify-center gap-6 px-4 text-center">
+      <div className="flex flex-0 w-full items-stretch justify-center gap-6 px-4 text-center">
         <h1
-          className="font-bold text-shadow-blue-900 leading-none"
+          className="flex-1 text-start font-bold leading-none"
           style={{ fontSize: 'clamp(3rem, 10vw, 6rem)', letterSpacing: '-0.03em' }}>
           Your Personal<br />Photo Studio
         </h1>
-        <p className="max-w-md text-lg text-white/70">
-          She was a feeling. Now she&apos;s a photograph.
-        </p>
-        <CtaButton />
+        <div className="flex flex-col flex-1">
+          <div className="flex-1 flex items-center justify-end">
+            <p className="text-lg">
+              She was a feeling. Now she&apos;s a photograph
+            </p>
+          </div>
+          <div className="flex-1 text-end">
+            <CtaButton />
+          </div>
+        </div>
       </div>
     </section>
   )
