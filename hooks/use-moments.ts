@@ -53,6 +53,7 @@ export const useMoments = () => {
           posts(id)
         `
         )
+        .eq('user_id', session.user.id)
         .order('created_at', { ascending: false })
         .order('created_at', { referencedTable: 'photos', ascending: false })
         .range(pageParam, pageParam + PAGE_SIZE - 1)
