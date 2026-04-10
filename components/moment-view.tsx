@@ -7,11 +7,11 @@ import { Button } from '@/components/button'
 import {
   Badge,
 } from '@/components/ui'
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui'
+import { Avatar } from '@/components/avatar'
 import { MomentCarousel } from '@/components/moment-carousel'
 import { useBus } from '@/lib/bus'
 import { assets } from '@/lib/assets-config'
-import type { MomentWithPhotos } from '@/lib/types'
+import type { MomentWithPhotos, Profile } from '@/lib/types'
 import { assetUrl, cn, photoUrl, uploadUrl } from '@/lib/utils'
 import { useMixins } from '@/hooks/use-mixins'
 import { useDeleteMoment, useDeletePhoto } from '@/hooks/use-moments'
@@ -28,6 +28,7 @@ import {
   RotateCcw,
   Trash
 } from 'lucide-react'
+import { MomentPrompt } from './moment-prompt'
 
 export interface MomentViewProps {
   moment: MomentWithPhotos
@@ -95,12 +96,7 @@ export function MomentView({
         {readOnly && author ? (
           <div className="flex h-full w-full flex-col gap-3 p-4">
             <div className="flex items-center gap-3">
-              <Avatar className="size-10">
-                {author.avatar && (
-                  <AvatarImage src={author.avatar} alt={author.name || ''} />
-                )}
-                <AvatarFallback>{(author.name || '?')[0]}</AvatarFallback>
-              </Avatar>
+              <Avatar user={author as Profile} className="size-10" />
               <div>
                 <p className="font-semibold text-foreground">
                   {author.name || 'Anonymous'}
@@ -145,8 +141,8 @@ export function MomentView({
                 src={
                   merged?.face
                     ? assetUrl(assetsMap?.get(merged.face as string)?.path ?? '') ||
-                      '/face.png'
-                    : '/face.png'
+                      '/icons/face.png'
+                    : '/icons/face.png'
                 }
                 width={80}
                 height={80}
@@ -205,20 +201,7 @@ export function MomentView({
               ))}
             </div>
           )}
-          <div className="relative rounded border bg-linear-to-t from-background/80 to-background/40 p-4">
-            <Badge className="absolute -top-2 left-1 bg-background/80 text-foreground">
-              Prompt
-            </Badge>
-            <motion.div
-              className="max-h-24 overflow-clip"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}>
-              <p className="text-xs text-foreground">
-                {currentPhoto.prompt || moment.prompt || '(EMPTY)'}
-              </p>
-            </motion.div>
-          </div>
+          <MomentPrompt value={currentPhoto?.prompt || moment?.prompt} />
           {!readOnly && (
             <>
               <div className="flex flex-0 items-center gap-2">

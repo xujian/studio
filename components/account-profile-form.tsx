@@ -1,28 +1,33 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar } from '@/components/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { Camera, Loader2, Pencil } from 'lucide-react'
+import { useUpload } from '@/hooks/use-upload'
+import { createClient } from '@/lib/supabase/client'
+import { compressImage } from '@/lib/compress-image'
+import { assetUrl, uploadUrl } from '@/lib/utils'
+import { Profile } from '@/lib/types'
+import { profile } from 'console'
 
 type Props = {
-  name: string
-  avatar: string
-  createdAt: string
+  user: Profile
 }
 
-export const AccountProfileForm = ({ name: initialName, avatar: initialAvatar, createdAt }: Props) => {
-  const [name, setName] = useState(initialName)
-  const [avatar, setAvatar] = useState(initialAvatar)
+export const AccountProfileForm = ({ user }: Props) => {
+  const [name, setName] = useState(user.name)
+  const [avatar, setAvatar] = useState(user.avatar)
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [uploading, setUploading] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const queryClient = useQueryClient()
+  const supabase = createClient()
+  const { upload, uploading } = useUpload({ bucket: 'uploads' })
 
   useEffect(() => {
     if (editing) inputRef.current?.focus()
@@ -44,39 +49,41 @@ export const AccountProfileForm = ({ name: initialName, avatar: initialAvatar, c
   }
 
   const handleCancel = () => {
-    setName(initialName)
+    setName(user.name)
     setEditing(false)
   }
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    setUploading(true)
-    try {
-      const formData = new FormData()
-      formData.append('avatar', file)
-      const res = await fetch('/api/account/avatar', { method: 'POST', body: formData })
-      const { url } = await res.json()
-      if (url) {
-        setAvatar(url)
-        queryClient.invalidateQueries({ queryKey: ['profile'] })
-      }
-    } finally {
-      setUploading(false)
-    }
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return
+    compressImage(file).then(compressed => {
+      upload(file, {
+        onSuccess: async (result) => {
+          await supabase
+            .from('profiles')
+            .update({ avatar: result.path })
+            .eq('id', session.user.id)
+          setAvatar(result.path)
+          queryClient.invalidateQueries({ queryKey: ['profile'] })
+        },
+      })
+    })
   }
 
   const initials = name?.[0]?.toUpperCase() ?? '?'
+
+  const avatarUrl = useMemo(() => {
+    return avatar.startsWith('http') ? avatar : uploadUrl(avatar)
+  }, [avatar])
 
   return (
     <Card>
       <CardContent>
       <div className="flex items-center gap-4">
         <div className="relative shrink-0">
-          <Avatar className="h-16 w-16">
-            <AvatarImage src={avatar} />
-            <AvatarFallback className="text-lg">{initials}</AvatarFallback>
-          </Avatar>
+          <Avatar user={user} className="h-16 w-16" />
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
@@ -130,7 +137,7 @@ export const AccountProfileForm = ({ name: initialName, avatar: initialAvatar, c
             </div>
           )}
           <p className="text-xs text-muted-foreground mt-0.5">
-            Member since {new Date(createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+            Member since {new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
           </p>
         </div>
       </div>

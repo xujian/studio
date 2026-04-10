@@ -15,13 +15,13 @@ export function Credits({ prefix = '', className, ...props }: CreditsProps) {
   if (profile == null) return null
 
   return (
-    <Link href="/credits" className="w-full">
+    <Link href="/credits" className="w-full cursor-pointer">
       <div
         className={cn(
           'credits flex h-8 items-center justify-between gap-4 px-1',
           'text-sm tabular-nums',
           'cursor-pointer w-full',
-          'rounded-lg hover:bg-accent transition-colors',
+          'rounded-lg hover:bg-secondary',
           className
         )}
         {...props}>

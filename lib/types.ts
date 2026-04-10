@@ -21,8 +21,8 @@ export type User = CamelCasedProperties<SupabaseUser>
 
 export type Profile = {
   id: string
-  name: string | null
-  avatar: string | null
+  name: string
+  avatar: string
   credits: number
   stripe_customer_id: string | null
   subscription_tier: SubscriptionTier

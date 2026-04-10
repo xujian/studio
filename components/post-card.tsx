@@ -2,14 +2,10 @@
 
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
-import {
-  Avatar,
-  AvatarImage,
-  AvatarFallback,
-} from '@/components/ui'
+import { Avatar } from '@/components/avatar'
 import { Button } from '@/components/button'
 import { Heart } from 'lucide-react'
-import type { Post } from '@/lib/types'
+import type { Post, Profile } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { useLikePost } from '@/hooks/use-posts'
 import { MomentCarousel } from '@/components/moment-carousel'
@@ -41,9 +37,9 @@ export function PostCard({ post, href, className }: PostCardProps) {
   return (
     <div className="cursor-pointer" onClick={() => router.push(href)}>
       <MomentCarousel moment={moment}>
-        <Avatar className="absolute top-1 left-1 size-8 opacity-0 transition-opacity group-hover:opacity-100">
-          {author.avatar && <AvatarImage src={author.avatar} alt={author.name || ''} />}
-        </Avatar>
+        <Avatar
+          user={author as Profile}
+          className="absolute top-1 left-1 size-8 opacity-0 transition-opacity group-hover:opacity-100" />
         <Button
           size="icon"
           onClick={handleLike}

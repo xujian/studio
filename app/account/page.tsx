@@ -55,11 +55,7 @@ export default async function AccountPage() {
         {/* Profile */}
         <section className="space-y-3">
           <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Profile</h2>
-          <AccountProfileForm
-            name={profile?.name ?? session.user.user_metadata?.full_name ?? ''}
-            avatar={profile?.avatar ?? session.user.user_metadata?.avatar_url ?? ''}
-            createdAt={profile?.created_at ?? session.user.created_at}
-          />
+          {profile && <AccountProfileForm user={profile} />}
         </section>
 
         {/* Credits + Subscription side-by-side */}

@@ -16,12 +16,12 @@ export const photoUrl = (userId: string, momentId: string, photoId: string) =>
     `${userId}/${momentId}/${photoId}.jpg`
   ].join('')
 
-export const uploadUrl = (userId: string, filename: string) =>
+export const uploadUrl = (userIdOrFilename: string, filename?: string) =>
   [
     `${process.env.NEXT_PUBLIC_SUPABASE_URL}`,
-    '/storage/v1/object/public/uploads/',
-    `${userId}/${filename}`
-  ].join('')
+    'storage/v1/object/public/uploads',
+    filename ? `${userIdOrFilename}/${filename}` : userIdOrFilename
+  ].join('/')
 
 export const assetUrl = (path: string) =>
   path
