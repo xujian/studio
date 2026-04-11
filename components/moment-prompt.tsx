@@ -44,14 +44,7 @@ const isJson = (str: string) => {
 export const MomentPrompt = ({ value }: MomentPromptProps) => {
   const [extracting, setExtracting] = useState<boolean>(false)
   const [translating, setTranslating] = useState<boolean>(false)
-  const [result, setResult] = useState<{ title: string; content: string } | null>({
-    title: 'Extracted',
-    content: `{
-  "setting": "cozy rustic wooden cabin",
-  "background": "authentic cabin details: black cast-iron wood-burning stove with brick surround, wooden panel walls, vintage wooden dresser, and potted plants on the mantel",
-  "foreground": "large red patterned Persian rug"
-}`
-  })
+  const [result, setResult] = useState<{ title: string; content: string } | null>(null)
   const [copied, setCopied] = useState(false)
 
   const handleExtract = async (type: AssetType) => {
