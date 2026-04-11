@@ -159,6 +159,12 @@
     }
   }
 
+  code {
+    .token {
+      white-space: break-spaces;
+    }
+  }
+
   @keyframes wave-flow {
     0%, 100% {
       background-position: 0% 0%, 0% 0%, 100% 100%;
