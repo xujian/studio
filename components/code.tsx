@@ -24,7 +24,7 @@ export const Code = ({ children, language = 'json' }: CodeProps) => {
         overflowX: 'auto',
         wordBreak: 'break-all',
         whiteSpace: 'pre-wrap',
-        wrapLoneLines: true,
+        wrapLongLines: true,
       }}>
       {children}
     </SyntaxHighlighter>
