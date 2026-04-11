@@ -14,7 +14,7 @@ interface PhotoProps {
 export function Photo({ data, className }: PhotoProps) {
   return (
     <Link
-      href={`/moments/${data.moment_id}?photo=${data.id}`}
+      href={`/moments/${data.moment}?photo=${data.id}`}
       className={className}
     >
       <motion.div
@@ -24,7 +24,7 @@ export function Photo({ data, className }: PhotoProps) {
         transition={{ duration: 0.3 }}
       >
         <Image
-          src={photoUrl(data.user_id, data.moment_id, data.id)}
+          src={photoUrl(data.user, data.moment, data.id)}
           alt="Generated portrait"
           fill
           loading="lazy"

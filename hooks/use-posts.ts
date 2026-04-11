@@ -62,13 +62,13 @@ export const useLikePost = () => {
         const { error } = await supabase
           .from('likes')
           .delete()
-          .eq('post_id', postId)
-          .eq('user_id', session.user.id)
+          .eq('post', postId)
+          .eq('user', session.user.id)
         if (error) throw error
       } else {
         const { error } = await supabase
           .from('likes')
-          .insert({ post_id: postId, user_id: session.user.id })
+          .insert({ post: postId, user: session.user.id })
         if (error) throw error
       }
     },
@@ -91,7 +91,7 @@ export const usePublishPost = () => {
 
       const { error } = await supabase
         .from('posts')
-        .insert({ user_id: session.user.id, moment_id: momentId })
+        .insert({ user: session.user.id, moment: momentId })
       if (error) throw error
     },
     onSuccess: () => {
@@ -110,7 +110,7 @@ export const useUnpublishPost = () => {
       const { error } = await supabase
         .from('posts')
         .delete()
-        .eq('moment_id', momentId)
+        .eq('moment', momentId)
       if (error) throw error
     },
     onSuccess: () => {

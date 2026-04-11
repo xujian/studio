@@ -15,18 +15,18 @@ export async function POST(req: NextRequest) {
   const admin = createAdminClient()
   const { data: profile } = await admin
     .from('profiles')
-    .select('stripe_customer_id')
+    .select('customer')
     .eq('id', session.user.id)
     .single()
 
-  if (!profile?.stripe_customer_id) {
+  if (!profile?.customer) {
     return NextResponse.json({ error: 'No billing account found' }, { status: 404 })
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL!
 
   const portalSession = await stripe.billingPortal.sessions.create({
-    customer: profile.stripe_customer_id,
+    customer: profile.customer,
     return_url: `${baseUrl}/credits`,
   })
 

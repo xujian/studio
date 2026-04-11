@@ -75,7 +75,7 @@ export const AssetForm = forwardRef<AssetFormHandle, AssetFormProps>(function As
   const [description, setDescription] = useState(asset?.description ?? '')
   const [content, setContent] = useState(asset?.content ?? '')
   const [price, setPrice] = useState<string>(asset?.price != null ? String(asset.price) : '')
-  const hasPrice = !!asset && asset.user_id == null
+  const hasPrice = !!asset && asset.user == null
   const [suggesting, setSuggesting] = useState(false)
   const [previewing, setPreviewing] = useState(false)
   const [extracting, setExtracting] = useState(false)
@@ -444,7 +444,7 @@ export const AssetForm = forwardRef<AssetFormHandle, AssetFormProps>(function As
           bucket="assets"
           ref={uploadRef}
           className="aspect-square"
-          path={({ userId }) => asset?.user_id === null
+          path={({ userId }) => asset?.user === null
             ? `${type}`
             : `${userId}/${type}`}
           value={displaying ? assetUrl(displaying) : ''}

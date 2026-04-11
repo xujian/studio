@@ -84,7 +84,7 @@ CLAUDE.md documents `profiles`, `moments`, `photos`, `assets`, `purchases`. The 
 - **`posts`** — community sharing; one moment → one post (UNIQUE constraint)
 - **`likes`** — user-post many-to-many; one like per user per post
 - **`transactions`** — credit ledger; `amount` is signed int (negative = debit); types: `asset_purchase`, `generation_cost`, `credit_purchase`, `refund`
-- **`subscriptions`** — one active Stripe sub per user; tiers: `free`, `basic`, `pro`, `max`; `profiles` also has `stripe_customer_id` and `subscription_tier` columns
+- **`subscriptions`** — one active Stripe sub per user; tiers: `free`, `basic`, `pro`, `max`; `profiles` also has `customer` and `tier` columns
 
 ---
 

@@ -8,32 +8,32 @@ CREATE TABLE profiles (
   name text,
   avatar text,
   credits integer DEFAULT 10,
-  created_at timestamptz DEFAULT now()
+  created timestamptz DEFAULT now()
 );
 
 -- Add subscription tracking to profiles
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS stripe_customer_id text UNIQUE;
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS subscription_tier text DEFAULT 'free';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS customer text UNIQUE;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS tier text DEFAULT 'free';
 -- Values: 'free' | 'basic' | 'pro' | 'max'
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS super boolean NOT NULL DEFAULT false;
 
 -- Moments table (user generations)
 CREATE TABLE moments (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid REFERENCES profiles(id) ON DELETE CASCADE,
+  "user" uuid REFERENCES profiles(id) ON DELETE CASCADE,
   prompt text NOT NULL,
   title text, -- AI-generated evocative title for the moment
   mixins jsonb, -- baseline mixins for this moment
-  final_prompt text,
+  final text,
   seed bigint,
   status text DEFAULT 'pending', -- pending, processing, completed, failed
-  created_at timestamptz DEFAULT now()
+  created timestamptz DEFAULT now()
 );
 
 -- Assets table (personal library + official store)
 CREATE TABLE assets (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid REFERENCES profiles(id) ON DELETE CASCADE, -- NULL = official Kanojo Studio asset
+  "user" uuid REFERENCES profiles(id) ON DELETE CASCADE, -- NULL = official Kanojo Studio asset
   name text NOT NULL,
   title text,
   description text,
@@ -41,70 +41,71 @@ CREATE TABLE assets (
   path text, -- if image-based asset (relative path in assets bucket)
   content text, -- if text-based asset
   price integer, -- credits cost (NULL = personal asset, not for sale)
-  created_at timestamptz DEFAULT now()
+  created timestamptz DEFAULT now()
 );
 
 
 -- Photos table (output images from generations)
 CREATE TABLE photos (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  moment_id uuid REFERENCES moments(id) ON DELETE CASCADE,
+  moment uuid REFERENCES moments(id) ON DELETE CASCADE,
+  "user" uuid REFERENCES profiles(id) ON DELETE CASCADE,
   prompt text, -- only if different from moment's prompt
   mixins jsonb, -- only keys that differ from moment's mixins
-  created_at timestamptz DEFAULT now()
+  created timestamptz DEFAULT now()
 );
 
 -- Posts table (community posts)
 CREATE TABLE posts (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid REFERENCES profiles(id) ON DELETE CASCADE,
-  moment_id uuid REFERENCES moments(id) ON DELETE CASCADE,
-  created_at timestamptz DEFAULT now(),
-  UNIQUE(moment_id) -- Each moment can only be posted once
+  "user" uuid REFERENCES profiles(id) ON DELETE CASCADE,
+  moment uuid REFERENCES moments(id) ON DELETE CASCADE,
+  created timestamptz DEFAULT now(),
+  UNIQUE(moment) -- Each moment can only be posted once
 );
 
 -- Likes table (many-to-many)
 CREATE TABLE likes (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  post_id uuid REFERENCES posts(id) ON DELETE CASCADE,
-  user_id uuid REFERENCES profiles(id) ON DELETE CASCADE,
-  created_at timestamptz DEFAULT now(),
-  UNIQUE(post_id, user_id) -- User can only like a post once
+  post uuid REFERENCES posts(id) ON DELETE CASCADE,
+  "user" uuid REFERENCES profiles(id) ON DELETE CASCADE,
+  created timestamptz DEFAULT now(),
+  UNIQUE(post, "user") -- User can only like a post once
 );
 
 -- Purchases table (asset purchases from store)
 CREATE TABLE purchases (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  buyer_id uuid REFERENCES profiles(id) ON DELETE CASCADE,
-  asset_id uuid REFERENCES assets(id) ON DELETE CASCADE,
+  buyer uuid REFERENCES profiles(id) ON DELETE CASCADE,
+  asset uuid REFERENCES assets(id) ON DELETE CASCADE,
   price integer NOT NULL, -- credits spent at time of purchase
-  created_at timestamptz DEFAULT now(),
-  UNIQUE(buyer_id, asset_id) -- Can't buy same asset twice
+  created timestamptz DEFAULT now(),
+  UNIQUE(buyer, asset) -- Can't buy same asset twice
 );
 
 -- Transactions table (credit history)
 CREATE TABLE transactions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid REFERENCES profiles(id) ON DELETE CASCADE,
+  "user" uuid REFERENCES profiles(id) ON DELETE CASCADE,
   type text NOT NULL, -- 'asset_purchase', 'generation_cost', 'credit_purchase', 'refund'
   amount integer NOT NULL, -- negative = debit, positive = credit
-  related_id uuid, -- purchase_id, moment_id, etc. (nullable)
+  ref uuid, -- purchase_id, moment_id, etc. (nullable)
   stripe_session_id text,
   description text,
-  created_at timestamptz DEFAULT now()
+  created timestamptz DEFAULT now()
 );
 
 -- Subscriptions table (active subscription per user)
 CREATE TABLE IF NOT EXISTS subscriptions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid REFERENCES profiles(id) ON DELETE CASCADE UNIQUE,
-  stripe_subscription_id text UNIQUE NOT NULL,
-  stripe_customer_id text NOT NULL,
+  "user" uuid REFERENCES profiles(id) ON DELETE CASCADE UNIQUE,
+  subscription text UNIQUE NOT NULL,
+  customer text NOT NULL,
   tier text NOT NULL, -- 'basic' | 'pro' | 'max'
   status text NOT NULL, -- 'active' | 'past_due' | 'canceled'
-  current_period_end timestamptz NOT NULL,
-  created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now()
+  "end" timestamptz NOT NULL,
+  created timestamptz DEFAULT now(),
+  updated timestamptz DEFAULT now()
 );
 
 
@@ -112,28 +113,28 @@ CREATE TABLE IF NOT EXISTS subscriptions (
 -- Indexes
 -- =============================================
 
-CREATE INDEX idx_moments_user_id ON moments(user_id);
-CREATE INDEX idx_moments_created_at ON moments(created_at DESC);
+CREATE INDEX idx_moments_user ON moments("user");
+CREATE INDEX idx_moments_created ON moments(created DESC);
 CREATE INDEX idx_moments_status ON moments(status);
 CREATE INDEX IF NOT EXISTS idx_moments_mixins ON moments USING GIN (mixins);
 
-CREATE INDEX idx_assets_user_id ON assets(user_id);
+CREATE INDEX idx_assets_user ON assets("user");
 CREATE INDEX idx_assets_type ON assets(type);
 
-CREATE INDEX idx_photos_moment_id ON photos(moment_id);
+CREATE INDEX idx_photos_moment ON photos(moment);
 CREATE INDEX IF NOT EXISTS idx_photos_mixins ON photos USING GIN (mixins);
 
-CREATE INDEX idx_posts_user_id ON posts(user_id);
-CREATE INDEX idx_posts_created_at ON posts(created_at DESC);
+CREATE INDEX idx_posts_user ON posts("user");
+CREATE INDEX idx_posts_created ON posts(created DESC);
 
-CREATE INDEX idx_likes_post_id ON likes(post_id);
-CREATE INDEX idx_likes_user_id ON likes(user_id);
+CREATE INDEX idx_likes_post ON likes(post);
+CREATE INDEX idx_likes_user ON likes("user");
 
-CREATE INDEX idx_purchases_buyer_id ON purchases(buyer_id);
-CREATE INDEX idx_purchases_asset_id ON purchases(asset_id);
+CREATE INDEX idx_purchases_buyer ON purchases(buyer);
+CREATE INDEX idx_purchases_asset ON purchases(asset);
 
-CREATE INDEX idx_transactions_user_id ON transactions(user_id);
-CREATE INDEX idx_transactions_created_at ON transactions(created_at DESC);
+CREATE INDEX idx_transactions_user ON transactions("user");
+CREATE INDEX idx_transactions_created ON transactions(created DESC);
 CREATE UNIQUE INDEX idx_transactions_stripe_session_id
   ON transactions(stripe_session_id)
   WHERE stripe_session_id IS NOT NULL;
@@ -166,7 +167,7 @@ CREATE POLICY "Users can update own profile"
   USING (auth.uid() = id);
 
 -- Prevent authenticated users from directly writing server-managed columns
-REVOKE UPDATE (stripe_customer_id, subscription_tier) ON profiles FROM authenticated;
+REVOKE UPDATE (customer, tier) ON profiles FROM authenticated;
 
 CREATE POLICY "Users can insert own profile"
   ON profiles FOR INSERT
@@ -176,7 +177,7 @@ CREATE POLICY "Can view profiles of post authors"
   ON profiles FOR SELECT
   USING (
     EXISTS (
-      SELECT 1 FROM posts WHERE posts.user_id = profiles.id
+      SELECT 1 FROM posts WHERE posts."user" = profiles.id
     )
   );
 
@@ -185,25 +186,25 @@ ALTER TABLE moments ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can view own moments"
   ON moments FOR SELECT
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = "user");
 
 CREATE POLICY "Users can insert own moments"
   ON moments FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK (auth.uid() = "user");
 
 CREATE POLICY "Users can update own moments"
   ON moments FOR UPDATE
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = "user");
 
 CREATE POLICY "Users can delete own moments"
   ON moments FOR DELETE
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = "user");
 
 CREATE POLICY "Can view moments of public posts"
   ON moments FOR SELECT
   USING (
     EXISTS (
-      SELECT 1 FROM posts WHERE posts.moment_id = moments.id
+      SELECT 1 FROM posts WHERE posts.moment = moments.id
     )
   );
 
@@ -212,23 +213,23 @@ ALTER TABLE assets ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can view own assets"
   ON assets FOR SELECT
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = "user");
 
 CREATE POLICY "Users can view public store assets"
   ON assets FOR SELECT
-  USING (user_id IS NULL);
+  USING ("user" IS NULL);
 
 CREATE POLICY "Users can insert own assets"
   ON assets FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK (auth.uid() = "user");
 
 CREATE POLICY "Users can update own assets"
   ON assets FOR UPDATE
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = "user");
 
 CREATE POLICY "Users can delete own assets"
   ON assets FOR DELETE
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = "user");
 
 CREATE POLICY "Super can view all assets"
   ON assets FOR SELECT
@@ -250,8 +251,8 @@ CREATE POLICY "Users can view photos of own moments"
   USING (
     EXISTS (
       SELECT 1 FROM moments
-      WHERE moments.id = photos.moment_id
-      AND moments.user_id = auth.uid()
+      WHERE moments.id = photos.moment
+      AND moments."user" = auth.uid()
     )
   );
 
@@ -260,7 +261,7 @@ CREATE POLICY "Users can view photos of public posts"
   USING (
     EXISTS (
       SELECT 1 FROM posts
-      WHERE posts.moment_id = photos.moment_id
+      WHERE posts.moment = photos.moment
     )
   );
 
@@ -269,8 +270,8 @@ CREATE POLICY "Users can insert photos to own moments"
   WITH CHECK (
     EXISTS (
       SELECT 1 FROM moments
-      WHERE moments.id = photos.moment_id
-      AND moments.user_id = auth.uid()
+      WHERE moments.id = photos.moment
+      AND moments."user" = auth.uid()
     )
   );
 
@@ -279,8 +280,8 @@ CREATE POLICY "Users can delete photos of own moments"
   USING (
     EXISTS (
       SELECT 1 FROM moments
-      WHERE moments.id = photos.moment_id
-      AND moments.user_id = auth.uid()
+      WHERE moments.id = photos.moment
+      AND moments."user" = auth.uid()
     )
   );
 
@@ -293,11 +294,11 @@ CREATE POLICY "Anyone can view posts"
 
 CREATE POLICY "Users can insert own posts"
   ON posts FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK (auth.uid() = "user");
 
 CREATE POLICY "Users can delete own posts"
   ON posts FOR DELETE
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = "user");
 
 -- Likes
 ALTER TABLE likes ENABLE ROW LEVEL SECURITY;
@@ -308,36 +309,36 @@ CREATE POLICY "Anyone can view likes"
 
 CREATE POLICY "Users can insert own likes"
   ON likes FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK (auth.uid() = "user");
 
 CREATE POLICY "Users can delete own likes"
   ON likes FOR DELETE
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = "user");
 
 -- Purchases
 ALTER TABLE purchases ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can view own purchases"
   ON purchases FOR SELECT
-  USING (auth.uid() = buyer_id);
+  USING (auth.uid() = buyer);
 
 CREATE POLICY "Users can insert own purchases"
   ON purchases FOR INSERT
-  WITH CHECK (auth.uid() = buyer_id);
+  WITH CHECK (auth.uid() = buyer);
 
 -- Transactions
 ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can view own transactions"
   ON transactions FOR SELECT
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = "user");
 
 -- Subscriptions RLS
 ALTER TABLE subscriptions ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can view own subscription"
   ON subscriptions FOR SELECT
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = "user");
 
 -- =============================================
 -- Functions and Triggers
@@ -381,9 +382,9 @@ DECLARE
   v_user_id uuid;
   v_prompt text;
 BEGIN
-  -- Get user_id and prompt from parent moment
-  SELECT m.user_id, m.prompt INTO v_user_id, v_prompt
-  FROM public.moments m WHERE m.id = NEW.moment_id;
+  -- Get user and prompt from parent moment
+  SELECT m."user", m.prompt INTO v_user_id, v_prompt
+  FROM public.moments m WHERE m.id = NEW.moment;
 
   -- Deduct credits from user profile
   UPDATE public.profiles
@@ -391,7 +392,7 @@ BEGIN
   WHERE id = v_user_id;
 
   -- Log transaction
-  INSERT INTO public.transactions (user_id, type, amount, related_id, description)
+  INSERT INTO public.transactions ("user", type, amount, ref, description)
   VALUES (
     v_user_id,
     'generation_cost',
@@ -423,17 +424,17 @@ BEGIN
   -- Deduct credits from buyer
   UPDATE public.profiles
   SET credits = credits - NEW.price
-  WHERE id = NEW.buyer_id;
+  WHERE id = NEW.buyer;
 
   -- Log transaction
-  INSERT INTO public.transactions (user_id, type, amount, related_id, description)
+  INSERT INTO public.transactions ("user", type, amount, ref, description)
   VALUES (
-    NEW.buyer_id,
+    NEW.buyer,
     'asset_purchase',
     -NEW.price,
     NEW.id,
     'Purchased asset: ' || (
-      SELECT name FROM public.assets WHERE id = NEW.asset_id
+      SELECT name FROM public.assets WHERE id = NEW.asset
     )
   );
 
@@ -448,11 +449,11 @@ CREATE TRIGGER on_asset_purchased
   FOR EACH ROW
   EXECUTE FUNCTION process_asset_purchase();
 
--- Function to get user's accessible assets (own + purchased) with is_purchased flag
+-- Function to get user's accessible assets (own + purchased) with purchased flag
 CREATE OR REPLACE FUNCTION get_user_assets(user_uuid uuid)
 RETURNS TABLE (
   id uuid,
-  user_id uuid,
+  "user" uuid,
   name text,
   title text,
   description text,
@@ -460,8 +461,8 @@ RETURNS TABLE (
   path text,
   content text,
   price integer,
-  created_at timestamptz,
-  is_purchased boolean
+  created timestamptz,
+  purchased boolean
 )
 LANGUAGE SQL
 STABLE
@@ -469,26 +470,26 @@ SECURITY DEFINER
 SET search_path = ''
 AS $$
   SELECT
-    a.id, a.user_id, a.name, a.title, a.description,
-    a.type, a.path, a.content, a.price, a.created_at,
-    (p.id IS NOT NULL) AS is_purchased
+    a.id, a."user", a.name, a.title, a.description,
+    a.type, a.path, a.content, a.price, a.created,
+    (p.id IS NOT NULL) AS purchased
   FROM public.assets a
-  LEFT JOIN public.purchases p ON p.asset_id = a.id AND p.buyer_id = user_uuid
+  LEFT JOIN public.purchases p ON p.asset = a.id AND p.buyer = user_uuid
   WHERE a.name != ''
     AND (
-      a.user_id = user_uuid
+      a."user" = user_uuid
       OR p.id IS NOT NULL
-      OR (a.user_id IS NULL AND a.price IS NULL)
-      OR (a.user_id IS NULL AND (SELECT super FROM public.profiles WHERE id = user_uuid))
+      OR (a."user" IS NULL AND a.price IS NULL)
+      OR (a."user" IS NULL AND (SELECT super FROM public.profiles WHERE id = user_uuid))
     )
-  ORDER BY a.created_at DESC;
+  ORDER BY a.created DESC;
 $$;
 
 -- Function to get all public store assets with purchase status for a user
 CREATE OR REPLACE FUNCTION get_store_assets(user_uuid uuid)
 RETURNS TABLE (
   id uuid,
-  user_id uuid,
+  "user" uuid,
   name text,
   title text,
   description text,
@@ -496,8 +497,8 @@ RETURNS TABLE (
   path text,
   content text,
   price integer,
-  created_at timestamptz,
-  is_purchased boolean
+  created timestamptz,
+  purchased boolean
 )
 LANGUAGE SQL
 STABLE
@@ -505,27 +506,26 @@ SECURITY DEFINER
 SET search_path = ''
 AS $$
   SELECT
-    a.id, a.user_id, a.name, a.title, a.description,
-    a.type, a.path, a.content, a.price, a.created_at,
+    a.id, a."user", a.name, a.title, a.description,
+    a.type, a.path, a.content, a.price, a.created,
     EXISTS (
       SELECT 1 FROM public.purchases p
-      WHERE p.asset_id = a.id AND p.buyer_id = user_uuid
-    ) AS is_purchased
+      WHERE p.asset = a.id AND p.buyer = user_uuid
+    ) AS purchased
   FROM public.assets a
   WHERE a.price IS NOT NULL
-  ORDER BY a.type, a.created_at DESC;
+  ORDER BY a.type, a.created DESC;
 $$;
 
 -- Function to get community posts with like counts and user like status
 CREATE OR REPLACE FUNCTION get_posts(user_uuid uuid, page_limit int DEFAULT 20, page_offset int DEFAULT 0)
 RETURNS TABLE (
   id uuid,
-  user_id uuid,
-  moment_id uuid,
-  created_at timestamptz,
+  "user" uuid,
+  created timestamptz,
   moment jsonb,
   author jsonb,
-  likes_count bigint,
+  likes bigint,
   liked boolean
 )
 LANGUAGE SQL
@@ -535,27 +535,26 @@ SET search_path = ''
 AS $$
   SELECT
     p.id,
-    p.user_id,
-    p.moment_id,
-    p.created_at,
+    p."user",
+    p.created,
     jsonb_build_object(
       'id', m.id,
-      'user_id', m.user_id,
+      'user', m."user",
       'prompt', m.prompt,
       'title', m.title,
       'mixins', m.mixins,
       'status', m.status,
-      'created_at', m.created_at,
+      'created', m.created,
       'photos', COALESCE(
         (SELECT jsonb_agg(
           jsonb_build_object(
             'id', ph.id,
-            'moment_id', ph.moment_id,
+            'moment', ph.moment,
             'prompt', ph.prompt,
             'mixins', ph.mixins,
-            'created_at', ph.created_at
-          ) ORDER BY ph.created_at DESC
-        ) FROM public.photos ph WHERE ph.moment_id = m.id),
+            'created', ph.created
+          ) ORDER BY ph.created DESC
+        ) FROM public.photos ph WHERE ph.moment = m.id),
         '[]'::jsonb
       )
     ) AS moment,
@@ -564,14 +563,14 @@ AS $$
       'name', pr.name,
       'avatar', pr.avatar
     ) AS author,
-    (SELECT COUNT(*) FROM public.likes l WHERE l.post_id = p.id) AS likes_count,
+    (SELECT COUNT(*) FROM public.likes l WHERE l.post = p.id) AS likes,
     EXISTS (
-      SELECT 1 FROM public.likes l WHERE l.post_id = p.id AND l.user_id = user_uuid
+      SELECT 1 FROM public.likes l WHERE l.post = p.id AND l."user" = user_uuid
     ) AS liked
   FROM public.posts p
-  JOIN public.moments m ON m.id = p.moment_id
-  JOIN public.profiles pr ON pr.id = p.user_id
-  ORDER BY p.created_at DESC
+  JOIN public.moments m ON m.id = p.moment
+  JOIN public.profiles pr ON pr.id = p."user"
+  ORDER BY p.created DESC
   LIMIT page_limit
   OFFSET page_offset;
 $$;
@@ -596,12 +595,12 @@ BEGIN
   END IF;
 
   -- Must be a public asset with a price
-  IF v_asset.user_id IS NOT NULL OR v_asset.price IS NULL THEN
+  IF v_asset."user" IS NOT NULL OR v_asset.price IS NULL THEN
     RETURN json_build_object('success', false, 'error', 'Asset is not for sale');
   END IF;
 
   -- Check if already purchased
-  IF EXISTS (SELECT 1 FROM public.purchases WHERE buyer_id = v_user_id AND asset_id = asset_uuid) THEN
+  IF EXISTS (SELECT 1 FROM public.purchases WHERE buyer = v_user_id AND asset = asset_uuid) THEN
     RETURN json_build_object('success', false, 'error', 'Already purchased');
   END IF;
 
@@ -612,7 +611,7 @@ BEGIN
   END IF;
 
   -- Insert purchase (existing trigger handles credit deduction + transaction logging)
-  INSERT INTO public.purchases (buyer_id, asset_id, price)
+  INSERT INTO public.purchases (buyer, asset, price)
   VALUES (v_user_id, asset_uuid, v_asset.price);
 
   RETURN json_build_object('success', true, 'remaining_credits', v_credits - v_asset.price);
@@ -658,9 +657,9 @@ USING (
   bucket_id = 'photos' AND
   EXISTS (
     SELECT 1 FROM photos p
-    JOIN moments m ON m.id = p.moment_id
-    JOIN posts ON posts.moment_id = p.moment_id
-    WHERE name = m.user_id || '/' || m.id || '/' || p.id || '.jpg'
+    JOIN moments m ON m.id = p.moment
+    JOIN posts ON posts.moment = p.moment
+    WHERE name = m."user"::text || '/' || m.id || '/' || p.id || '.jpg'
   )
 );
 
@@ -742,7 +741,7 @@ BEGIN
     RAISE EXCEPTION 'Profile not found for user_uuid: %', user_uuid;
   END IF;
 
-  INSERT INTO public.transactions (user_id, type, amount, description)
+  INSERT INTO public.transactions ("user", type, amount, description)
   VALUES (
     user_uuid,
     'subscription_reset',

@@ -49,7 +49,7 @@ export function AssetCard({ data, hasPrice, onDetail, onEdit, onBuy }: AssetCard
   }
 
   const handleDelete = (asset: AssetWithPurchaseInfo) => {
-    if (asset.is_purchased) {
+    if (asset.purchased) {
       removePurchase.mutate(asset.id!)
     } else {
       deleteAsset.mutate({ id: asset.id!, path: asset.path })

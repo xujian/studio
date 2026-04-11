@@ -69,7 +69,7 @@ export function MomentView({
   const emptyAssets = Array(4 - (nonFaceMixins.length % 4)).fill(null)
 
   const download = async () => {
-    const url = photoUrl(moment.user_id, moment.id, currentPhoto.id)
+    const url = photoUrl(moment.user, moment.id, currentPhoto.id)
     const res = await fetch(url)
     const blob = await res.blob()
     const objectUrl = URL.createObjectURL(blob)
@@ -106,9 +106,9 @@ export function MomentView({
             {moment.title && (
               <h1 className="text-3xl font-bold text-foreground">{moment.title}</h1>
             )}
-            {moment.created_at && (
+            {moment.created && (
               <p className="text-sm text-muted-foreground">
-                {new Date(moment.created_at).toLocaleString('en-US', {
+                {new Date(moment.created).toLocaleString('en-US', {
                   month: 'short',
                   day: 'numeric',
                   year: 'numeric'
@@ -156,7 +156,7 @@ export function MomentView({
                 </Badge>
                 <Image
                   alt="reference"
-                  src={uploadUrl(moment.user_id, moment.reference)}
+                  src={uploadUrl(moment.user, moment.reference)}
                   width={180}
                   height={320}
                   className="max-h-50 max-w-50 object-cover"
@@ -258,7 +258,7 @@ export function MomentView({
                     action={() =>
                       deletePhoto.mutate(
                         {
-                          userId: moment.user_id,
+                          userId: moment.user,
                           momentId: moment.id,
                           photoId: currentPhoto.id
                         },

@@ -6,8 +6,8 @@ import type { AssetWithPurchaseInfo } from '@/lib/types'
 export const useAssetStatus = (asset: AssetWithPurchaseInfo) => {
   const { data: profile } = useProfile()
   const isSuper = profile?.super ?? false
-  const isPublic = asset.user_id == null
-  const isPurchased = !!asset.is_purchased
+  const isPublic = asset.user == null
+  const isPurchased = !!asset.purchased
   const isCustom = !isPublic && !isPurchased
   return {
     isPublic,

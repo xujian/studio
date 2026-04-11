@@ -25,7 +25,7 @@ export const useCreateAsset = () => {
       const { data, error } = await supabase
         .from('assets')
         .insert({
-          user_id: session.user.id,
+          user: session.user.id,
           name,
           title: title || undefined,
           description: description || undefined,

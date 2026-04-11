@@ -98,11 +98,11 @@ export function MomentCarousel({
       transition={{ duration: 0.3 }}
       onClick={!onClose ? (e) => {
         e.stopPropagation()
-        router.push(`/moments/${p.moment_id}?photo=${p.id}`)
+        router.push(`/moments/${p.moment}?photo=${p.id}`)
       } : undefined}
       {...dragProps}>
       <Image
-        src={photoUrl(moment.user_id, moment.id, p.id)}
+        src={photoUrl(moment.user, moment.id, p.id)}
         alt={moment.title || 'Photo'}
         fill
         loading="lazy"

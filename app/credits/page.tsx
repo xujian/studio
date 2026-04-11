@@ -27,19 +27,19 @@ export default async function CreditsPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('credits, subscription_tier')
+    .select('credits, tier')
     .eq('id', session.user.id)
     .single()
 
   const { data: subscription } = (await supabase
     .from('subscriptions')
     .select('*')
-    .eq('user_id', session.user.id)
+    .eq('user', session.user.id)
     .eq('status', 'active')
     .maybeSingle()) as { data: Subscription | null }
 
   const currentCredits = profile?.credits ?? 0
-  const currentTier = profile?.subscription_tier ?? 'free'
+  const currentTier = profile?.tier ?? 'free'
   const hasSubscription = !!subscription
 
   return (
@@ -136,7 +136,7 @@ export default async function CreditsPage() {
           {hasSubscription && (
             <p className="mt-3 text-center text-xs text-muted-foreground">
               Credits reset on{' '}
-              {new Date(subscription.current_period_end).toLocaleDateString(
+              {new Date(subscription.end).toLocaleDateString(
                 'en-US',
                 {
                   month: 'long',

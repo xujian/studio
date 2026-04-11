@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
     .update({ credits: profile.credits - 1 })
     .eq('id', userId)
   await supabase.from('transactions').insert({
-    user_id: userId,
+    user: userId,
     type: 'generation_cost',
     amount: -1,
     description: `Asset analyze: ${type}`

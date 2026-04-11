@@ -39,11 +39,11 @@ export default async function AccountPage() {
   const { data: subscription } = (await supabase
     .from('subscriptions')
     .select('*')
-    .eq('user_id', session.user.id)
+    .eq('user', session.user.id)
     .eq('status', 'active')
     .maybeSingle()) as { data: Subscription | null }
 
-  const currentTier = profile?.subscription_tier ?? 'free'
+  const currentTier = profile?.tier ?? 'free'
   const planInfo = SUBSCRIPTION_PLANS.find(p => p.id === currentTier)
   const credits = profile?.credits ?? 0
 
@@ -97,7 +97,7 @@ export default async function AccountPage() {
                   </div>
                   {subscription ? (
                     <p className="text-xs text-muted-foreground">
-                      Renews {new Date(subscription.current_period_end).toLocaleDateString('en-US', {
+                      Renews {new Date(subscription.end).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
                         year: 'numeric',

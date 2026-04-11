@@ -24,28 +24,28 @@ export type Profile = {
   name: string
   avatar: string
   credits: number
-  stripe_customer_id: string | null
-  subscription_tier: SubscriptionTier
+  customer: string | null        // was: stripe_customer_id
+  tier: SubscriptionTier         // was: subscription_tier
   super: boolean
-  created_at: string
+  created: string                // was: created_at
 }
 
 export type Moment = {
   id: string
-  user_id: string
+  user: string                   // was: user_id
   prompt: string
   title?: string
   reference?: string,
   mixins?: Mixins
-  final_prompt?: string
+  final?: string                 // was: final_prompt
   status?: 'pending' | 'processing' | 'completed' | 'failed'
-  created_at?: string
+  created?: string               // was: created_at
 }
 
 export type Photo = {
   id: string
-  moment_id: string
-  user_id: string
+  moment: string                 // was: moment_id
+  user: string                   // was: user_id
   /**
    * Only set if different from moment's prompt.
    * Display logic: photo.prompt || moment.prompt
@@ -57,7 +57,7 @@ export type Photo = {
    * Example: { face: "uuid-of-face-asset" }
    */
   mixins: Mixins | null
-  created_at: string
+  created: string                // was: created_at
 }
 
 export type MomentWithPhotos = Moment & {
@@ -70,15 +70,15 @@ export type MomentWithPhotos = Moment & {
  */
 export type Asset = {
   id?: string
-  user_id?: string // NULL = official Kanojo Studio asset
+  user?: string                  // was: user_id — NULL = official Kanojo Studio asset
   name?: string
   title?: string
   description?: string
-  type: AssetType // face, reference, outfit, scene, etc.
-  path?: string | null // if image-based asset
-  content?: string | null // if text-based asset
-  price?: number | null // credits cost (NULL = personal asset, not for sale)
-  created_at?: string
+  type: AssetType                // face, reference, outfit, scene, etc.
+  path?: string | null           // if image-based asset
+  content?: string | null        // if text-based asset
+  price?: number | null          // credits cost (NULL = personal asset, not for sale)
+  created?: string               // was: created_at
 }
 
 export type AdhocAsset = Asset & {
@@ -104,12 +104,11 @@ export type Mixins = {
  */
 export type Post = {
   id: string
-  user_id: string
-  moment_id: string
-  created_at: string
+  user: string                   // was: user_id
+  created: string                // was: created_at
   moment: MomentWithPhotos
   author: { id: string; name: string | null; avatar: string | null }
-  likes_count: number
+  likes: number                  // was: likes_count
   liked: boolean
 }
 
@@ -118,9 +117,9 @@ export type Post = {
  */
 export type Like = {
   id: string
-  post_id: string
-  user_id: string
-  created_at: string
+  post: string                   // was: post_id
+  user: string                   // was: user_id
+  created: string                // was: created_at
 }
 
 /**
@@ -128,35 +127,35 @@ export type Like = {
  */
 export type Purchase = {
   id: string
-  buyer_id: string
-  asset_id: string
-  price: number // credits spent at time of purchase
-  created_at: string
+  buyer: string                  // was: buyer_id
+  asset: string                  // was: asset_id
+  price: number                  // credits spent at time of purchase
+  created: string                // was: created_at
 }
 
 export type Transaction = {
   id: string
-  user_id: string
+  user: string                   // was: user_id
   type: 'asset_purchase' | 'generation_cost' | 'credit_purchase' | 'refund' | 'subscription_reset'
-  amount: number // negative = debit, positive = credit
-  related_id: string | null // purchase_id, moment_id, etc.
+  amount: number                 // negative = debit, positive = credit
+  ref: string | null             // was: related_id — purchase_id, moment_id, etc.
   description: string | null
-  created_at: string
+  created: string                // was: created_at
 }
 
 export type Subscription = {
   id: string
-  user_id: string
-  stripe_subscription_id: string
-  stripe_customer_id: string
+  user: string                   // was: user_id
+  subscription: string           // was: stripe_subscription_id
+  customer: string               // was: stripe_customer_id
   tier: SubscriptionTier
   status: 'active' | 'past_due' | 'canceled'
-  current_period_end: string
-  created_at: string
-  updated_at: string
+  end: string                    // was: current_period_end
+  created: string                // was: created_at
+  updated: string                // was: updated_at
 }
 
-export type AssetWorkMode = 
+export type AssetWorkMode =
   'text-first'
   | 'image-only'
   | 'text-only'
@@ -164,7 +163,7 @@ export type AssetWorkMode =
 export type AssetRunMode = 'text' | 'image'
 
 export type AssetWithPurchaseInfo = Asset & {
-  is_purchased: boolean
+  purchased: boolean             // was: is_purchased
 }
 
 export type JsonPrompt = Partial<Record<AssetType, string | Record<string, string>>>

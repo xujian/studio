@@ -1,11 +1,11 @@
 -- Seed data: preset mood assets (official Kanojo Studio assets)
--- user_id = NULL means official Kanojo Studio asset (public by convention)
+-- "user" = NULL means official Kanojo Studio asset (public by convention)
 
 -- ============================================
 -- Emotional Tones
 -- ============================================
 
-INSERT INTO assets (user_id, name, description, type, content) VALUES
+INSERT INTO assets ("user", name, description, type, content) VALUES
 (NULL, 'melancholic', 'Wistful sadness and quiet longing', 'mood',
   'A deep sense of wistful melancholy permeates the image. The subject carries a quiet sadness in their expression — distant eyes, slightly parted lips, a weight in their posture. Colors lean toward muted blues, desaturated tones, and cool shadows. The atmosphere feels like a rainy afternoon, still and heavy with unspoken emotion. Everything is soft, subdued, and achingly beautiful.'),
 
@@ -35,7 +35,7 @@ INSERT INTO assets (user_id, name, description, type, content) VALUES
 -- Cinematic Vibes
 -- ============================================
 
-INSERT INTO assets (user_id, name, description, type, content) VALUES
+INSERT INTO assets ("user", name, description, type, content) VALUES
 (NULL, 'film-noir', 'Classic black-and-white cinematic drama', 'mood',
   'Classic film noir atmosphere drenches the image in dramatic monochrome tension. The subject is framed in stark chiaroscuro — deep shadows carving the face, a single hard light source creating sharp contrasts. Expression is guarded, world-weary, and magnetic. The palette is pure black and white with rich silver midtones. The atmosphere is smoky, suspenseful, and fatalistic, like a 1940s detective thriller.'),
 
@@ -56,7 +56,7 @@ INSERT INTO assets (user_id, name, description, type, content) VALUES
 -- Energy Levels
 -- ============================================
 
-INSERT INTO assets (user_id, name, description, type, content) VALUES
+INSERT INTO assets ("user", name, description, type, content) VALUES
 (NULL, 'ethereal', 'Otherworldly and dreamlike', 'mood',
   'An otherworldly, dreamlike quality transcends the image beyond reality. The subject appears almost supernatural — luminous skin, faraway gaze, floating and weightless body language. Colors are soft and iridescent: pearl whites, pale lilacs, shimmering silvers, and translucent blues. The atmosphere is misty and celestial, like existing between worlds. Light wraps around everything with an impossible softness.'),
 

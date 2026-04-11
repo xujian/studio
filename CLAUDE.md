@@ -26,25 +26,6 @@ or when the user explicitly asks for a formal plan.
 
 AI-powered portrait photography platform (Kanojo Studio MVP) built with Next.js 16, Supabase, and Google Gemini API.
 
-## Development Commands
-
-```bash
-# Install dependencies
-pnpm install
-
-# Run development server
-pnpm dev
-
-# Build production
-pnpm build
-
-# Start production server
-pnpm start
-
-# Lint code
-pnpm lint
-```
-
 ## Development Server
 
 The dev server runs **HTTPS on port 443** using local certs:
@@ -127,119 +108,58 @@ For **complex queries** involving:
 
 Create a Postgres function and call via RPC instead of writing complex client-side queries.
 
-**Pattern Example (useAssets):**
-
-```typescript
-// ❌ BAD: Multiple queries + business logic in client
-const { data: ownAssets } = await supabase.from('assets').select('*').eq('user_id', userId)
-const { data: purchases } = await supabase.from('purchases').select('asset_id').eq('buyer_id', userId)
-// ... then merge and deduplicate in client code
-
-// ✅ GOOD: Single RPC call to server-side function
-const { data } = await supabase.rpc('get_user_assets', { user_uuid: userId })
-```
-
-**Hook Structure:**
-
-```typescript
-'use client'
-
-import { useQuery } from '@tanstack/react-query'
-import { createClient } from '@/lib/supabase/client'
-import type { Asset } from '@/lib/types'
-
-export const useAssets = () => {
-  const supabase = createClient()
-
-  return useQuery({
-    queryKey: ['assets'],
-    queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) return []
-
-      const { data, error } = await supabase.rpc('get_user_assets', {
-        user_uuid: session.user.id
-      })
-
-      if (error) throw error
-      return (data || []) as Asset[]
-    },
-    staleTime: 5 * 60 * 1000 // Cache duration
-  })
-}
-```
-
-**Corresponding Postgres Function:**
-
-```sql
-CREATE OR REPLACE FUNCTION get_user_assets(user_uuid uuid)
-RETURNS SETOF assets
-LANGUAGE SQL STABLE SECURITY DEFINER
-AS $$
-  SELECT DISTINCT a.*
-  FROM assets a
-  LEFT JOIN purchases p ON p.asset_id = a.id AND p.buyer_id = user_uuid
-  WHERE a.user_id = user_uuid OR p.id IS NOT NULL
-  ORDER BY a.created_at DESC;
-$$;
-```
-
-**Benefits:**
-- Single database round trip
-- Database logic stays in schema.sql (version controlled, reviewable)
-- Client code stays simple and declarative
-- Easier to optimize queries (indexes, query plans)
-- Better security (SECURITY DEFINER ensures proper RLS)
+**Pattern:** prefer a single `supabase.rpc('function_name', ...)` call over multiple queries with client-side merging. Database logic stays in `schema.sql`; hooks stay simple and declarative.
 
 ### Database Schema
 
 Core tables with RLS policies:
 
 1. **`profiles`** - User profiles (auto-created via trigger on signup)
-   - Fields: `id`, `name`, `avatar`, `credits`, `created_at`
+   - Fields: `id`, `name`, `avatar`, `credits`, `customer`, `tier`, `created`
    - RLS: Users can only view/update own profile
 
 2. **`moments`** - Generation sessions (baseline prompt + mixins)
-   - Fields: `id`, `user_id`, `prompt`, `mixins` (JSONB), `final_prompt`, `status`, `created_at`
+   - Fields: `id`, `user`, `prompt`, `mixins` (JSONB), `final`, `status`, `created`
    - RLS: Users can only view/insert/delete own moments
    - A moment represents a creation session with baseline settings
 
 3. **`photos`** - Generated images (delta storage)
-   - Fields: `id`, `moment_id`, `url`, `storage_path`, `prompt` (delta), `mixins` (delta), `created_at`
+   - Fields: `id`, `moment`, `user`, `prompt` (delta), `mixins` (delta), `created`
    - RLS: Users can only view/insert/delete photos for their moments
    - Only stores **differences** from moment baseline (efficient storage)
    - Display logic: `photo.prompt || moment.prompt` and `{ ...moment.mixins, ...photo.mixins }`
 
 4. **`assets`** - Reusable prompt components (faces, styles, scenes, etc.)
-   - Fields: `id`, `user_id`, `name`, `type`, `url`, `content`, `price`, `created_at`
+   - Fields: `id`, `user`, `name`, `type`, `path`, `content`, `price`, `created`
    - Types: face, makeup, hair, outfit, scene, lighting, camera
-   - Supports both image-based (URL) and text-based (content) assets
+   - Supports both image-based (path) and text-based (content) assets
    - Marketplace functionality with credits system
 
 5. **`purchases`** - Asset marketplace transactions
+   - Fields: `id`, `buyer`, `asset`, `price`, `created`
    - Tracks which assets users have purchased
    - Used by `get_user_assets()` RPC to return owned + purchased assets
 
 6. **`posts`** - Community sharing
-   - Fields: `id`, `user_id`, `moment_id`, `created_at`
-   - One moment → one post enforced via UNIQUE constraint on `moment_id`
+   - Fields: `id`, `user`, `moment` (UNIQUE), `created`
+   - One moment → one post enforced via UNIQUE constraint on `moment`
    - RLS: Users can insert own posts; public read for published posts
 
 7. **`likes`** - User-post reactions (many-to-many)
-   - Fields: `id`, `post_id`, `user_id`, `created_at`
+   - Fields: `id`, `post`, `user`, `created`
    - One like per user per post enforced via UNIQUE constraint
    - RLS: Users can insert/delete own likes; public read
 
 8. **`transactions`** - Credit ledger
-   - Fields: `id`, `user_id`, `amount` (signed int), `type`, `reference_id`, `created_at`
+   - Fields: `id`, `user`, `amount` (signed int), `type`, `ref`, `created`
    - `amount` is signed: positive = credit, negative = debit
    - Types: `asset_purchase`, `generation_cost`, `credit_purchase`, `refund`
    - RLS: Users can only view own transactions
 
 9. **`subscriptions`** - Stripe subscription state
-   - Fields: `id`, `user_id`, `stripe_subscription_id`, `tier`, `status`, `created_at`
+   - Fields: `id`, `user`, `subscription`, `customer`, `tier`, `status`, `end`, `created`, `updated`
    - One active subscription per user; tiers: `free`, `basic`, `pro`, `max`
-   - `profiles` table also has `stripe_customer_id` and `subscription_tier` columns
+   - `profiles` table also has `customer` and `tier` columns
 
 ### Component Architecture
 
@@ -263,19 +183,6 @@ All database and domain types are defined in `lib/types.ts`:
 - `JsonPrompt` - Structured prompt format (output from ImageAnalyzer/PromptAnalyzer)
   - Contains: subject, outfit, pose, scene, makeup, lighting, camera sections
   - Used for merging reference image analysis with text prompt analysis
-
-**JsonPrompt Structure:**
-```typescript
-{
-  subject: { bodyType, skinTone, expression, bodyLanguage },
-  outfit: { top, bottom, footwear?, accessories?, overall },
-  pose: { position, limbs, angle, energy },
-  scene: { setting, background, foreground, atmosphere },
-  makeup: { face, eyes, lips, overall },
-  lighting: { direction, quality, shadows, highlights, mood },
-  camera: { lens, aperture, angle, framing, focus, style }
-}
-```
 
 Always use these types instead of inline definitions.
 
@@ -318,16 +225,6 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=   # New format: sb_publishable_xxx
 GEMINI_API_KEY=
 NEXT_PUBLIC_APP_URL=                    # For OAuth redirects
 ```
-
-**Note:** Supabase has transitioned to publishable keys (`sb_publishable_xxx`) which replace the older anon keys. If you have an older project, you can find your publishable key in the Supabase Dashboard under Settings → API → API Keys. During the transition period, both key types work, but new projects should use publishable keys.
-
-## Supabase Setup Requirements
-
-1. Run `supabase/schema.sql` in SQL Editor
-2. Enable Google OAuth in Authentication → Providers
-3. Create public storage bucket named `photos`
-4. Create public storage bucket named `assets` with upload policy for `{userId}/*`
-4. Add storage policy allowing users to upload to their own folders: `{userId}/{momentId}/*.{jpg|png}`
 
 ## Key Patterns
 

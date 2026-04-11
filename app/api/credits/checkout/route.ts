@@ -60,12 +60,12 @@ export async function POST(req: NextRequest) {
     const admin = createAdminClient()
     const { data: profile } = await admin
       .from('profiles')
-      .select('stripe_customer_id, subscription_tier')
+      .select('customer, tier')
       .eq('id', session.user.id)
       .single()
 
     // Already subscribed (any tier) — send to portal to change plan instead
-    if (profile?.subscription_tier && profile.subscription_tier !== 'free') {
+    if (profile?.tier && profile.tier !== 'free') {
       return NextResponse.redirect(`${baseUrl}/credits`, 303)
     }
 
@@ -88,8 +88,8 @@ export async function POST(req: NextRequest) {
       cancel_url: `${baseUrl}/credits`,
     }
 
-    if (profile?.stripe_customer_id) {
-      customerParams.customer = profile.stripe_customer_id
+    if (profile?.customer) {
+      customerParams.customer = profile.customer
     } else {
       customerParams.customer_email = session.user.email ?? undefined
     }

@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     .from('assets')
     .select('id, path, type')
     .eq('id', assetId)
-    .eq('user_id', userId)
+    .eq('user', userId)
     .single()
 
   if (fetchError || !asset) {
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
   // Promote: clear owner, set price, update path
   const { error: updateError } = await supabase
     .from('assets')
-    .update({ user_id: null, price: 10, path: newPath })
+    .update({ user: null, price: 10, path: newPath })
     .eq('id', assetId)
 
   if (updateError) {

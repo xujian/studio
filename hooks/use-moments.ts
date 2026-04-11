@@ -53,16 +53,16 @@ export const useMoments = () => {
           posts(id)
         `
         )
-        .eq('user_id', session.user.id)
-        .order('created_at', { ascending: false })
-        .order('created_at', { referencedTable: 'photos', ascending: false })
+        .eq('user', session.user.id)
+        .order('created', { ascending: false })
+        .order('created', { referencedTable: 'photos', ascending: false })
         .range(pageParam, pageParam + PAGE_SIZE - 1)
       if (error) throw error
       const moments = (data || []).map(moment => ({
         ...moment,
         photos: (moment.photos ?? []).map((photo: Record<string, unknown>) => ({
           ...photo,
-          user_id: moment.user_id,
+          user: moment.user,
         })),
         published: !!(moment.posts as { id: string } | null),
       })) as MomentWithPhotos[]
@@ -161,7 +161,7 @@ export const useDeleteMoment = () => {
       // Fetch moment + photos (ids, mixins) for storage cleanup and ad-hoc asset cleanup
       const { data: moment } = await supabase
         .from('moments')
-        .select('user_id, mixins, photos(id, mixins)')
+        .select('user, mixins, photos(id, mixins)')
         .eq('id', id)
         .single()
 
@@ -174,7 +174,7 @@ export const useDeleteMoment = () => {
 
       if (moment?.photos?.length) {
         const paths = moment.photos.map(
-          (p: { id: string }) => `${moment.user_id}/${id}/${p.id}.jpg`
+          (p: { id: string }) => `${moment.user}/${id}/${p.id}.jpg`
         )
         const { error: storageError } = await supabase.storage
           .from('photos')

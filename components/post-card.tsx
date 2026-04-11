@@ -20,17 +20,17 @@ export function PostCard({ post, href, className }: PostCardProps) {
   const like = useLikePost()
   const { moment, author } = post
   const [liked, setLiked] = React.useState(post.liked)
-  const [likesCount, setLikesCount] = React.useState(post.likes_count)
+  const [likesCount, setLikesCount] = React.useState(post.likes)
 
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     const next = !liked
     setLiked(next)
-    setLikesCount(prev => next ? prev + 1 : prev - 1)
+    setLikesCount((prev: number) => next ? prev + 1 : prev - 1)
     like.mutate(
       { postId: post.id, liked },
-      { onError: () => { setLiked(liked); setLikesCount(post.likes_count) } }
+      { onError: () => { setLiked(liked); setLikesCount(post.likes) } }
     )
   }
 

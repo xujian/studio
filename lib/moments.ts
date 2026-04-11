@@ -8,7 +8,7 @@ export async function fetchMoment(id: string) {
   const { data: moment, error } = await supabase
     .from('moments')
     .select('*, photos(*)')
-    .order('created_at', { referencedTable: 'photos', ascending: false })
+    .order('created', { referencedTable: 'photos', ascending: false })
     .eq('id', id)
     .single()
 
@@ -17,14 +17,14 @@ export async function fetchMoment(id: string) {
   const typedMoment = moment as MomentWithPhotos
 
   const { data: { session } } = await supabase.auth.getSession()
-  const readOnly = session?.user?.id !== typedMoment.user_id
+  const readOnly = session?.user?.id !== typedMoment.user
 
   let author: { id: string; name: string | null; avatar: string | null } | undefined
   if (readOnly) {
     const { data: post } = await supabase
       .from('posts')
-      .select('user_id, profiles:user_id(id, name, avatar)')
-      .eq('moment_id', id)
+      .select('user, profiles:user(id, name, avatar)')
+      .eq('moment', id)
       .maybeSingle()
 
     if (post?.profiles) {

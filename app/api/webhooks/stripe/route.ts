@@ -31,13 +31,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true })
     }
 
-    // Persist stripe_customer_id on the profile for future use
+    // Persist customer on the profile for future use
     if (session.customer && session.metadata?.userId) {
       await supabase
         .from('profiles')
-        .update({ stripe_customer_id: session.customer as string })
+        .update({ customer: session.customer as string })
         .eq('id', session.metadata.userId)
-        .is('stripe_customer_id', null)
+        .is('customer', null)
     }
 
     // ── Subscription checkout ──
@@ -55,17 +55,17 @@ export async function POST(req: NextRequest) {
       const periodEnd = stripeSubscription.items.data[0].current_period_end
 
       await supabase.from('subscriptions').upsert({
-        user_id: userId,
-        stripe_subscription_id: subscriptionId,
-        stripe_customer_id: session.customer as string,
+        user: userId,
+        subscription: subscriptionId,
+        customer: session.customer as string,
         tier: planId,
         status: 'active',
-        current_period_end: new Date(periodEnd * 1000).toISOString(),
-      }, { onConflict: 'user_id' })
+        end: new Date(periodEnd * 1000).toISOString(),
+      }, { onConflict: 'user' })
 
       await supabase
         .from('profiles')
-        .update({ subscription_tier: planId })
+        .update({ tier: planId })
         .eq('id', userId)
 
       // Idempotency: skip if this checkout session was already processed
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
 
       // Record with stripe_session_id for idempotency
       await supabase.from('transactions').insert({
-        user_id: userId,
+        user: userId,
         type: 'subscription_reset',
         amount: credits,
         stripe_session_id: session.id,
@@ -131,10 +131,10 @@ export async function POST(req: NextRequest) {
     }
 
     await supabase.from('transactions').insert({
-      user_id: userId,
+      user: userId,
       type: 'credit_purchase',
       amount: credits,
-      related_id: null,
+      ref: null,
       stripe_session_id: session.id,
       description: `Purchased ${credits} credits`,
     })
@@ -176,10 +176,10 @@ export async function POST(req: NextRequest) {
       .from('subscriptions')
       .update({
         status: 'active',
-        current_period_end: new Date(periodEnd * 1000).toISOString(),
-        updated_at: new Date().toISOString(),
+        end: new Date(periodEnd * 1000).toISOString(),
+        updated: new Date().toISOString(),
       })
-      .eq('stripe_subscription_id', subscriptionId)
+      .eq('subscription', subscriptionId)
 
     const { error } = await supabase.rpc('reset_subscription_credits', {
       user_uuid: userId,
@@ -193,7 +193,7 @@ export async function POST(req: NextRequest) {
 
     // Record with invoice.id in stripe_session_id for idempotency
     await supabase.from('transactions').insert({
-      user_id: userId,
+      user: userId,
       type: 'subscription_reset',
       amount: credits,
       stripe_session_id: invoice.id,
@@ -208,8 +208,8 @@ export async function POST(req: NextRequest) {
 
     await supabase
       .from('subscriptions')
-      .update({ status: 'past_due', updated_at: new Date().toISOString() })
-      .eq('stripe_subscription_id', subscriptionId)
+      .update({ status: 'past_due', updated: new Date().toISOString() })
+      .eq('subscription', subscriptionId)
   }
 
   // ─── Subscription canceled ────────────────────────────────────────────────
@@ -223,13 +223,13 @@ export async function POST(req: NextRequest) {
 
     await supabase
       .from('subscriptions')
-      .update({ status: 'canceled', updated_at: new Date().toISOString() })
-      .eq('stripe_subscription_id', subscription.id)
+      .update({ status: 'canceled', updated: new Date().toISOString() })
+      .eq('subscription', subscription.id)
 
     if (userId) {
       await supabase
         .from('profiles')
-        .update({ subscription_tier: 'free' })
+        .update({ tier: 'free' })
         .eq('id', userId)
     }
   }
@@ -251,14 +251,14 @@ export async function POST(req: NextRequest) {
         .update({
           tier: planId,
           status: subscription.status as 'active' | 'past_due' | 'canceled',
-          current_period_end: new Date(periodEnd * 1000).toISOString(),
-          updated_at: new Date().toISOString(),
+          end: new Date(periodEnd * 1000).toISOString(),
+          updated: new Date().toISOString(),
         })
-        .eq('stripe_subscription_id', subscription.id)
+        .eq('subscription', subscription.id)
 
       await supabase
         .from('profiles')
-        .update({ subscription_tier: planId })
+        .update({ tier: planId })
         .eq('id', userId)
     }
   }

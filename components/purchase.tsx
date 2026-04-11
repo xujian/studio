@@ -26,7 +26,7 @@ export function PurchaseModal({
   const router = useRouter()
   const purchase = usePurchase()
 
-  const isOwned = asset.is_purchased
+  const isOwned = asset.purchased
   const hasImage = !!asset.path
 
   const handleBuy = () => {

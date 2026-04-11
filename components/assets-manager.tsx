@@ -127,7 +127,7 @@ export function AssetsManager({ type, onClose }: AssetsManagerProps) {
             setDetailPaneOpen(false)
           }}
           onDelete={() => {
-            if ((activeItem as AssetWithPurchaseInfo).is_purchased) {
+            if ((activeItem as AssetWithPurchaseInfo).purchased) {
               removePurchase.mutate(activeItem!.id!, {
                 onSuccess: () => setDetailPaneOpen(false)
               })

@@ -20,7 +20,7 @@ Reusable prompt components that shape how portraits are generated. Each asset co
 ```ts
 type Asset = {
   id?: string
-  user_id?: string       // NULL = official Kanojo Studio asset
+  user?: string          // NULL = official Kanojo Studio asset
   name?: string          // slug identifier, e.g. "wavy-dark-brown"
   title?: string         // human label, e.g. "Wavy Dark Brown"
   description?: string   // user note for personal reference
@@ -28,7 +28,7 @@ type Asset = {
   path?: string | null   // relative path in 'assets' storage bucket (image-based), for text-based assets, it's a preview image
   content?: string | null // text fed to the engine (text-based)
   price?: number | null  // credits cost; NULL = personal, not for sale
-  created_at?: string
+  created?: string
 }
 ```
 
@@ -47,7 +47,7 @@ All other asset types support two modes:
 
 ## Ownership Model
 
-| `user_id` | `is_purchased` | Description |
+| `user` | `purchased` | Description |
 |---|---|---|
 | NULL | — | Official Kanojo Studio asset (free or purchasable) |
 | user's id | false | Personal/custom asset |
@@ -117,7 +117,7 @@ Deletes the storage file and database row. `useRemovePurchase` handles purchased
 
 ## Fetching Assets
 
-`useAssets()` calls the `get_user_assets(user_uuid)` Postgres RPC which returns owned + purchased assets in one query, returning `AssetWithPurchaseInfo[]` (adds `is_purchased: boolean`).
+`useAssets()` calls the `get_user_assets(user_uuid)` Postgres RPC which returns owned + purchased assets in one query, returning `AssetWithPurchaseInfo[]` (adds `purchased: boolean`).
 
 Cache: 5 minutes (`staleTime`).
 

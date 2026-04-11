@@ -65,23 +65,23 @@ export function MomentInfo(moment: MomentWithPhotos) {
         </h1>
       )}
       {
-      moment.created_at && (
+      moment.created && (
       <div className="flex items-end gap-2">
         <p className="text-xl text-muted-foreground">
-          {new Date(moment.created_at).toLocaleString('en-US', {
+          {new Date(moment.created).toLocaleString('en-US', {
               weekday: 'short',
             })
           }
         </p>
         <p className="text-xl text-foreground">
-          {new Date(moment.created_at).toLocaleString('en-US', {
+          {new Date(moment.created).toLocaleString('en-US', {
               month: 'short',
               day: 'numeric'
             })
           }
         </p>
         <p className="text-sm text-muted-foreground">
-          {new Date(moment.created_at).toLocaleString('en-US', {
+          {new Date(moment.created).toLocaleString('en-US', {
               year: 'numeric'
             })
           }

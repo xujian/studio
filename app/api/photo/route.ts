@@ -83,14 +83,14 @@ export const POST = withAxiom(async function POST(request: NextRequest) {
       // load moment data to compare
       const { data: moment, error: momentError } = await supabase
         .from('moments')
-        .select('user_id, prompt, reference, mixins')
+        .select('user, prompt, reference, mixins')
         .eq('id', momentId)
         .single()
         .overrideTypes<Moment>()
       if (momentError) {
         return NextResponse.json({ error: 'Moment not found' }, { status: 404 })
       }
-      if (moment.user_id !== userId) {
+      if (moment.user !== userId) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
       }
       // the prompt parameter is '' means
@@ -161,7 +161,7 @@ export const POST = withAxiom(async function POST(request: NextRequest) {
         .from('moments')
         .insert({
           id: momentId,
-          user_id: userId,
+          user: userId,
           prompt: input.prompt,
           reference: input.reference,
           mixins: mixins || null,
@@ -177,7 +177,7 @@ export const POST = withAxiom(async function POST(request: NextRequest) {
     // 9. Insert photo record
     const { error: photoError } = await supabase.from('photos').insert({
       id: photoId,
-      moment_id: momentId,
+      moment: momentId,
       prompt: photoData.prompt,
       mixins: photoData.mixins
     })

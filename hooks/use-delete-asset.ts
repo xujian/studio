@@ -43,8 +43,8 @@ export const useRemovePurchase = () => {
       const { error } = await supabase
         .from('purchases')
         .delete()
-        .eq('asset_id', assetId)
-        .eq('buyer_id', session!.user.id)
+        .eq('asset', assetId)
+        .eq('buyer', session!.user.id)
 
       if (error) throw error
     },

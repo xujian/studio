@@ -137,7 +137,7 @@ export const AccountProfileForm = ({ user }: Props) => {
             </div>
           )}
           <p className="text-xs text-muted-foreground mt-0.5">
-            Member since {new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+            Member since {new Date(user.created).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
           </p>
         </div>
       </div>

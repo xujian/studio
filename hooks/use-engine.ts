@@ -39,7 +39,7 @@ export const useEngine = () => {
     onSuccess: (raw: MomentWithPhotos) => {
       const newMoment: MomentWithPhotos = {
         ...raw,
-        photos: raw.photos.map(p => ({ ...p, user_id: raw.user_id })),
+        photos: raw.photos.map(p => ({ ...p, user: raw.user })),
       }
       type MomentsPage = { moments: MomentWithPhotos[]; [key: string]: unknown }
       type MomentsData = { pages: MomentsPage[]; [key: string]: unknown }
