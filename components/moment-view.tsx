@@ -2,22 +2,20 @@
 
 import Image from 'next/image'
 import * as React from 'react'
-import { motion } from 'motion/react'
-import { Button } from '@/components/button'
-import {
-  Badge,
-} from '@/components/ui'
 import { Avatar } from '@/components/avatar'
+import { Button } from '@/components/button'
 import { MomentCarousel } from '@/components/moment-carousel'
-import { useBus } from '@/lib/bus'
+import { Badge } from '@/components/ui'
 import { assets } from '@/lib/assets-config'
-import type { MomentWithPhotos, Profile } from '@/lib/types'
+import { useBus } from '@/lib/bus'
+import type { AssetType, MomentWithPhotos, Profile } from '@/lib/types'
 import { assetUrl, cn, photoUrl, uploadUrl } from '@/lib/utils'
 import { useMixins } from '@/hooks/use-mixins'
 import { useDeleteMoment, useDeletePhoto } from '@/hooks/use-moments'
 import { usePublishPost, useUnpublishPost } from '@/hooks/use-posts'
 import { ConfirmButton } from './confirm-button'
 import { MomentInfo } from './moment-info'
+import { MomentPrompt } from './moment-prompt'
 import {
   Download,
   GalleryHorizontal,
@@ -28,7 +26,7 @@ import {
   RotateCcw,
   Trash
 } from 'lucide-react'
-import { MomentPrompt } from './moment-prompt'
+import { AssetMenu } from './asset-menu'
 
 export interface MomentViewProps {
   moment: MomentWithPhotos
@@ -104,7 +102,9 @@ export function MomentView({
               </div>
             </div>
             {moment.title && (
-              <h1 className="text-3xl font-bold text-foreground">{moment.title}</h1>
+              <h1 className="text-3xl font-bold text-foreground">
+                {moment.title}
+              </h1>
             )}
             {moment.created && (
               <p className="text-sm text-muted-foreground">
@@ -124,14 +124,14 @@ export function MomentView({
         <MomentCarousel
           moment={{ ...moment, photos }}
           photo={initialPhotoId}
-          onChange={(photo) => setCurrentPhoto(photo)}
+          onChange={photo => setCurrentPhoto(photo)}
           onClose={onClose}
           sizes="(min-width: 1280px) 400px, 50vw"
         />
       </div>
       <div className="attributes flex-1">
         <div className="@container flex h-full flex-col gap-4 pt-16 pr-4 pb-4">
-          <div className="min-h-20 gap flex items-start justify-start">
+          <div className="gap flex min-h-20 items-start justify-start">
             <div className="face relative">
               <Badge className="absolute top-1 left-1 bg-background/80 text-foreground">
                 Face
@@ -140,13 +140,14 @@ export function MomentView({
                 alt="face"
                 src={
                   merged?.face
-                    ? assetUrl(assetsMap?.get(merged.face as string)?.path ?? '') ||
-                      '/icons/face.png'
+                    ? assetUrl(
+                        assetsMap?.get(merged.face as string)?.path ?? ''
+                      ) || '/icons/face.png'
                     : '/icons/face.png'
                 }
                 width={80}
                 height={80}
-                className="w-full h-full object-cover object-top"
+                className="h-full w-full object-cover object-top"
               />
             </div>
             {moment.reference && (
@@ -166,7 +167,7 @@ export function MomentView({
             )}
           </div>
           {nonFaceMixins.length > 0 && (
-            <div className="mixins max-w-120 grid grid-cols-2 gap-px overflow-hidden rounded border bg-foreground/10 @sm:grid-cols-3 @lg:grid-cols-4">
+            <div className="mixins grid max-w-120 grid-cols-2 gap-px overflow-hidden rounded border bg-foreground/10 @sm:grid-cols-3 @lg:grid-cols-4">
               {nonFaceMixins.map(([type, assetId]) => {
                 const assetType = assets.find(t => t.id === type)
                 const displayName = assetType?.id || type
@@ -175,29 +176,39 @@ export function MomentView({
                 return (
                   <div
                     key={type}
-                    className="mixin-item relative flex h-30 items-center justify-center rounded overflow-hidden bg-background/75">
-                    <Badge className="absolute top-1 left-1 z-10 bg-background/50  text-foreground">
+                    className="mixin-item relative flex h-30 items-center justify-center overflow-hidden rounded bg-background/75">
+                    <Badge className="absolute top-1 left-1 z-10 bg-background/50 text-foreground">
                       {displayName}
                     </Badge>
-                    {asset?.path
-                      ? (<Image
-                            alt={asset.name || displayName}
-                            src={assetUrl(asset.path)}
-                            fill
-                            className="object-cover"
-                            sizes="(min-width: 1280px) 25vw, (min-width: 768px) 33vw, 50vw"
-                          />)
-                      : (<p className="text-xs">
-                            {asset?.name || displayName}
-                          </p>)}
+                    {asset?.path ? (
+                      <Image
+                        alt={asset.name || displayName}
+                        src={assetUrl(asset.path)}
+                        fill
+                        className="object-cover"
+                        sizes="(min-width: 1280px) 25vw, (min-width: 768px) 33vw, 50vw"
+                      />
+                    ) : (
+                      <p className="text-xs">{asset?.name || displayName}</p>
+                    )}
+                    {asset && (
+                      <div className="absolute bottom-1 right-1">
+                        <AssetMenu
+                          asset={asset}
+                          onUse={() =>
+                            $bus.emit('mixin:select', {
+                              type: type as AssetType,
+                              assetId: asset.id!
+                            })
+                          }
+                        />
+                      </div>
+                    )}
                   </div>
                 )
               })}
               {emptyAssets.map((_, index) => (
-                <div
-                  key={`empty-${index}`}
-                  className="mixin-item h-30"
-                />
+                <div key={`empty-${index}`} className="mixin-item h-30" />
               ))}
             </div>
           )}
@@ -224,7 +235,9 @@ export function MomentView({
                 <Button
                   size="icon-lg"
                   tooltip={
-                    published ? 'unpublish from community' : 'publish to community'
+                    published
+                      ? 'unpublish from community'
+                      : 'publish to community'
                   }
                   className="cursor-pointer bg-primary text-primary-foreground"
                   variant="ghost"
@@ -270,27 +283,27 @@ export function MomentView({
                         }
                       )
                     }>
-                      <div className="flex">
-                        <Trash />
-                        <ImageIcon />
-                      </div>
+                    <div className="flex">
+                      <Trash />
+                      <ImageIcon />
+                    </div>
                   </ConfirmButton>
                 )}
                 <ConfirmButton
                   message="Delete this moment and all the photos?"
                   isPending={deleteMoment.isPending}
                   className="delete-button"
-                  action={(e) => {
+                  action={e => {
                     e.stopPropagation()
                     deleteMoment.mutate(moment.id, {
                       onSuccess: () => onClose?.()
                     })
                   }}>
-                    <div className="flex">
-                      <Trash />
-                      <GalleryHorizontal />
-                    </div>
-                  </ConfirmButton>
+                  <div className="flex">
+                    <Trash />
+                    <GalleryHorizontal />
+                  </div>
+                </ConfirmButton>
               </div>
             </>
           )}
