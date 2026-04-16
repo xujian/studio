@@ -81,6 +81,29 @@ export type Asset = {
   created?: string               // was: created_at
 }
 
+export type AssetPreviewSettings = {
+  aperture: number,
+  focal: number,
+  /**
+   * from the camera to the subject
+   */
+  distance?: number,  // meters from camera to subject; closer = shallower DoF
+  translate?: string,
+  /**
+   * Depth of the view
+   */
+  depth?: number,
+  rotate?: {
+    x: string,
+    y: string,
+    z: string,
+  },
+  /**
+   * demonstrating angle of the view
+   */
+  perspective?: string, 
+}
+
 export type AdhocAsset = Asset & {
   name: ''
 }

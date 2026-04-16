@@ -9,7 +9,17 @@ export const DEFAULTS: Record<AssetType, string> = {
   outfit: '',
   scene: assetUrl('/scene/99a02fad88dd87d8.jpg'),
   lighting: '',
-  camera: '',
+  camera: `{
+    "settings": {
+      "aperture": 1.8,
+      "focal": 50,
+      "iso": 400,
+      "shutter": "1/200s",
+      "lens": "50mm",
+      "framing": "full-body",
+      "whiteBalance": "5300k",
+      "__preview__": { "aperture": 1.8, "focal": 50, "distance": 2 }
+  }`,
   mood: ''
 }
 

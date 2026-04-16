@@ -10,12 +10,13 @@ import type { Asset, AssetRunMode, AssetType } from '@/lib/types'
 import { useCreateAsset } from '@/hooks/use-create-asset'
 import { useUpdateAsset } from '@/hooks/use-update-asset'
 import { assetUrl, removeAssetImage } from '@/lib/utils'
-import { assetModes } from '@/lib/assets-config'
+import { assets as assetsConfig } from '@/lib/assets-config'
 import { ArrowDown, ArrowUp, Loader2, OctagonAlert, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge, Hint } from './ui'
 import { useQueryClient } from '@tanstack/react-query'
 import { CloseButton } from './close-button'
+import { AssetPreview } from './asset-preview'
 
 const uploadPlaceholders: Record<AssetType, string> = {
   face: 'Upload your photo with clear face',
@@ -56,7 +57,8 @@ type AssetFormProps = {
  * @param
  * @returns 
  */
-export const AssetForm = forwardRef<AssetFormHandle, AssetFormProps>(function AssetForm({ type, asset, onClose }: AssetFormProps, ref) {
+export const AssetForm = forwardRef<AssetFormHandle, AssetFormProps>(
+  function AssetForm({ type, asset, onClose }: AssetFormProps, ref) {
   const uploadRef = useRef<UploadHandle>(null)
   const createAsset = useCreateAsset()
   const updateAsset = useUpdateAsset()
@@ -85,12 +87,12 @@ export const AssetForm = forwardRef<AssetFormHandle, AssetFormProps>(function As
   const [cropped, setCropped] = useState('')
   const [previewError, setPreviewError] = useState('')
   const [extractError, setExtractError] = useState('')
-  const assetMode = assetModes[type]
+  const config = assetsConfig.find(a => a.id === type)
 
   const [cleared, setCleared] = useState(false)
 
   const [runMode, setRunMode] = useState<AssetRunMode>(
-    assetMode === 'image-only'
+    config?.mode === 'image-only'
       ? 'image'
       : asset
         ? asset.content
@@ -339,6 +341,20 @@ export const AssetForm = forwardRef<AssetFormHandle, AssetFormProps>(function As
     return uploaded || previewed || extracted
   }, [uploaded, previewed, extracted])
 
+  const data = useMemo<Asset>(() => {
+    if (asset) {
+      return asset
+    }
+    return {
+      name,
+      title,
+      description,
+      content,
+      type,
+      path: attached
+    } as Asset
+  }, [asset, name, title, description, content, type, attached])
+
   /**
    * image displaying in the upload
    */
@@ -403,7 +419,7 @@ export const AssetForm = forwardRef<AssetFormHandle, AssetFormProps>(function As
       <div className={cn('flex flex-col items-center gap-2',
         runMode === 'image' && 'flex-col-reverse'
         )}>
-        {assetMode !== 'image-only' && (
+        {config?.mode !== 'image-only' && (
           <Textarea label="Prompt Text"
             value={content}
             onChange={e => setContent(e.target.value)}
@@ -411,7 +427,7 @@ export const AssetForm = forwardRef<AssetFormHandle, AssetFormProps>(function As
             disabled={runMode === 'image'}
             className="overflow-hidden"
             rows={3}>
-              { content.length > 0 && (
+              { config?.previewMode === 'image' && content.length > 0 && (
                 <CreditButton
                   cost={1}
                   type="button"
@@ -429,7 +445,7 @@ export const AssetForm = forwardRef<AssetFormHandle, AssetFormProps>(function As
                     : 'Generate preview'}
                 </CreditButton>)}
               {previewing && <div className="pulse absolute inset-0 rounded-2xl pointer-events-none" />}
-              <div className={cn('error absolute z-20 left-0 w-full h-1/2 rounded-xl p-4 transition-top duration-300 backdrop-blur-md',
+              <div className={cn('error absolute z-101 left-0 w-full h-1/2 rounded-xl p-4 transition-top duration-300 backdrop-blur-md',
                   previewError ? 'top-1/2' : 'top-full'
                 )}>
                 <CloseButton onClick={() => setPreviewError('')} />
@@ -440,119 +456,123 @@ export const AssetForm = forwardRef<AssetFormHandle, AssetFormProps>(function As
               </div>
             </Textarea>)
         }
-        <Upload
-          bucket="assets"
-          ref={uploadRef}
-          className="aspect-square"
-          path={({ userId }) => asset?.user === null
-            ? `${type}`
-            : `${userId}/${type}`}
-          value={displaying ? assetUrl(displaying) : ''}
-          compress={type !== 'face'}
-          onBeforeUpload={setOriginalImage}
-          placeholder={(
-            runMode === 'text'
-              ? `Upload preview image (optional)`
-              : uploadPlaceholders[type]
-          )}
-          onComplete={(path) => {
-            if (uploaded) {
-              removeAssetImage(uploaded)
-            }
-            cleanupState()
-            setUploaded(path)
-            setCleared(false)
-          }}
-          onClear={() => {
-            if (attached) {
-              removeAssetImage(attached)
-            }
-            originalImage.current = ''
-            cleanupState()
-            setCleared(true)
-          }}>
-          <Badge variant="ghost"
-            className="absolute top-2 left-2 text-xs font-medium bg-neutral text-neutral-foreground z-1">
-            { runMode === 'text'
-              ? 'Preview'
-              : 'Reference image' }
-          </Badge>
-          <div className="absolute bottom-1 right-1 flex items-center gap-1">
-            {uploaded && assetMode !== 'image-only' && (
-              <CreditButton
-                cost={1}
-                type="button"
-                size="xs"
-                tooltip="Analyze prompt from image"
-                onClick={handleAnalyze}
-                disabled={analyzing || extracting}
-                className="z-1 gap-2">
-                {analyzing ? (
-                  <Loader2 className="size-3.5 animate-spin" />
-                ) : (
-                  <Sparkles className="size-3.5" />
-                )}
-                Analyze
-              </CreditButton>
-            )}
-            {uploaded && assetMode !== 'image-only' && (
-              <CreditButton
-                cost={1}
-                type="button"
-                size="xs"
-                onClick={handleExtract}
-                disabled={extracting}
-                className="z-1 gap-2">
-                {extracting ? (
-                  <Loader2 className="size-3.5 animate-spin" />
-                ) : (
-                  <Sparkles className="size-3.5" />
-                )}
-                {extracted
-                  ? `Re-extract`
-                  : `Extract`}
-              </CreditButton>
-            )}
-            {assetMode === 'text-first' && (
-              <Button variant="outline" size="xs"
-                className="bg-muted z-1"
-                tooltip={runMode === 'text'
-                  ? 'Use the uploaded image as a reference for this asset'
-                  : 'Use the text content as a prompt for this asset'}
-                onClick={toggleWorkMode}>
-                { runMode === 'text'
-                  ? <ArrowUp className="size-4" />
-                  : <ArrowDown className="size-4" />
+        { config?.previewMode === 'image'
+          ? (
+            <Upload
+              bucket="assets"
+              ref={uploadRef}
+              className="aspect-square"
+              path={({ userId }) => asset?.user === null
+                ? `${type}`
+                : `${userId}/${type}`}
+              value={displaying ? assetUrl(displaying) : ''}
+              compress={type !== 'face'}
+              onBeforeUpload={setOriginalImage}
+              placeholder={(
+                runMode === 'text'
+                  ? `Upload preview image (optional)`
+                  : uploadPlaceholders[type]
+              )}
+              onComplete={(path) => {
+                if (uploaded) {
+                  removeAssetImage(uploaded)
                 }
+                cleanupState()
+                setUploaded(path)
+                setCleared(false)
+              }}
+              onClear={() => {
+                if (attached) {
+                  removeAssetImage(attached)
+                }
+                originalImage.current = ''
+                cleanupState()
+                setCleared(true)
+              }}>
+              <Badge variant="ghost"
+                className="absolute top-2 left-2 text-xs font-medium bg-neutral text-neutral-foreground z-1">
                 { runMode === 'text'
-                  ? 'Use this as reference image'
-                  : 'Use text as prompt' }
-              </Button>)
-            }
-          </div>
-          <Hint variant="tooltip"
-            className="absolute bottom-1 left-1 z-1 max-w-50">
-            {runMode === 'text'
-              ? 'Upload an image to use as reference for this asset. It can be used as a hint for AI generation or just for your own reference.'
-              : 'Describe the asset in text. This can be used as a prompt for AI generation or just as a note for yourself.'}
-          </Hint>
-          <div className={cn('absolute h-full w-full inset-0 pointer-events-none left-0 transition-top duration-300',
-            extracting
-              ? 'top-0'
-              : 'top-full'
-          )}>
-            <div className="pulse h-full w-full rounded-xl"></div>
-          </div>
-          <div className={cn('error absolute left-0 bottom-0 w-full h-1/2 rounded-xl p-4 transition-top duration-300 backdrop-blur-md',
-              extractError ? 'top-1/2' : 'top-full'
-            )}>
-            <CloseButton size="icon-lg" onClick={() => setExtractError('')} />
-            <div className="flex items-center h-full gap-2">
-              <OctagonAlert />
-              {extractError}
-            </div>
-          </div>
-        </Upload>
+                  ? 'Preview'
+                  : 'Reference image' }
+              </Badge>
+              <div className="absolute bottom-1 right-1 flex items-center gap-1">
+                {uploaded && config?.mode !== 'image-only' && (
+                  <CreditButton
+                    cost={1}
+                    type="button"
+                    size="xs"
+                    tooltip="Analyze prompt from image"
+                    onClick={handleAnalyze}
+                    disabled={analyzing || extracting}
+                    className="z-1 gap-2">
+                    {analyzing ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : (
+                      <Sparkles className="size-3.5" />
+                    )}
+                    Analyze
+                  </CreditButton>
+                )}
+                {uploaded && config?.mode !== 'image-only' && (
+                  <CreditButton
+                    cost={1}
+                    type="button"
+                    size="xs"
+                    onClick={handleExtract}
+                    disabled={extracting}
+                    className="z-1 gap-2">
+                    {extracting ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : (
+                      <Sparkles className="size-3.5" />
+                    )}
+                    {extracted
+                      ? `Re-extract`
+                      : `Extract`}
+                  </CreditButton>
+                )}
+                {config?.mode === 'text-first' && (
+                  <Button variant="outline" size="xs"
+                    className="bg-muted z-1"
+                    tooltip={runMode === 'text'
+                      ? 'Use the uploaded image as a reference for this asset'
+                      : 'Use the text content as a prompt for this asset'}
+                    onClick={toggleWorkMode}>
+                    { runMode === 'text'
+                      ? <ArrowUp className="size-4" />
+                      : <ArrowDown className="size-4" />
+                    }
+                    { runMode === 'text'
+                      ? 'Use this as reference image'
+                      : 'Use text as prompt' }
+                  </Button>)
+                }
+              </div>
+              <Hint variant="tooltip"
+                className="absolute bottom-1 left-1 z-1 max-w-50">
+                {runMode === 'text'
+                  ? 'Upload an image to use as reference for this asset. It can be used as a hint for AI generation or just for your own reference.'
+                  : 'Describe the asset in text. This can be used as a prompt for AI generation or just as a note for yourself.'}
+              </Hint>
+              <div className={cn('absolute h-full w-full inset-0 pointer-events-none left-0 transition-top duration-300',
+                extracting
+                  ? 'top-0'
+                  : 'top-full'
+              )}>
+                <div className="pulse h-full w-full rounded-xl"></div>
+              </div>
+              <div className={cn('error absolute left-0 bottom-0 w-full h-1/2 rounded-xl p-4 transition-top duration-300 backdrop-blur-md',
+                  extractError ? 'top-1/2' : 'top-full'
+                )}>
+                <CloseButton size="icon-lg" onClick={() => setExtractError('')} />
+                <div className="flex items-center h-full gap-2">
+                  <OctagonAlert />
+                  {extractError}
+                </div>
+              </div>
+            </Upload>)
+          : (<AssetPreview asset={data} />)
+        }
       </div>
       <Input
         label="Name"

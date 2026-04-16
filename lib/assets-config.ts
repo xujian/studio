@@ -13,7 +13,7 @@ export const assetModes: Record<AssetType, AssetWorkMode> = {
   mood: 'text-only'
 }
 
-export type AssetPreviewMode = 'image' | 'svg'
+export type AssetPreviewMode = 'image' | 'svg' | 'html'
 
 export const assetPreviewModes: Record<AssetType, AssetPreviewMode> = {
   face: 'image',
@@ -21,8 +21,8 @@ export const assetPreviewModes: Record<AssetType, AssetPreviewMode> = {
   outfit: 'image',
   makeup: 'image',
   scene: 'image',
-  lighting: 'svg',
-  camera: 'svg',
+  lighting: 'image',
+  camera: 'html',
   mood: 'image'
 }
 
