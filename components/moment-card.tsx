@@ -32,7 +32,7 @@ export function MomentCard({ moment }: MomentCardProps) {
   return (
     <MomentCarousel moment={moment}>
       <Button
-        size="sm"
+        size="xs"
         variant="ghost"
         tooltip="Publish to Community"
         className={cn(
