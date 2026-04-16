@@ -144,19 +144,15 @@ async function buildMood(asset: Asset) {
 }
 
 async function buildCamera(asset: Asset) {
-  if (asset.path) {
-    const inlineData = await fetchImage(asset.path)
-    return {
-      image: {
-        inlineData
-      },
-      text: `use the "reference camera"`
-    }
-  } else {
-    return Promise.resolve({
-      text: asset.content!
-    })
+  // Camera content may be JSON with a `prompt` field — extract it if so
+  let text = asset.content!
+  try {
+    const parsed = JSON.parse(asset.content!)
+    if (parsed.prompt) text = parsed.prompt
+  } catch {
+    // plain text — use as-is
   }
+  return Promise.resolve({ text })
 }
 
 const assetMethods = new Map<

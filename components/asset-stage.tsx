@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import type { CSSProperties } from 'react'
 import { cn } from '@/lib/utils'
 import { Asset, AssetPreviewSettings } from '@/lib/types'
@@ -56,7 +56,7 @@ export function AssetStage({
   const depth = w * preview.depth!
   const gridSize = `12.5% 12.5%`
   const lineColor = '#ffffff33',
-    bgColor = '#444444'
+    bgColor = 'transparent'
   const hLines = `linear-gradient(${lineColor} 1px, transparent 1px)`
   const vLines = `linear-gradient(90deg, ${lineColor} 1px, transparent 1px)`
   const grid = `linear-gradient(${lineColor} 1px, transparent 1px),
@@ -69,6 +69,18 @@ export function AssetStage({
     border: `1px solid ${lineColor}`,
     ...extra
   })
+  const translate = useMemo(
+    () => {
+      let [x = '0', y = '0', z = '0'] = (preview.translate || '0, 0, 0').split(/\,\s*/)
+      if (!z.endsWith('px')) {
+        const floatZ = parseFloat(z)
+        z = Math.abs(floatZ) <= 10
+          ? `${Math.floor(w * floatZ)}px`
+          : `${floatZ}px`
+      }
+      return [x,y,z].join(',')
+    },
+    [preview])
   const bokeh = computeBokeh(preview.aperture, preview.focal, preview.distance)
 
   return (
@@ -164,7 +176,7 @@ export function AssetStage({
             <div className={cn('figure absolute top-0 left-0 w-full h-full')}
               style={{
                 transform: [
-                  ...preview.translate ? [`translate3d(${preview.translate})`] : [],
+                  ...preview.translate ? [`translate3d(${translate})`] : [],
                     ...preview.rotate?.x ? [`rotateX(${preview.rotate.x})`] : [],
                     ...preview.rotate?.y ? [`rotateY(${preview.rotate.y})`] : [],
                     ...preview.rotate?.z ? [`rotateZ(${preview.rotate.z})`] : [],
