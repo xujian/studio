@@ -21,6 +21,7 @@ type Events = {
   'mixin:select': MixinSelectPayload
   'assets:open': { type: AssetType }
   'assets:close': void
+  'prompt:prefill': string
 }
 
 const emitter = mitt<Events>()
