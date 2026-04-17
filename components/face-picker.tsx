@@ -24,12 +24,13 @@ import { X } from 'lucide-react'
 export type FacePickerProps = {
   faces: Asset[],
   selected?: string,
-  onSelect?: (faceId: string) => void
+  onSelect?: (faceId: string) => void,
+  onOpen?: () => void,
 }
 
 const systemFace = '/icons/face.png'
 
-export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
+export function FacePicker ({ faces, selected, onSelect, onOpen }: FacePickerProps) {
   const [popoverOpen, setPopoverOpen] = useState(false)
 
   const selectedFace = faces.find(f => f.id === selected)
@@ -38,11 +39,15 @@ export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
   return (
     <div className="relative">
       <TooltipProvider delayDuration={600}>
-        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+        <Popover open={popoverOpen} onOpenChange={(open) => {
+          setPopoverOpen(open)
+          if (open) onOpen?.()
+        }}>
           <Tooltip open={popoverOpen ? false : undefined}>
             <TooltipTrigger asChild>
               <PopoverTrigger asChild>
                 <Button
+                  data-coach="face"
                   variant={selected ? "ghost" :  "outline"}
                   className={cn(
                     'p-0 m-0 w-18 h-18 border bg-image rounded-xl cursor-pointer'
