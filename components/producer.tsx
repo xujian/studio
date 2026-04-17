@@ -22,9 +22,12 @@ import { Loader2, ArrowUp, Plus, GripHorizontal, X, Square, RotateCcw } from 'lu
 interface ProducerProps {
   className?: string
   onGenerationComplete?: (moment: MomentWithPhotos) => void
+  onFacePickerOpen?: () => void
+  onExpandedChange?: (expanded: boolean) => void
+  onPromptChange?: () => void
 }
 
-export function Producer({ className, onGenerationComplete }: ProducerProps) {
+export function Producer({ className, onGenerationComplete, onFacePickerOpen, onExpandedChange, onPromptChange }: ProducerProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const mixinsRef = useRef<MixinsHandle>(null)
   const router = useRouter()
@@ -86,6 +89,11 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
 
   $bus.on('mixin:select', (payload: MixinSelectPayload) => {
     setMixins(prev => ({ ...prev, [payload.type]: payload.assetId }))
+  })
+
+  $bus.on('prompt:prefill', (text) => {
+    setPrompt(text)
+    textareaRef.current?.focus()
   })
 
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -192,6 +200,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
     if (mode === 'retry') {
       setDirty(true)
     }
+    onPromptChange?.()
   }
 
   const handleFaceSelect = (faceId: string) => {
@@ -202,7 +211,9 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
   }
 
   const toggleExpanded = () => {
-    setExpanded(!expanded)
+    const next = !expanded
+    setExpanded(next)
+    onExpandedChange?.(next)
   }
 
   const handleTextareaPaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
@@ -311,6 +322,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
             <Textarea
               ref={textareaRef}
               data-lenis-prevent-wheel
+              data-coach="textarea"
               aria-label="Portrait description"
               placeholder="Describe the portrait you want to create..."
               className={cn(
@@ -335,6 +347,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
                   pressed={expanded}
                   type="button"
                   variant="outline"
+                  data-coach="mixins"
                   className="rounded-xl h-10 w-18 data-[state=on]:bg-primary! data-[state=on]:text-primary-foreground"
                   onClick={toggleExpanded}>
                   <GripHorizontal />
@@ -388,6 +401,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
           faces={filterAssets('face')}
           onSelect={handleFaceSelect}
           selected={mixins.face as string | undefined}
+          onOpen={onFacePickerOpen}
         />
       </div>
       <div
