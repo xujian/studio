@@ -16,14 +16,13 @@ export default function MagazinePage() {
     <div className="page-body">
       {/* Masthead */}
       <div className="mx-auto max-w-5xl px-6 pt-20 pb-12 text-center">
-        <p className="text-xs tracking-[0.3em] uppercase text-muted-foreground mb-4">
+        <p className="text-xs uppercase text-muted-foreground my-0">
           Kanojo Studio
         </p>
-        <h1 className="text-6xl sm:text-7xl font-bold">Magazine</h1>
-        <p className="mt-5 text-muted-foreground italic text-lg max-w-md mx-auto">
+        <h1>Magazine</h1>
+        <p className="caption">
           Essays on light, beauty, and the art of the portrait.
         </p>
-        <div className="mt-12 border-t border-border" />
       </div>
 
       {posts.length === 0 ? (
@@ -58,10 +57,10 @@ export default function MagazinePage() {
                     day: 'numeric',
                   })}
                 </time>
-                <h2 className="text-4xl sm:text-5xl font-bold mt-3 mb-4 leading-tight group-hover:opacity-70 transition-opacity">
+                <h2>
                   {hero.title}
                 </h2>
-                <p className="text-muted-foreground italic text-lg leading-relaxed">
+                <p className="text-muted-foreground text-lg leading-tight">
                   {hero.excerpt}
                 </p>
               </div>

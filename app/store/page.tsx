@@ -31,7 +31,7 @@ export default async function StorePage() {
   }))
   return (
     <section className="flex w-full flex-col px-4 pt-2 pb-16 md:px-8 lg:px-16">
-      <h1 className="mb-8 text-2xl font-semibold">Store</h1>
+      <h1>Store</h1>
       <AssetGrid data={sections} />
     </section>
   )

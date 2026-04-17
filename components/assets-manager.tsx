@@ -56,7 +56,7 @@ export function AssetsManager({ type, onClose }: AssetsManagerProps) {
             <ArrowLeft className="size-10" strokeWidth={3} />
           </Button>
           <div>
-            <h2 className="my-0 text-2xl leading-none font-semibold">
+            <h2 className="my-0 leading-none">
               {label}
             </h2>
             <p className="my-0 text-sm text-muted-foreground">

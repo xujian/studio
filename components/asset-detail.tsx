@@ -53,7 +53,7 @@ export const AssetDetail = ({
           ) : null}
         </div>
       </div>
-      <div className="flex flex-col flex-1 gap-1 p-4">
+      <div className="flex flex-col flex-1 gap-1 p-2">
         <h2 className="text-base my-0 font-semibold">
           {asset.title || asset.name}
         </h2>
@@ -64,13 +64,17 @@ export const AssetDetail = ({
         )}
         <p>&nbsp;</p>
         <h6>Content</h6>
-        <div className="bg-muted p-2 rounded-2xl text-xs leading-tight text-muted-foreground">
+        <div className="p-2 rounded-2xl text-xs border leading-tight text-muted-foreground">
           {asset.content || '(EMPTY)'}
         </div>
+        <p>&nbsp;</p>
         {asset.description && (
-          <p className="text-sm leading-snug text-muted-foreground">
-            {asset.description}
-          </p>
+          <>
+            <h6>Description</h6>
+            <div className="rounded-2xl text-xs leading-tight text-muted-foreground">
+              {asset.description}
+            </div>
+          </>
         )}
       </div>
       <div className="flex-1 p-2 flex flex-col gap-1 justify-end">
@@ -78,7 +82,7 @@ export const AssetDetail = ({
           {deletable && (
             <Button
               variant="destructive"
-              size="sm"
+              size="xs"
               className="button"
               disabled={isDeleting}
               onClick={onDelete}>
@@ -86,22 +90,22 @@ export const AssetDetail = ({
             </Button>
           )}
           {canEdit && onEdit && (
-            <Button variant="outline" size="sm" className="button" onClick={onEdit}>
+            <Button variant="outline" size="xs" className="button" onClick={onEdit}>
               Edit
             </Button>
           )}
           {canPromote && onPromote && (
-            <Button variant="outline" size="sm" className="button" onClick={onPromote}>
+            <Button variant="outline" size="xs" className="button" onClick={onPromote}>
               Promote
             </Button>
           )}
           {canUse && (
-            <Button className="button flex-1" size="sm" onClick={onUse}>
+            <Button className="button flex-1" size="xs" onClick={onUse}>
               Use
             </Button>
           )}
           {hasPrice && purchasable && (
-            <CreditButton cost={asset.price ?? 0} className="button flex-1" size="sm" onClick={onBuy}>
+            <CreditButton cost={asset.price ?? 0} className="button flex-1" size="xs" onClick={onBuy}>
               Buy
             </CreditButton>
           )}

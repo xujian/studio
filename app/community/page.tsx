@@ -49,7 +49,7 @@ export default async function CommunityPage() {
 
   return (
     <div className="page-body flex w-full flex-col px-4 pb-16 pt-2 md:px-8 lg:px-16">
-      <h1 className="mb-8 text-2xl font-semibold">Community</h1>
+      <h1>Community</h1>
       {allPosts.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-20 text-center">
           <p className="text-muted-foreground">No posts yet</p>
@@ -59,7 +59,7 @@ export default async function CommunityPage() {
         <div className="flex flex-col gap-10">
           {sections.map(section => (
             <section key={section.title} className="flex flex-col gap-4">
-              <h2 className="my-0 text-lg font-semibold">{section.title}</h2>
+              <h2>{section.title}</h2>
               <div role="list"
                 aria-label={`${section.title} posts`}
                 className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">

@@ -1,7 +1,7 @@
 export function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section>
-      <h2 className="text-2xl font-bold mb-5">{title}</h2>
+      <h2 className="text-2xl mb-5">{title}</h2>
       <div className="text-muted-foreground leading-relaxed space-y-3">
         {children}
       </div>

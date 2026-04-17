@@ -44,7 +44,7 @@ export const StudioDemo = () => {
         <p className="mb-3 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
           Generation Layers
         </p>
-        <h2 className="text-3xl font-bold md:text-4xl">
+        <h2 className="md:text-4xl">
           Anatomy of a Portrait
         </h2>
         <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">

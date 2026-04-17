@@ -102,8 +102,8 @@ export function MomentView({
               </div>
             </div>
             {moment.title && (
-              <h1 className="text-3xl font-bold text-foreground">
-                {moment.title}
+              <h1 className="text-6xl text-foreground">
+                {moment.title} |
               </h1>
             )}
             {moment.created && (

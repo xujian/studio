@@ -39,7 +39,7 @@ export default function StudioPage() {
   return (
     <>
       <section className={activeAssets ? 'hidden' : 'moments flex w-full flex-col items-start justify-center px-4 pb-52 md:px-8 lg:px-16'}>
-        <h1 className="mb-8 text-2xl font-semibold">Moments</h1>
+        <h1>Moments</h1>
         {isLoading && (
           <StaggerGrid className="w-full grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
             {Array.from({ length: 10 }).map((_, i) => (

@@ -46,11 +46,11 @@ export default async function CreditsPage() {
     <div className="page-body flex w-full flex-col items-center px-8 pt-2 pb-16">
       <div className="w-full max-w-3xl space-y-12">
         <div>
-          <h1 className="text-2xl font-semibold">Buy Plans & Credits</h1>
+          <h1>Buy Plans & Credits</h1>
           <Credits prefix="CURRENT BALANCE" className="bg-accent px-4" />
         </div>
         <div>
-          <h2 className="mb-4 font-medium text-muted-foreground uppercase">
+          <h2 className="text-muted-foreground uppercase">
             Monthly Plans
           </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -150,10 +150,10 @@ export default async function CreditsPage() {
 
         {/* One-time Credit Top-ups */}
         <div>
-          <h2 className="mb-1 font-medium text-muted-foreground uppercase">
+          <h2 className="text-muted-foreground uppercase">
             Credit Packs
           </h2>
-          <p className="mb-4 text-xs text-muted-foreground">
+          <p className="caption">
             One-time purchase. Credits never expire.
           </p>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-4">

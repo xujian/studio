@@ -57,7 +57,7 @@ export function MomentInfo(moment: MomentWithPhotos) {
           onClick={() => setEditing(true)}
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setEditing(true) } }}
           className={cn(
-            'group flex items-center gap-2 text-3xl font-bold cursor-pointer',
+            'group flex items-center gap-2 text-4xl cursor-pointer',
             moment.title ? 'text-foreground' : 'text-muted-foreground'
           )}>
           {value || '(NO TITLE)'}

@@ -50,24 +50,24 @@ export default async function AccountPage() {
   return (
     <div className="page-body flex w-full flex-col items-center px-4 md:px-8 pt-2 pb-16">
       <div className="w-full max-w-2xl space-y-10">
-        <h1 className="text-2xl font-semibold">Account</h1>
+        <h1>Account</h1>
 
         {/* Profile */}
         <section className="space-y-3">
-          <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Profile</h2>
+          <h2 className="text-muted-foreground uppercase tracking-wider">Profile</h2>
           {profile && <AccountProfileForm user={profile} />}
         </section>
 
         {/* Credits + Subscription side-by-side */}
         <section className="space-y-3">
-          <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Billing</h2>
+          <h2 className="text-muted-foreground uppercase tracking-wider">Billing</h2>
           <div className="grid grid-cols-2 gap-4">
             {/* Credits card */}
             <Card className="relative overflow-hidden">
               <CardContent className="flex flex-col gap-4">
                 <div>
                   <p className="text-xs text-muted-foreground mb-2">Credits</p>
-                  <p className="text-3xl font-bold tabular-nums flex items-center gap-1.5">
+                  <p className="text-3xl tabular-nums flex items-center gap-1.5">
                     <Zap className="credits size-6 shrink-0" />
                     {credits.toLocaleString()}
                   </p>
@@ -120,7 +120,7 @@ export default async function AccountPage() {
 
         {/* Connected Accounts */}
         <section className="space-y-3">
-          <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Connected Accounts</h2>
+          <h2 className="text-muted-foreground uppercase tracking-wider">Connected Accounts</h2>
           <Card>
             <CardContent className="flex items-center gap-3">
               <div className="size-8 rounded-full bg-secondary flex items-center justify-center shrink-0">
@@ -139,7 +139,7 @@ export default async function AccountPage() {
 
         {/* Danger Zone */}
         <section className="space-y-3">
-          <h2 className="text-xs font-medium text-destructive uppercase tracking-wider">Danger Zone</h2>
+          <h2 className="text-destructive uppercase tracking-wider">Danger Zone</h2>
           <Card>
             <CardContent className="flex items-center justify-between gap-4">
               <div>

@@ -30,9 +30,9 @@ export const Hero = () => {
       </div>
       <div className="flex flex-0 w-full items-stretch justify-center gap-6 px-4 text-center">
         <h1
-          className="flex-1 text-start font-bold leading-none"
-          style={{ fontSize: 'clamp(3rem, 10vw, 6rem)', letterSpacing: '-0.03em' }}>
-          Your Personal<br />Photo Studio
+          className="flex-1 text-start leading-24"
+          style={{ fontSize: 'clamp(3rem, 12vw, 8rem)' }}>
+          Your Personal<br/>Photo Studio
         </h1>
         <div className="flex flex-col flex-1">
           <div className="flex-1 flex items-center justify-end">

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Alumni_Sans } from 'next/font/google'
 import { Providers } from '@/context/providers'
 import { Header } from '@/components/header'
 import { GoogleOneTap } from '@/components/google-one-tap'
@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import '@/styles/app.css'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
+const alumniSans = Alumni_Sans({ subsets: ['latin'], variable: '--font-alumni-sans' })
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://kanojostudio.com'),
@@ -68,7 +69,7 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/logo.svg" type="image/svg+xml" />
       </head>
-      <body className={cn(inter.variable, inter.className, "min-h-screen antialiased striped")}>
+      <body className={cn(inter.variable, alumniSans.variable, inter.className, "min-h-screen antialiased striped")}>
         <Providers>
           <GoogleOneTap />
           <Header />
