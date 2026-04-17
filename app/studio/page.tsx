@@ -8,13 +8,19 @@ import { Producer } from '@/components/producer'
 import { AssetsManager } from '@/components/assets-manager'
 import { StaggerGrid } from '@/components/stagger-grid'
 import { Button } from '@/components/ui'
-import type { AssetType } from '@/lib/types'
+import { StudioWelcome } from '@/components/studio-welcome'
+import { StudioCoachMarks } from '@/components/studio-coach-marks'
+import type { AssetType, MomentWithPhotos } from '@/lib/types'
 import { useMoments } from '@/hooks/use-moments'
 import { useBus } from '@/lib/bus'
 import { ArrowRight } from 'lucide-react'
 
 export default function StudioPage() {
   const [activeAssets, setActiveAssets] = useState<AssetType | null>(null)
+  const [onboardingStep, setOnboardingStep] = useState<0 | 1 | 2 | 3>(() => {
+    if (typeof window === 'undefined') return 0
+    return localStorage.getItem('kanojo:onboarded') ? 0 : 1
+  })
   const $bus = useBus()
 
   useEffect(() => {
@@ -29,6 +35,26 @@ export default function StudioPage() {
     hasNextPage,
     isFetchingNextPage
   } = useMoments()
+
+  const handleFacePickerOpen = () => {
+    if (onboardingStep === 1) setOnboardingStep(2)
+  }
+
+  const handleExpandedChange = (expanded: boolean) => {
+    if (onboardingStep === 2 && expanded) setOnboardingStep(3)
+  }
+
+  const handlePromptChange = () => {
+    if (onboardingStep === 3) {
+      localStorage.setItem('kanojo:onboarded', '1')
+      setOnboardingStep(0)
+    }
+  }
+
+  const handleGenerationComplete = (moment: MomentWithPhotos) => {
+    localStorage.setItem('kanojo:onboarded', '1')
+    setOnboardingStep(0)
+  }
 
   // Flatten all pages into single array
   const allMoments =
@@ -55,12 +81,7 @@ export default function StudioPage() {
             </Button>
           </div>
         )}
-        {allMoments.length === 0 && !isLoading && !error && (
-          <div className="flex flex-col items-center gap-3 py-20 text-center w-full">
-            <p className="text-muted-foreground">There is all your moments</p>
-            <p className="text-sm text-muted-foreground/70">Use the prompt bar below to create your first portrait</p>
-          </div>
-        )}
+        {allMoments.length === 0 && !isLoading && !error && <StudioWelcome />}
         <LayoutGroup>
           <StaggerGrid className="w-full grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
             {allMoments.map(moment => (
@@ -92,8 +113,14 @@ export default function StudioPage() {
         </section>
       )}
       <Suspense>
-        <Producer />
+        <Producer
+          onFacePickerOpen={handleFacePickerOpen}
+          onExpandedChange={handleExpandedChange}
+          onPromptChange={handlePromptChange}
+          onGenerationComplete={handleGenerationComplete}
+        />
       </Suspense>
+      <StudioCoachMarks step={onboardingStep} />
     </>
   )
 }
