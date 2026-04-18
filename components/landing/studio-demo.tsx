@@ -82,24 +82,36 @@ export const StudioDemo = () => {
                     width: `${CARD_W}px`,
                     height: `${CARD_H}px`
                   }}
-                  className="absolute flex flex-col bg-muted p-4 rounded-2xl border-card border">
-                  <div className={cn('absolute mb-3 flex items-center gap-2 transition-top',
+                  className="absolute flex flex-col bg-muted p-4 rounded-4xl border-card border">
+                  <div className={cn('absolute mb-3 flex items-center gap-2 transition-all',
                     expanded ? '-top-10' : 'top-3'
                     )}>
                     <div className="shrink-0 rounded-full bg-white/25 p-1.5">
                       <img src={asset.icon} alt={asset.label} className="h-3.5 w-3.5 text-white" />
                     </div>
-                    <span className="text-xs font-semibold tracking-wide text-white">
+                    <span className="tracking-wide text-white">
                       {asset.label}
                     </span>
                   </div>
-                  <div className="flex flex-1 items-center justify-center overflow-hidden rounded-xl">
+                  <h3
+                    className={cn(
+                      'absolute z-100 number text-4xl h-10 w-10 rounded-[50%]',
+                      'border-2 border-muted-foreground flex items-center justify-center bottom-1 left-1',
+                      'transition-all',
+                      expanded ? '-bottom-12 -left-12' : 'bottom-1 left-1'
+                    )}
+                    style={{
+                      transform: 'translateZ(10px)'
+                    }}>
+                    { i + 1 }
+                  </h3>
+                  <div className="absolute z-101 flex flex-1 items-center justify-center overflow-hidden rounded-xl">
                     
                   </div>
                 </div>
               )
             })}
-            <div className={`absolute rounded-2xl bg-cover overflow-hidden`} style={{
+            <div className={`absolute rounded-4xl bg-cover overflow-hidden`} style={{
               width: `${CARD_W}px`,
               height: `${CARD_H}px`,
               transform: `translateZ(${expanded ? (assets.length - 4) * Z_STEP : 7 * 2}px) ${expanded ? 'rotateZ(30deg)' : ''}`,

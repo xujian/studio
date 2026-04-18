@@ -22,12 +22,9 @@ import { Loader2, ArrowUp, Plus, GripHorizontal, X, Square, RotateCcw } from 'lu
 interface ProducerProps {
   className?: string
   onGenerationComplete?: (moment: MomentWithPhotos) => void
-  onFacePickerOpen?: () => void
-  onExpandedChange?: (expanded: boolean) => void
-  onPromptChange?: () => void
 }
 
-export function Producer({ className, onGenerationComplete, onFacePickerOpen, onExpandedChange, onPromptChange }: ProducerProps) {
+export function Producer({ className, onGenerationComplete }: ProducerProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const mixinsRef = useRef<MixinsHandle>(null)
   const router = useRouter()
@@ -200,7 +197,6 @@ export function Producer({ className, onGenerationComplete, onFacePickerOpen, on
     if (mode === 'retry') {
       setDirty(true)
     }
-    onPromptChange?.()
   }
 
   const handleFaceSelect = (faceId: string) => {
@@ -213,7 +209,6 @@ export function Producer({ className, onGenerationComplete, onFacePickerOpen, on
   const toggleExpanded = () => {
     const next = !expanded
     setExpanded(next)
-    onExpandedChange?.(next)
   }
 
   const handleTextareaPaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
@@ -401,7 +396,6 @@ export function Producer({ className, onGenerationComplete, onFacePickerOpen, on
           faces={filterAssets('face')}
           onSelect={handleFaceSelect}
           selected={mixins.face as string | undefined}
-          onOpen={onFacePickerOpen}
         />
       </div>
       <div

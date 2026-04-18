@@ -20,7 +20,7 @@ export function StudioWelcome() {
     <div className="flex flex-col items-center gap-8 py-16 w-full">
       <div className="relative w-48 aspect-9/16 rounded-3xl overflow-hidden shadow-2xl border border-white/10">
         <Image
-          src="/examples/portrait.jpg"
+          src="/example.jpg"
           alt="Example portrait"
           fill
           className="object-cover"

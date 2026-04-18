@@ -9,18 +9,14 @@ import { AssetsManager } from '@/components/assets-manager'
 import { StaggerGrid } from '@/components/stagger-grid'
 import { Button } from '@/components/ui'
 import { StudioWelcome } from '@/components/studio-welcome'
-import { StudioCoachMarks } from '@/components/studio-coach-marks'
-import type { AssetType, MomentWithPhotos } from '@/lib/types'
+import { StudioTour } from '@/components/studio-tour'
+import type { AssetType } from '@/lib/types'
 import { useMoments } from '@/hooks/use-moments'
 import { useBus } from '@/lib/bus'
 import { ArrowRight } from 'lucide-react'
 
 export default function StudioPage() {
   const [activeAssets, setActiveAssets] = useState<AssetType | null>(null)
-  const [onboardingStep, setOnboardingStep] = useState<0 | 1 | 2 | 3>(() => {
-    if (typeof window === 'undefined') return 0
-    return localStorage.getItem('kanojo:onboarded') ? 0 : 1
-  })
   const $bus = useBus()
 
   useEffect(() => {
@@ -35,26 +31,6 @@ export default function StudioPage() {
     hasNextPage,
     isFetchingNextPage
   } = useMoments()
-
-  const handleFacePickerOpen = () => {
-    if (onboardingStep === 1) setOnboardingStep(2)
-  }
-
-  const handleExpandedChange = (expanded: boolean) => {
-    if (onboardingStep === 2 && expanded) setOnboardingStep(3)
-  }
-
-  const handlePromptChange = () => {
-    if (onboardingStep === 3) {
-      localStorage.setItem('kanojo:onboarded', '1')
-      setOnboardingStep(0)
-    }
-  }
-
-  const handleGenerationComplete = (moment: MomentWithPhotos) => {
-    localStorage.setItem('kanojo:onboarded', '1')
-    setOnboardingStep(0)
-  }
 
   // Flatten all pages into single array
   const allMoments =
@@ -113,14 +89,9 @@ export default function StudioPage() {
         </section>
       )}
       <Suspense>
-        <Producer
-          onFacePickerOpen={handleFacePickerOpen}
-          onExpandedChange={handleExpandedChange}
-          onPromptChange={handlePromptChange}
-          onGenerationComplete={handleGenerationComplete}
-        />
+        <Producer />
       </Suspense>
-      <StudioCoachMarks step={onboardingStep} />
+      <StudioTour />
     </>
   )
 }
