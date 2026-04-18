@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Joyride, type CallBackProps, STATUS } from 'react-joyride'
+import { Joyride, type EventData, STATUS } from 'react-joyride'
 import { useBus } from '@/lib/bus'
 
 const STEPS = [
@@ -35,8 +35,8 @@ export function StudioTour() {
     setRun(false)
   })
 
-  const handleCallback = ({ status }: CallBackProps) => {
-    if ((status === STATUS.FINISHED || status === STATUS.SKIPPED)) {
+  const handleEvent = ({ status }: EventData) => {
+    if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
       done()
       setRun(false)
     }
@@ -47,9 +47,11 @@ export function StudioTour() {
       steps={STEPS}
       run={run}
       continuous
-      showSkipButton
-      disableScrolling
-      callback={handleCallback}
+      onEvent={handleEvent}
+      options={{
+        buttons: ['back', 'skip', 'primary'],
+        skipScroll: true,
+      }}
     />
   )
 }
