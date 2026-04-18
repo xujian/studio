@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Joyride, { type CallBackProps, STATUS } from 'react-joyride'
+import { Joyride, type CallBackProps, STATUS } from 'react-joyride'
 import { useBus } from '@/lib/bus'
 
 const STEPS = [
