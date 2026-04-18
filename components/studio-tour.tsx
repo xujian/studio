@@ -8,17 +8,14 @@ const STEPS = [
   {
     target: '[data-coach="face"]',
     content: 'Pick a face to start',
-    skipBeacon: true,
   },
   {
     target: '[data-coach="mixins"]',
     content: 'Layer your style with Mixins',
-    skipBeacon: true,
   },
   {
     target: '[data-coach="textarea"]',
     content: 'Describe your portrait here',
-    skipBeacon: true,
   },
 ]
 
@@ -33,6 +30,10 @@ export function StudioTour() {
     run,
     continuous: true,
     options: {
+      backgroundColor: '#ffffff33',
+      textColor: '#ffffff',
+      arrowColor: '#ffffff33',
+      arrowSize: 8,
       buttons: ['back', 'skip', 'primary'],
       skipScroll: true,
     },
