@@ -25,12 +25,11 @@ export type FacePickerProps = {
   faces: Asset[],
   selected?: string,
   onSelect?: (faceId: string) => void,
-  onOpen?: () => void,
 }
 
 const systemFace = '/icons/face.png'
 
-export function FacePicker ({ faces, selected, onSelect, onOpen }: FacePickerProps) {
+export function FacePicker ({ faces, selected, onSelect }: FacePickerProps) {
   const [popoverOpen, setPopoverOpen] = useState(false)
 
   const selectedFace = faces.find(f => f.id === selected)
@@ -39,10 +38,7 @@ export function FacePicker ({ faces, selected, onSelect, onOpen }: FacePickerPro
   return (
     <div className="relative">
       <TooltipProvider delayDuration={600}>
-        <Popover open={popoverOpen} onOpenChange={(open) => {
-          setPopoverOpen(open)
-          if (open) onOpen?.()
-        }}>
+        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
           <Tooltip open={popoverOpen ? false : undefined}>
             <TooltipTrigger asChild>
               <PopoverTrigger asChild>
