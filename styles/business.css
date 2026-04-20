@@ -165,6 +165,10 @@
     }
   }
 
+  .seq {
+    @apply flex items-center justify-center w-8 h-8 bg-accent border-accent-foreground border-0 font-bold rounded-full text-xl;
+  }
+
   @keyframes wave-flow {
     0%, 100% {
       background-position: 0% 0%, 0% 0%, 100% 100%;

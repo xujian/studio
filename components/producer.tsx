@@ -265,11 +265,11 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
       <div className="relative -m-px overflow-hidden rounded-3xl border border-foreground/50 bg-background/20 p-1">
         <div className="inputs min-h-32 gap-1 flex items-stretch">
           <div className="h-18 w-18"></div>
-          <div className={cn(
+          <div data-coach="reference" className={cn(
               'reference relative transition-[width,height] duration-300',
               reference
                 ? 'h-40 w-32 border overflow-hidden rounded-xl'
-                : 'h-9 w-9'
+                : 'h-10 w-10'
             )}>
             <input
               ref={fileInputRef}
@@ -321,7 +321,7 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
               aria-label="Portrait description"
               placeholder="Describe the portrait you want to create..."
               className={cn(
-                'min-h-32 max-h-40 h-full text-xs resize-none rounded-none border-none shadow-none bg-transparent!',
+                'h-32 max-h-40 text-xs resize-none rounded-none border-none shadow-none bg-transparent!',
                 'p-0 focus-visible:outline-none focus-visible:ring-0 focus-within:ring-0 focus-within:border-transparent',
                 '[&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full',
                 '[&::-webkit-scrollbar-thumb]:bg-white/20',

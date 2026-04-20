@@ -30,7 +30,7 @@ function Textarea({ label, className, children, ...props }: TextAreaProps) {
       }
       <textarea
         id={id}
-        className='text-foreground h-full placeholder:text-muted-foreground/70 flex w-full px-2 py-1 text-sm focus-visible:outline-none min-h-28 resize-none leading-4'
+        className='text-foreground h-full placeholder:text-muted-foreground/70 w-full px-1 py-1 text-sm focus-visible:outline-none resize-none leading-4'
         {...props}
       />
       {children}

@@ -91,7 +91,7 @@ export default function StudioPage() {
       <Suspense>
         <Producer />
       </Suspense>
-      <StudioTour />
+      {allMoments.length === 0 &&  <StudioTour />}
     </>
   )
 }

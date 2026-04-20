@@ -29,7 +29,7 @@ export function StudioWelcome() {
         />
       </div>
       <div className="text-center flex flex-col gap-2">
-        <h2 className="text-2xl">Your studio starts here</h2>
+        <h2 className="text-2xl">Create your first moment of phptos</h2>
         <p className="text-sm text-muted-foreground max-w-xs">
           Pick a face, describe the mood, generate your first portrait.
         </p>
