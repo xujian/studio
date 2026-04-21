@@ -4,6 +4,7 @@ import * as React from 'react'
 import { useRef, useState } from 'react'
 import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { BorderBeam } from 'border-beam'
 import { Textarea, Toggle, Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui'
 import { Button } from '@/components/button'
 import { createClient } from '@/lib/supabase/client'
@@ -246,7 +247,6 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
     return assets.filter(asset => asset.type === type)
   }
 
-
   return (
     <div data-lenis-prevent-wheel className={cn(
         'producer fixed bottom-4 left-1/2 z-50 w-[calc(100%-2rem)] max-w-4xl -translate-x-1/2',
@@ -254,172 +254,177 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
         'transition-all duration-300 overflow-hidden',
         className
       )}>
-      <div className={cn(
-          'overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out',
-          expanded ? 'max-h-14 opacity-100' : 'max-h-0 opacity-0'
-        )}>
-        <div className="flex px-8">
-          <Mixins ref={mixinsRef} value={mixins} onChange={setMixins} />
+      <BorderBeam active={isPending} size="md" colorVariant="mono" duration={4} strength={0.88}>
+        <div className={cn(
+            'overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out',
+            expanded ? 'max-h-14 opacity-100' : 'max-h-0 opacity-0'
+          )}>
+          <div className="flex px-8">
+            <Mixins ref={mixinsRef} value={mixins} onChange={setMixins} />
+          </div>
         </div>
-      </div>
-      <div className="relative -m-px overflow-hidden rounded-3xl border border-foreground/50 bg-background/20 p-1">
-        <div className="inputs min-h-32 gap-1 flex items-stretch">
-          <div className="h-18 w-18"></div>
-          <div data-coach="reference" className={cn(
-              'reference relative transition-[width,height] duration-300',
-              reference
-                ? 'h-40 w-32 border overflow-hidden rounded-xl'
-                : 'h-10 w-10'
-            )}>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleReferenceUpload}
-            />
-            {reference
-              ? (
-                  <>
-                    <Image
-                      className="h-full w-full object-cover"
-                      alt="reference"
-                      src={uploadUrl(userId, reference)}
-                      fill
-                      sizes="100px"
-                    />
+        <div className="relative -m-px overflow-hidden rounded-3xl border border-foreground/50 bg-background/20 p-1">
+          <div className="inputs min-h-32 gap-1 flex items-stretch">
+            <div className="h-18 w-18"></div>
+            <div data-coach="reference" className={cn(
+                'reference relative transition-[width,height] duration-300',
+                reference
+                  ? 'h-40 w-32 border overflow-hidden rounded-xl'
+                  : 'h-10 w-10'
+              )}>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleReferenceUpload}
+              />
+              {reference
+                ? (
+                    <>
+                      <Image
+                        className="h-full w-full object-cover"
+                        alt="reference"
+                        src={uploadUrl(userId, reference)}
+                        fill
+                        sizes="100px"
+                      />
+                      <Button
+                        type="button"
+                        size="icon"
+                        className="absolute top-1 right-1 h-6 w-6 rounded-full bg-background/60 text-foreground hover:bg-background/80"
+                        onClick={handleReferenceClear}>
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </>
+                  )
+                : (
                     <Button
                       type="button"
-                      size="icon"
-                      className="absolute top-1 right-1 h-6 w-6 rounded-full bg-background/60 text-foreground hover:bg-background/80"
-                      onClick={handleReferenceClear}>
-                      <X className="h-3 w-3" />
+                      variant="outline"
+                      size="icon-lg"
+                      tooltip="Upload reference image"
+                      className={cn("button", dropping && "dropping")}
+                      disabled={isPending || uploading}
+                      onClick={() => fileInputRef.current?.click()}
+                      {...dndProps}>
+                      {uploading
+                        ? (<Loader2 className="h-4 w-4 animate-spin" />)
+                        : (<Plus />)}
                     </Button>
-                  </>
-                )
-              : (
-                  <Button
+                  )}
+            </div>
+            <div className={cn('flex-1 p-0 h-full')}>
+              <Textarea
+                ref={textareaRef}
+                data-lenis-prevent-wheel
+                data-coach="textarea"
+                aria-label="Portrait description"
+                placeholder="Describe the portrait you want to create..."
+                className={cn(
+                  'h-32 max-h-40 text-xs resize-none rounded-none border-none shadow-none bg-transparent!',
+                  'p-0 focus-visible:outline-none focus-visible:ring-0 focus-within:ring-0 focus-within:border-transparent',
+                  '[&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full',
+                  '[&::-webkit-scrollbar-thumb]:bg-white/20',
+                  '[&::-webkit-scrollbar-track]:bg-transparent')}
+                value={prompt}
+                onChange={handlePromptChange}
+                onPaste={handleTextareaPaste}
+                onWheel={handleTextareaWheel}
+                disabled={isPending}
+              />
+            </div>
+          </div>
+          <div className="absolute bottom-0 left-0 p-1">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>{/** to fix the toggle's state=closed problem */}
+                  <Toggle
+                    pressed={expanded}
                     type="button"
                     variant="outline"
-                    size="icon-lg"
-                    tooltip="Upload reference image"
-                    className={cn("button", dropping && "dropping")}
-                    disabled={isPending || uploading}
-                    onClick={() => fileInputRef.current?.click()}
-                    {...dndProps}>
-                    {uploading
-                      ? (<Loader2 className="h-4 w-4 animate-spin" />)
-                      : (<Plus />)}
-                  </Button>
-                )}
+                    data-coach="mixins"
+                    className="rounded-xl h-10 w-18 data-[state=on]:bg-primary! data-[state=on]:text-primary-foreground"
+                    onClick={toggleExpanded}>
+                    <GripHorizontal />
+                  </Toggle>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent align='center' side="top" sideOffset={10}>
+                mixins
+              </TooltipContent>
+            </Tooltip>
           </div>
-          <div className={cn('flex-1 p-0 h-full')}>
-            <Textarea
-              ref={textareaRef}
-              data-lenis-prevent-wheel
-              data-coach="textarea"
-              aria-label="Portrait description"
-              placeholder="Describe the portrait you want to create..."
-              className={cn(
-                'h-32 max-h-40 text-xs resize-none rounded-none border-none shadow-none bg-transparent!',
-                'p-0 focus-visible:outline-none focus-visible:ring-0 focus-within:ring-0 focus-within:border-transparent',
-                '[&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full',
-                '[&::-webkit-scrollbar-thumb]:bg-white/20',
-                '[&::-webkit-scrollbar-track]:bg-transparent')}
-              value={prompt}
-              onChange={handlePromptChange}
-              onPaste={handleTextareaPaste}
-              onWheel={handleTextareaWheel}
-              disabled={isPending}
-            />
-          </div>
-        </div>
-        <div className="absolute bottom-0 left-0 p-1">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div>{/** to fix the toggle's state=closed problem */}
-                <Toggle
-                  pressed={expanded}
-                  type="button"
-                  variant="outline"
-                  data-coach="mixins"
-                  className="rounded-xl h-10 w-18 data-[state=on]:bg-primary! data-[state=on]:text-primary-foreground"
-                  onClick={toggleExpanded}>
-                  <GripHorizontal />
-                </Toggle>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent align='center' side="top" sideOffset={10}>
-              mixins
-            </TooltipContent>
-          </Tooltip>
-        </div>
-        <div className="absolute bottom-0 right-0 p-1 flex gap-1">
-          {/* New/Clear button (only visible in retry mode) */}
-          {mode === 'retry' && (
+          <div className="absolute bottom-0 right-0 p-1 flex gap-1">
+            {/* New/Clear button (only visible in retry mode) */}
+            {mode === 'retry' && (
+              <Button
+                type="button"
+                variant="default"
+                tooltip="retry"
+                className="h-10 w-10 rounded-xl"
+                onClick={handleNew}
+                disabled={isPending}>
+                <X />
+              </Button>
+            )}
+            {/* Generate/Retry button */}
             <Button
               type="button"
               variant="default"
-              tooltip="retry"
               className="h-10 w-10 rounded-xl"
-              onClick={handleNew}
-              disabled={isPending}>
-              <X />
+              tooltip="generate"
+              onClick={handleGenerate}
+              disabled={isPending || couldNotSubmit}>
+              {isPending
+                ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  )
+                : mode === 'create'
+                  ? (<ArrowUp />)
+                  : (<RotateCcw />)
+              }
             </Button>
-          )}
-          {/* Generate/Retry button */}
-          <Button
-            type="button"
-            variant="default"
-            className="h-10 w-10 rounded-xl"
-            tooltip="generate"
-            onClick={handleGenerate}
-            disabled={isPending || couldNotSubmit}>
-            {isPending
-              ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                )
-              : mode === 'create'
-                ? (<ArrowUp />)
-                : (<RotateCcw />)
-            }
+          </div>
+        </div>
+        {/* Face Picker */}
+        <div
+          className={cn(
+            'absolute left-1 transition-all duration-500',
+            expanded ? 'top-8' : 'top-1'
+          )}>
+          <FacePicker
+            faces={filterAssets('face')}
+            onSelect={handleFaceSelect}
+            selected={mixins.face as string | undefined}
+          />
+        </div>
+        <div
+          role="alert"
+          aria-live="assertive"
+          className={cn([
+            'error absolute flex items-center justify-between bottom-0 right-0 left-0 rounded-full',
+            'h-12 p-2 pl-4 backdrop-blur-md duration-500',
+            error || resolutionError ? 'translate-y-0' : 'translate-y-full',
+          ].join(' '))}>
+          {resolutionError
+            ? <p className="text-xs text-destructive">{resolutionError}</p>
+            : error && error.message
+          }
+          <Button size="icon-lg" className="absolute top-1 right-1" aria-label="Dismiss error" onClick={() => { clearError(); setResolutionError(null) }}>
+            <X />
           </Button>
         </div>
-      </div>
-      {/* Face Picker */}
-      <div
-        className={cn(
-          'absolute left-1 transition-all duration-500',
-          expanded ? 'top-8' : 'top-1'
-        )}>
-        <FacePicker
-          faces={filterAssets('face')}
-          onSelect={handleFaceSelect}
-          selected={mixins.face as string | undefined}
-        />
-      </div>
-      <div
-        role="alert"
-        aria-live="assertive"
-        className={cn([
-          'error absolute flex items-center justify-between bottom-0 right-0 left-0 rounded-full',
-          'h-12 p-2 pl-4 backdrop-blur-md duration-500',
-          error || resolutionError ? 'translate-y-0' : 'translate-y-full',
-        ].join(' '))}>
-        {resolutionError
-          ? <p className="text-xs text-destructive">{resolutionError}</p>
-          : error && error.message
-        }
-        <Button size="icon-lg" className="absolute top-1 right-1" aria-label="Dismiss error" onClick={() => { clearError(); setResolutionError(null) }}>
-          <X />
-        </Button>
-      </div>
-      <div className={cn('pulse', isPending ? 'on' : 'off')} aria-live="polite">
-        {isPending && <span className="sr-only">Generating portrait...</span>}
-        <Button size="icon-lg" className="absolute top-1 right-1 icon-button" tooltip="stop" aria-label="Stop generation">
-          <Square />
-        </Button>
-      </div>
+        <div className={
+          cn('absolute left-0 w-full h-full flex justify-center backdrop-blur-3xl items-center transition-all duration-400',
+            isPending ? 'top-0' : 'top-full')}
+          aria-live="polite">
+          <p className="animate-pulse">Generating photo...</p>
+          <Button size="icon-lg" className="absolute top-1 right-1 icon-button" tooltip="stop" aria-label="Stop generation">
+            <Square />
+          </Button>
+        </div>
+      </BorderBeam>
     </div>
   )
 }

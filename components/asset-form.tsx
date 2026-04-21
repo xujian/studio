@@ -1,6 +1,7 @@
 'use client'
 
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
+import { BorderBeam } from 'border-beam'
 import { Button } from '@/components/button'
 import { CreditButton } from '@/components/credit-button'
 import { Input } from '@/components/ui/input'
@@ -414,6 +415,12 @@ export const AssetForm = forwardRef<AssetFormHandle, AssetFormProps>(
     }
   }, [])
 
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     setPreviewing(true)
+  //   }, 5000)
+  // })
+
   return (
     <div className="asset-create flex min-h-full flex-col gap-2 p-2" onPaste={handlePaste}>
       <div className={cn('flex flex-col items-center gap-2',
@@ -425,7 +432,7 @@ export const AssetForm = forwardRef<AssetFormHandle, AssetFormProps>(
             onChange={e => setContent(e.target.value)}
             placeholder={contentPlaceholders[type]}
             disabled={runMode === 'image'}
-            className="overflow-hidden"
+            className="overflow-hidden h-25"
             rows={3}>
               { config?.previewMode === 'image' && content.length > 0 && (
                 <CreditButton
@@ -444,7 +451,13 @@ export const AssetForm = forwardRef<AssetFormHandle, AssetFormProps>(
                     'Re-generate preview'
                     : 'Generate preview'}
                 </CreditButton>)}
-              {previewing && <div className="pulse absolute inset-0 rounded-2xl pointer-events-none" />}
+              {previewing && (<div className="absolute inset-0 rounded-2xl">
+                <BorderBeam active={previewing} size="md" colorVariant="sunset" duration={4} strength={0.88} className="w-full h-full z-20">
+                  <div className="backdrop-blur-xl h-full w-full rounded-xl flex items-center justify-center">
+                    <p className="animate-pulse">Generating Preview...</p>
+                  </div>
+                </BorderBeam>
+              </div>)}
               <div className={cn('error absolute z-101 left-0 w-full h-1/2 rounded-xl p-4 transition-top duration-300 backdrop-blur-md',
                   previewError ? 'top-1/2' : 'top-full'
                 )}>
@@ -554,12 +567,16 @@ export const AssetForm = forwardRef<AssetFormHandle, AssetFormProps>(
                   ? 'Upload an image to use as reference for this asset. It can be used as a hint for AI generation or just for your own reference.'
                   : 'Describe the asset in text. This can be used as a prompt for AI generation or just as a note for yourself.'}
               </Hint>
-              <div className={cn('absolute h-full w-full inset-0 pointer-events-none left-0 transition-top duration-300',
+              <div className={cn('mask absolute h-full w-full left-0 transition-top duration-300 z-200',
                 extracting
                   ? 'top-0'
-                  : 'top-full'
+                  : 'top-full pointer-events-none'
               )}>
-                <div className="pulse h-full w-full rounded-xl"></div>
+                <BorderBeam active={extracting} size="md" colorVariant="sunset" duration={4} strength={0.88} className="w-full h-full z-20">
+                  <div className="backdrop-blur-xl h-full w-full rounded-xl flex items-center justify-center">
+                    <p className="animate-pulse">Extracting...</p>
+                  </div>
+                </BorderBeam>
               </div>
               <div className={cn('error absolute left-0 bottom-0 w-full h-1/2 rounded-xl p-4 transition-top duration-300 backdrop-blur-md',
                   extractError ? 'top-1/2' : 'top-full'
