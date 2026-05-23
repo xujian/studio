@@ -86,16 +86,17 @@ export const MomentPrompt = ({ value }: MomentPromptProps) => {
 
   return (
     <>
-      <div className="relative rounded-2xl border bg-linear-to-t from-background/80 to-background/40 p-4">
+      <div className="relative rounded-2xl border bg-linear-to-t from-background/80 to-background/40 py-4">
         <Badge className="absolute -top-2 left-1 bg-background/80 text-foreground">
           Prompt
         </Badge>
         <motion.div
-          className="relative inset-0 max-h-26 overflow-clip"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}>
-          <p className="text-xs text-foreground">{value || '(EMPTY)'}</p>
+          <div className="prompt-content max-h-26 overflow-y-auto px-4" data-lenis-prevent-wheel>
+            <p className="text-xs text-foreground">{value || '(EMPTY)'}</p>
+          </div>
         </motion.div>
         {value &&
           (<div className="absolute left-2 -bottom-4 z-200">
