@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { withAxiom, logger } from '@/lib/axiom/server'
 import { extractError } from '@/lib/error'
-import { engine, type GenerateParams } from '@/lib/engine'
+import { engine, type GenerationParams } from '@/lib/engine'
 import { ratelimit } from '@/lib/ratelimit'
 import { createClient } from '@/lib/supabase/server'
 import type { AssetType, Mixins, Moment, MomentWithPhotos, Photo } from '@/lib/types'
@@ -64,7 +64,7 @@ export const POST = withAxiom(async function POST(request: NextRequest) {
       /**
        * params to generate image
        */
-      generateParams: Omit<GenerateParams, 'requestId'> = {
+      generateParams: Omit<GenerationParams, 'requestId'> = {
         userId,
         prompt: input.prompt,
         reference: input.reference,

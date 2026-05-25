@@ -10,7 +10,7 @@ import { uploadUrl } from './utils'
 import { SYSTEM_PROMPT, TITLE_PROMPT } from './prompts'
 import { logger } from './axiom/server'
 
-export interface GenerateParams {
+export interface GenerationParams {
   userId: string
   prompt: string
   assets?: Assets
@@ -18,7 +18,7 @@ export interface GenerateParams {
   requestId: string
 }
 
-interface GenerateResult {
+interface GenerationResult {
   image: string // base64 encoded image
   mime: string
   title: string
@@ -49,7 +49,7 @@ export const engine = {
     assets,
     reference,
     requestId
-  }: GenerateParams): Promise<GenerateResult> => {
+  }: GenerationParams): Promise<GenerationResult> => {
     const json: JsonPrompt = {},
       ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! })
     // 1. Analyze inputs into structured json
@@ -126,7 +126,7 @@ export const engine = {
  * Extract base64 image data from Gemini response
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function extractGenerationResult (response: any, requestId: string): GenerateResult {
+function extractGenerationResult (response: any, requestId: string): GenerationResult {
   const parts = response.candidates?.[0]?.content?.parts || []
   let image = '', mime = '', title = ''
   for (const part of parts) {
