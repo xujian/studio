@@ -5,7 +5,10 @@ export const engineRequestSchema = z.object({
   prompt: z
     .string()
     // .min(1, 'Prompt is required')
-    .max(10240, 'Prompt too long (max 10240 characters)'),
+    .max(10240, 'Prompt too long (max 10240 characters)')
+    // remove invalid white space characterds
+    .transform(s => s.replace(/ /g, ' ')
+    .trim()),
   mixins: z
     .object({
       face: z.string().uuid('Invalid moment ID').optional(),
