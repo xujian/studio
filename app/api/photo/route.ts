@@ -51,13 +51,23 @@ export const POST = withAxiom(async function POST(request: NextRequest) {
     if (!profile || profile.credits < 1) {
       return NextResponse.json({ error: 'Insufficient credits' }, { status: 402 })
     }
-    // Rate limit: 10 generations per hour per user
-    const { success, remaining } = await ratelimit.limit(userId)
-    if (!success) {
-      return NextResponse.json(
-        { error: 'Rate limit exceeded. Try again later.' },
-        { status: 429, headers: { 'X-RateLimit-Remaining': '0' } }
-      )
+    // Rate limit: 10 generations per hour per user.
+    // Fail open: if the limiter backend is unreachable (e.g. Upstash down or
+    // DNS failure), log and allow the request rather than 500-ing the whole
+    // generation flow. Rate limiting is a safeguard, not a hard dependency.
+    try {
+      const { success } = await ratelimit.limit(userId)
+      if (!success) {
+        return NextResponse.json(
+          { error: 'Rate limit exceeded. Try again later.' },
+          { status: 429, headers: { 'X-RateLimit-Remaining': '0' } }
+        )
+      }
+    } catch (error) {
+      logger.error('photo.ratelimit.unavailable', {
+        requestId,
+        error: extractError(error)
+      })
     }
     const momentId = input.momentId || crypto.randomUUID()
     const mixins: Mixins = input.mixins as Mixins,
