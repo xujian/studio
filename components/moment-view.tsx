@@ -90,7 +90,7 @@ export function MomentView({
 
   return (
     <div className="relative z-10 flex h-full w-full justify-between">
-      <div className="flex-1">
+      <div className="left-pane flex-1">
         {readOnly && author ? (
           <div className="flex h-full w-full flex-col gap-3 p-4">
             <div className="flex items-center gap-3">
@@ -120,7 +120,7 @@ export function MomentView({
           <MomentInfo {...moment} />
         )}
       </div>
-      <div className="aspect-9/16 h-full p-4">
+      <div className="center-pane aspect-9/16 h-full p-4">
         <MomentCarousel
           moment={{ ...moment, photos }}
           photo={initialPhotoId}
@@ -129,8 +129,8 @@ export function MomentView({
           sizes="(min-width: 1280px) 400px, 50vw"
         />
       </div>
-      <div className="attributes flex-1">
-        <div className="@container flex h-full flex-col gap-4 pt-16 pr-4 pb-4">
+      <div className="attributes right-pane flex-1">
+        <div className="@container flex h-full flex-col gap-4 pt-16 pr-4 pb-4 relative">
           <div className="gap flex min-h-20 items-start justify-start">
             <div className="face relative">
               <Badge className="absolute top-1 left-1 bg-background/80 text-foreground">
@@ -309,7 +309,6 @@ export function MomentView({
           )}
           {readOnly && <div className="flex-1"></div>}
         </div>
-        {/**@container */}
       </div>
     </div>
   )

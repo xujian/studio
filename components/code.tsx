@@ -16,14 +16,15 @@ export const Code = ({ children, language = 'json' }: CodeProps) => {
     <SyntaxHighlighter
       language={language}
       style={oneDark}
+      codeTagProps={{ style: { background: 'transparent' } }}
       customStyle={{
         margin: 0,
         borderRadius: '1rem',
-        fontSize: '0.75rem',
-        maxHeight: '300px',
+        fontSize: '11px',
         overflowX: 'auto',
         wordBreak: 'break-all',
         whiteSpace: 'pre-wrap',
+        background: 'transparent'
       }}>
       {children}
     </SyntaxHighlighter>
