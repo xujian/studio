@@ -31,7 +31,7 @@ export const AssetGrid = ({data: sections}: AssetGridProps) => {
       <div className="flex flex-col gap-10">
         {sections.map(section => (
           <div key={section.type}>
-            <h2 className="mb-3 text-lg leading-6 font-semibold">
+            <h2 className="mb-3 leading-8 font-semibold">
               {section.name}
             </h2>
             <p className="caption mb-4">{section.assets.length} items total</p>
