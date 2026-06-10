@@ -1,0 +1,285 @@
+# AGENTS.md
+
+This file provides guidance to Codex (Codex.ai/code) when working with code in this repository.
+
+## Skill Pipeline Override
+
+**For small tasks (≤3 files, clear requirements, no architectural decisions): skip all skill pipelines.**
+Do NOT invoke brainstorming, planning, subagent-driven-development, or review skills.
+Just do the work directly: read → write → done.
+
+Reserve the full skill pipeline only for: large features, high-risk changes, multi-subsystem work,
+or when the user explicitly asks for a formal plan.
+
+## Quick Reference
+
+- **What:** AI portrait photography platform (Kanojo Studio) — MVP, pre-public-launch
+- **Dev server:** `sudo pnpm dev` → HTTPS port 443 at `https://kanojostudio.io`
+- **CRITICAL:** Three Supabase clients — never mix contexts (see Architecture below)
+- **Style:** kebab-case files, arrow functions, no semicolons, single quotes — see `docs/CODING_STYLE.md`
+- **Commits:** `feat|fix|refactor|docs: message` + `Co-Authored-By: Codex Sonnet 4.6 <noreply@anthropic.com>`
+- **Plans:** `docs/plans/{date}-{slug}-design.md` + `{date}-{slug}-plan.md` — use `/new-plan` to scaffold
+- **DB:** 9 tables total — `profiles`, `moments`, `photos`, `assets`, `purchases`, `posts`, `likes`, `transactions`, `subscriptions`
+- **Open questions:** `docs/OPEN_QUESTIONS.md` — check before touching content policy, look curation, or onboarding
+
+## Project Overview
+
+AI-powered portrait photography platform (Kanojo Studio MVP) built with Next.js 16, Supabase, and Google Gemini API.
+
+## Development Server
+
+The dev server runs **HTTPS on port 443** using local certs:
+
+- Cert files in repo root (gitignored): `kanojostudio.io.pem` + `kanojostudio.io-key.pem`
+- Local DNS: add `127.0.0.1 kanojostudio.io` to `/etc/hosts`
+- OAuth redirect must be `https://kanojostudio.io/auth/callback`
+- Binding port 443 may require `sudo pnpm dev` (EACCES without it on some setups)
+
+## Architecture
+
+### Supabase Client Pattern
+
+The project uses **three separate Supabase client instances** depending on context:
+
+- **`lib/supabase/client.ts`** - Browser client for Client Components (uses `createBrowserClient`)
+- **`lib/supabase/server.ts`** - Server client for Server Components/API Routes (uses `createServerClient` with async cookies)
+- **`lib/supabase/middleware.ts`** - Middleware client for session management in `proxy.ts` (handles cookie updates)
+
+**Critical:** Always import the correct client for your context:
+- Client Components → `import { createClient } from '@/lib/supabase/client'`
+- Server Components/API Routes → `import { createClient } from '@/lib/supabase/server'`
+- Middleware → `import { updateSession } from '@/lib/supabase/middleware'`
+
+All clients use the **publishable key** (format: `sb_publishable_xxx`) which respects Row Level Security policies. The service role key is NOT used in this codebase as all operations work through authenticated user sessions with RLS enforcement.
+
+### Authentication & Route Protection
+
+- Authentication is handled via `proxy.ts` (imported in Next.js middleware pattern)
+- Protected routes: `/studio`, `/gallery`
+- Auth flow: Google OAuth → `/auth/callback` → Supabase session → auto-create profile via database trigger
+- Logged-in users are redirected away from `/login` to `/studio`
+
+### Image Generation Flow
+
+**API Route** (`/api/photo` POST):
+1. Validate request with Zod (`engineRequestSchema`)
+2. Authenticate user via Supabase session
+3. Create or load moment record (baseline prompt + mixins)
+4. Load asset data from database based on mixins
+5. Call `engine.generate({ userId, prompt, assets, reference })`
+6. Upload base64 image to Supabase Storage (`{userId}/{momentId}/{photoId}.{ext}`)
+7. Insert photo record with deltas (only differences from moment baseline)
+8. Return complete moment with all photos
+
+**Engine** (`lib/engine.ts`) — pure generation function, no auth:
+1. **Analyze inputs** → structured JSON baseline
+   - Reference image → `ImageAnalyzer` (full scene description)
+   - Text prompt → `PromptAnalyzer` (only explicit mentions)
+   - Deep merge: prompt overrides reference
+2. **Build assets** → face image parts + text sections
+   - Face defaults to system face (`defaultAssets.face`) when not provided
+   - `AssetsBuilder` produces image parts (face) and text sections (other assets)
+   - Asset sections override corresponding JSON keys
+3. **Assemble prompt** → face image parts + single combined JSON
+4. **Generate** → Gemini API (9:16 portrait, 2K resolution)
+
+**Key Services:**
+- **ImageAnalyzer** (`lib/image-analyzer.ts`) - Analyzes reference images using Gemini Vision, extracts detailed structured data, caches results for 30 minutes
+- **PromptAnalyzer** (`lib/prompt-analyzer.ts`) - Converts natural language prompts to structured JSON format matching ImageAnalyzer output, enables prompt merging
+- **Engine** (`lib/engine.ts`) - Pure generation function: takes userId, prompt, assets, reference; returns base64 image. No auth or database access.
+
+### Data Fetching Pattern
+
+**Philosophy:** Keep database logic on the server, not in client code.
+
+**TanStack Query Hooks:** All client-side data fetching uses custom hooks in `/hooks`:
+- `useEngine()` - Image generation mutation (creates moments/photos), auto-invalidates query cache
+- `useMoments()` - Fetch user's moment history with photos
+- `useAssets()` - Fetch user's own assets + purchased assets (via RPC)
+- `useUser()` - Fetch current user profile
+
+**When to Use Postgres Functions:**
+
+For **complex queries** involving:
+- Multiple table JOINs
+- Subqueries or CTEs
+- Business logic that spans multiple tables
+- Data aggregation or transformations
+
+Create a Postgres function and call via RPC instead of writing complex client-side queries.
+
+**Pattern:** prefer a single `supabase.rpc('function_name', ...)` call over multiple queries with client-side merging. Database logic stays in `schema.sql`; hooks stay simple and declarative.
+
+### Database Schema
+
+Core tables with RLS policies:
+
+1. **`profiles`** - User profiles (auto-created via trigger on signup)
+   - Fields: `id`, `name`, `avatar`, `credits`, `customer`, `tier`, `created`
+   - RLS: Users can only view/update own profile
+
+2. **`moments`** - Generation sessions (baseline prompt + mixins)
+   - Fields: `id`, `user`, `prompt`, `mixins` (JSONB), `final`, `status`, `created`
+   - RLS: Users can only view/insert/delete own moments
+   - A moment represents a creation session with baseline settings
+
+3. **`photos`** - Generated images (delta storage)
+   - Fields: `id`, `moment`, `user`, `prompt` (delta), `mixins` (delta), `created`
+   - RLS: Users can only view/insert/delete photos for their moments
+   - Only stores **differences** from moment baseline (efficient storage)
+   - Display logic: `photo.prompt || moment.prompt` and `{ ...moment.mixins, ...photo.mixins }`
+
+4. **`assets`** - Reusable prompt components (faces, styles, scenes, etc.)
+   - Fields: `id`, `user`, `name`, `type`, `path`, `content`, `price`, `created`
+   - Types: face, makeup, hair, outfit, scene, lighting, camera
+   - Supports both image-based (path) and text-based (content) assets
+   - Marketplace functionality with credits system
+
+5. **`purchases`** - Asset marketplace transactions
+   - Fields: `id`, `buyer`, `asset`, `price`, `created`
+   - Tracks which assets users have purchased
+   - Used by `get_user_assets()` RPC to return owned + purchased assets
+
+6. **`posts`** - Community sharing
+   - Fields: `id`, `user`, `moment` (UNIQUE), `created`
+   - One moment → one post enforced via UNIQUE constraint on `moment`
+   - RLS: Users can insert own posts; public read for published posts
+
+7. **`likes`** - User-post reactions (many-to-many)
+   - Fields: `id`, `post`, `user`, `created`
+   - One like per user per post enforced via UNIQUE constraint
+   - RLS: Users can insert/delete own likes; public read
+
+8. **`transactions`** - Credit ledger
+   - Fields: `id`, `user`, `amount` (signed int), `type`, `ref`, `created`
+   - `amount` is signed: positive = credit, negative = debit
+   - Types: `asset_purchase`, `generation_cost`, `credit_purchase`, `refund`
+   - RLS: Users can only view own transactions
+
+9. **`subscriptions`** - Stripe subscription state
+   - Fields: `id`, `user`, `subscription`, `customer`, `tier`, `status`, `end`, `created`, `updated`
+   - One active subscription per user; tiers: `free`, `basic`, `pro`, `max`
+   - `profiles` table also has `customer` and `tier` columns
+
+### Component Architecture
+
+- **Server Components by default** - Use for static content, data fetching
+- **Client Components** (`'use client'`) - Only when needed for:
+  - TanStack Query hooks
+  - Form interactions (React Hook Form)
+  - Client-side state (useState, useEffect)
+  - Event handlers
+
+### TypeScript Types
+
+All database and domain types are defined in `lib/types.ts`:
+- `Profile` - User profile schema
+- `Moment` - Generation session schema
+- `Photo` - Generated image schema
+- `MomentWithPhotos` - Moment with related photos array
+- `Asset` - Reusable prompt component schema (see `docs/ASSET.md`)
+- `AssetType` - Union type for asset categories
+- `Mixins` / `Assets` / `AssetMap` - Asset selection types (see `docs/MIXIN.md`)
+- `JsonPrompt` - Structured prompt format (output from ImageAnalyzer/PromptAnalyzer)
+  - Contains: subject, outfit, pose, scene, makeup, lighting, camera sections
+  - Used for merging reference image analysis with text prompt analysis
+
+Always use these types instead of inline definitions.
+
+## File Structure
+
+```
+/app
+  /api/photo        # Image generation endpoint (POST)
+  /auth/callback    # OAuth callback handler
+  /studio           # Generation interface (protected)
+  /gallery          # Generation history (protected)
+  /login            # Auth page
+/components         # React components (mix of server/client)
+  /producer         # Main generation UI component
+  /face-picker      # Face asset selector
+/hooks              # TanStack Query hooks (all client-side)
+  use-engine.ts     # Generation mutation hook
+  use-assets.ts     # Asset fetching hook
+/lib
+  /supabase         # Three client implementations
+  engine.ts         # Image generation engine (pure function, no auth)
+  image-analyzer.ts # Reference image analyzer service (cached)
+  prompt-analyzer.ts # Text prompt structuring service (cached)
+  prompts.ts        # Prompt constants and templates
+  types.ts          # TypeScript type definitions
+  validations.ts    # Zod schemas
+  constants.ts      # Asset types and configuration
+  utils.ts          # Utility functions
+/supabase
+  schema.sql        # Database schema, RLS policies, triggers, functions
+```
+
+## Environment Variables
+
+Required in `.env.local`:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=   # New format: sb_publishable_xxx
+GEMINI_API_KEY=
+NEXT_PUBLIC_APP_URL=                    # For OAuth redirects
+```
+
+## Key Patterns
+
+- **Validation:** All user input validated with Zod schemas before processing (`engineRequestSchema`)
+- **Error Handling:** Failed generations propagate errors to the API route; analyzer failures are not swallowed
+- **Storage:** Images stored as `{userId}/{momentId}/{photoId}.{jpg|png}` in Supabase Storage bucket `photos`
+- **Delta Storage:** Photos only store differences from moment baseline (prompt/mixins deltas)
+  - Saves storage and makes variation tracking explicit
+  - Display: merge moment baseline with photo deltas
+- **AI Services with Caching:**
+  - `ImageAnalyzer` - 30-minute in-memory cache for reference image analysis
+  - `PromptAnalyzer` - 30-minute in-memory cache for prompt structuring
+  - Both return `JsonPrompt` structure for easy merging
+- **Analysis Merging:** When both reference + prompt provided, prompt analysis overrides reference (deep merge)
+- **State Management:** TanStack Query for server state, React Hook Form for form state
+- **Styling:** Tailwind CSS + Shadcn UI components
+
+## Coding Style
+
+Full guide: `docs/CODING_STYLE.md` — this is the authoritative reference.
+
+Quick summary:
+- **File naming:** kebab-case always (`use-assets.ts`, `face-picker.tsx`)
+- **Components:** arrow functions with named exports; pages use default export
+- **Formatting:** no semicolons, single quotes, trailing commas
+- **Import order:** React/Next → external packages → `@/` internal → relative → `import type` last
+- **Props:** inline `type` (not `interface`), destructure in function signature
+- **No** barrel files (`index.ts`) — import directly from source
+
+## Common Mistakes ⚠️
+
+1. **Wrong Supabase client** — server client in browser throws; browser client in API route silently misses the session. Match client to context (see Architecture → Supabase Client Pattern).
+2. **Missing `'use client'`** — any component importing from `/hooks/` must have `'use client'` at the top. Runtime error often points to wrong file.
+3. **`assets.path` is not a URL** — it's a Supabase Storage path. Use `supabase.storage.from('assets').getPublicUrl(path)` before rendering.
+4. **Photo fields are deltas** — always merge with moment baseline: `photo.prompt || moment.prompt` and `{ ...moment.mixins, ...photo.mixins }`.
+5. **Schema has 9 tables, docs show 5** — `posts`, `likes`, `transactions`, `subscriptions` also exist. Don't design around a missing table.
+6. **Port 443 needs `sudo`** — if `pnpm dev` throws EACCES, run `sudo pnpm dev`.
+7. **Credits are integers, not cents** — convert Stripe amounts (`stripeAmountInCents / 100`) before writing to `profiles.credits`.
+
+## Plans Workflow
+
+For any non-trivial feature, write docs before code:
+
+1. **Design doc** (`docs/plans/{YYYY-MM-DD}-{slug}-design.md`): problem, solution, key decisions, open questions, rejected alternatives
+2. **Implementation plan** (`docs/plans/{YYYY-MM-DD}-{slug}-plan.md`): ordered `- [ ]` checklist with sequencing notes
+
+See `docs/plans/2026-03-14-google-one-tap-design.md` as format reference.
+
+Use `/new-plan <feature-name>` to scaffold the pair automatically.
+
+## Open Questions
+
+`docs/OPEN_QUESTIONS.md` tracks three launch-blocking decisions:
+1. **Content policy** — affects what can be generated and shared publicly
+2. **Look curation pipeline** — affects asset marketplace design and moderation flow
+3. **First-shoot onboarding** — affects studio UX and API design
+
+Check this file before implementing features that touch any of these areas.
