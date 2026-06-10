@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { motion } from 'motion/react'
 import { Code } from '@/components/code'
 import {
@@ -30,7 +30,7 @@ import { cn } from '@/lib/utils'
 import { assetTypeNames } from '@/lib/types'
 import type { AssetType } from '@/lib/types'
 import { formatJson, isJson } from '@/lib/utils/string'
-import { useScrollBlock } from '@/hooks/use-scroll-block'
+import { useScrollLock } from '@/hooks/use-scroll-lock'
 
 export type MomentPromptProps = {
   value: string
@@ -44,7 +44,6 @@ export const MomentPrompt = ({ value }: MomentPromptProps) => {
   const [result, setResult] = useState<{ title: string; content: string } | null>(null)
   const [copied, setCopied] = useState(false)
   const [expanded, setExpanded] = useState(false)
-  const [blockScroll, allowScroll] = useScrollBlock()
 
   const handleExtract = async (type: AssetType) => {
     setExtracting(true)
@@ -89,14 +88,7 @@ export const MomentPrompt = ({ value }: MomentPromptProps) => {
   // whole ancestor chain, so it must be omitted — not set to false — when off.
   const preventWheel = promptIsJson && expanded ? '' : undefined
 
-  useEffect(() => {
-    if (promptIsJson && expanded) {
-      blockScroll()
-    } else {
-      allowScroll()
-    }
-    return () => allowScroll()
-  }, [promptIsJson, expanded])
+  useScrollLock(promptIsJson && expanded)
 
   return (
     <>

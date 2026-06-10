@@ -4,6 +4,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import * as React from 'react'
 import { Button } from '@/components/button'
 import { X, Loader2 } from 'lucide-react'
+import { useScrollLock } from '@/hooks/use-scroll-lock'
 
 export default function ModalLayout({
   children
@@ -67,6 +68,9 @@ export default function ModalLayout({
     document.addEventListener('keydown', handleTab)
     return () => document.removeEventListener('keydown', handleTab)
   }, [isOpen])
+
+  // Lock page scroll (native + Lenis) while the modal is open.
+  useScrollLock(isOpen)
 
   if (!isOpen) return null
 

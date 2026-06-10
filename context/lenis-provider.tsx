@@ -1,36 +1,41 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Lenis from 'lenis'
 
+const LenisContext = createContext<Lenis | null>(null)
+
+export const useLenis = () => useContext(LenisContext)
+
 export const LenisProvider = ({ children }: { children: React.ReactNode }) => {
-  const lenisRef = useRef<Lenis | null>(null)
+  const [lenis, setLenis] = useState<Lenis | null>(null)
   const pathname = usePathname()
 
   useEffect(() => {
-    const lenis = new Lenis()
-    lenisRef.current = lenis
+    const instance = new Lenis()
+    setLenis(instance)
 
-    const raf = (time: number) => {
-      lenis.raf(time)
-      requestAnimationFrame(raf)
+    let id = requestAnimationFrame(function raf(time) {
+      instance.raf(time)
+      id = requestAnimationFrame(raf)
+    })
+
+    return () => {
+      cancelAnimationFrame(id)
+      instance.destroy()
+      setLenis(null)
     }
-
-    requestAnimationFrame(raf)
-
-    return () => lenis.destroy()
   }, [])
 
+  // Scroll restoration only: reset to top on normal navigation. Modal routes
+  // keep the background's scroll position (the modal overlays it). Scroll
+  // *locking* is owned entirely by useScrollLock now — the provider no longer
+  // stops/starts Lenis here.
   useEffect(() => {
     const isModal = !!pathname.match(/^\/moments\/[^/]+/)
-    if (isModal) {
-      lenisRef.current?.stop()
-    } else {
-      lenisRef.current?.start()
-      lenisRef.current?.scrollTo(0, { immediate: true })
-    }
-  }, [pathname])
+    if (!isModal) lenis?.scrollTo(0, { immediate: true })
+  }, [pathname, lenis])
 
-  return <>{children}</>
+  return <LenisContext.Provider value={lenis}>{children}</LenisContext.Provider>
 }
