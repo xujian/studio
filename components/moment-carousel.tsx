@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import * as React from 'react'
-import { motion } from 'motion/react'
+import { motion, AnimatePresence } from 'motion/react'
 import { useRouter } from 'next/navigation'
 import {
   Carousel,
@@ -141,13 +141,19 @@ export function MomentCarousel({
           startIndex: initialIndex >= 0 ? initialIndex : 0
         }}>
         <CarouselContent>
-          {photos.map(p => (
-            <CarouselItem key={p.id}>
-              <div className="carousel-item relative aspect-9/16 w-full overflow-hidden bg-muted">
-                {renderPhoto(p)}
-              </div>
-            </CarouselItem>
-          ))}
+          <AnimatePresence initial={false}>
+            {photos.map(p => (
+              <CarouselItem key={p.id}>
+                <motion.div
+                  initial={{ opacity: 0, scale: 1.04 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.4, ease: 'easeOut' }}
+                  className="carousel-item relative aspect-9/16 w-full overflow-hidden bg-muted">
+                  {renderPhoto(p)}
+                </motion.div>
+              </CarouselItem>
+            ))}
+          </AnimatePresence>
         </CarouselContent>
         <div
           className="absolute bottom-1 h-8 w-full z-11 opacity-0 transition-opacity duration-200 group-hover:opacity-100 focus-within:opacity-100"
