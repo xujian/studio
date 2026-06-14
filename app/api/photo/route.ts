@@ -204,6 +204,7 @@ export const POST = withAxiom(async function POST(request: NextRequest) {
         photos (*)
       `)
       .eq('id', momentId)
+      .order('created', { referencedTable: 'photos', ascending: false })
       .single()
     if (fetchError) {
       logger.error('moment.fetch.failed', { request_id: requestId, error: fetchError.message })

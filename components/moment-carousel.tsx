@@ -39,7 +39,13 @@ export function MomentCarousel({
   const [count, setCount] = React.useState(0)
 
   const router = useRouter()
-  const { photos } = moment
+  const photos = React.useMemo(
+    () =>
+      [...moment.photos].sort(
+        (a, b) => new Date(b.created).getTime() - new Date(a.created).getTime()
+      ),
+    [moment.photos]
+  )
   const hasMultiplePhotos = photos.length > 1
   const initialIndex = initialPhotoId
     ? photos.findIndex(p => p.id === initialPhotoId)
