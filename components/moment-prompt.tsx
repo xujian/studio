@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui'
 import {
+  Check,
   Copy,
   Earth,
   Ellipsis,
@@ -82,6 +83,13 @@ export const MomentPrompt = ({ value }: MomentPromptProps) => {
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const handleCopyPrompt = async () => {
+    if (!value) return
+    await navigator.clipboard.writeText(value)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
   const promptIsJson = useMemo(() => isJson(value), [value])
 
   // Lenis detects this via hasAttribute (presence, not value) and scans the
@@ -132,9 +140,15 @@ export const MomentPrompt = ({ value }: MomentPromptProps) => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-full z-200 text-xs">
-                <DropdownMenuItem className="text-xs">
-                  <Copy className="size-4 text-muted-foreground" />
-                  Copy
+                <DropdownMenuItem
+                  className="text-xs"
+                  onSelect={(e) => e.preventDefault()}
+                  onClick={handleCopyPrompt}>
+                  {copied
+                    ? <Check className="size-4 text-green-500" />
+                    : <Copy className="size-4 text-muted-foreground" />
+                  }
+                  {copied ? 'Copied' : 'Copy'}
                 </DropdownMenuItem>
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger className="text-xs">
