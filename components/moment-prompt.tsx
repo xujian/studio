@@ -192,17 +192,17 @@ export const MomentPrompt = ({ value }: MomentPromptProps) => {
         open={!!result || extracting || translating}
         onOpenChange={(open) => { if (!open) setResult(null) }}>
         <DialogContent
-          className="prompt-process z-100 p-2 rounded-3xl max-w-160!"
+          className="prompt-process z-100 p-2 rounded-3xl max-w-200!"
           onInteractOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="capitalize text-sm leading-6 my-0 px-2">
               {result?.title || (<Loader2 className="size-3 animate-spin" />)}
             </DialogTitle>
           </DialogHeader>
-          <div className="px-2">
+          <div className="px-2 text-xs">
             {result?.content
               ? isJson(result.content)
-                ? <pre>{formatJson(result.content)}</pre>
+                ? <Code>{formatJson(result.content)}</Code>
                 : <div className="text-sm text-muted-foreground whitespace-pre-wrap">{result.content}</div>
               : (<p className="text-sm text-muted-foreground">
                   {extracting
