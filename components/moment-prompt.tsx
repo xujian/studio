@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { motion } from 'motion/react'
 import { Code } from '@/components/code'
+import { CopyButton } from '@/components/copy-button'
 import {
   Badge,
   Button,
@@ -74,13 +75,6 @@ export const MomentPrompt = ({ value }: MomentPromptProps) => {
     } finally {
       setTranslating(false)
     }
-  }
-
-  const handleCopy = async () => {
-    if (!result?.content) return
-    await navigator.clipboard.writeText(result.content)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
   }
 
   const handleCopyPrompt = async () => {
@@ -215,14 +209,11 @@ export const MomentPrompt = ({ value }: MomentPromptProps) => {
             }
           </div>
           <DialogFooter>
-            <Button
+            <CopyButton
+              value={result?.content ?? ''}
               variant="outline"
               size="icon-sm"
-              className=""
-              onClick={handleCopy}
-              disabled={!result?.content}>
-              <Copy className="size-4" />
-            </Button>
+              disabled={!result?.content} />
           </DialogFooter>
         </DialogContent>
       </Dialog>
