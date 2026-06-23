@@ -21,8 +21,6 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui'
 import {
-  Check,
-  Copy,
   Earth,
   Ellipsis,
   FileOutput,
@@ -44,7 +42,6 @@ export const MomentPrompt = ({ value }: MomentPromptProps) => {
   const [extracting, setExtracting] = useState<boolean>(false)
   const [translating, setTranslating] = useState<boolean>(false)
   const [result, setResult] = useState<{ title: string; content: string } | null>(null)
-  const [copied, setCopied] = useState(false)
   const [expanded, setExpanded] = useState(false)
 
   const handleExtract = async (type: AssetType) => {
@@ -75,13 +72,6 @@ export const MomentPrompt = ({ value }: MomentPromptProps) => {
     } finally {
       setTranslating(false)
     }
-  }
-
-  const handleCopyPrompt = async () => {
-    if (!value) return
-    await navigator.clipboard.writeText(value)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
   }
 
   const promptIsJson = useMemo(() => isJson(value), [value])
@@ -134,16 +124,11 @@ export const MomentPrompt = ({ value }: MomentPromptProps) => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-full z-200 text-xs">
-                <DropdownMenuItem
-                  className="text-xs"
-                  onSelect={(e) => e.preventDefault()}
-                  onClick={handleCopyPrompt}>
-                  {copied
-                    ? <Check className="size-4 text-green-500" />
-                    : <Copy className="size-4 text-muted-foreground" />
-                  }
-                  {copied ? 'Copied' : 'Copy'}
-                </DropdownMenuItem>
+                <CopyButton
+                  value={value}
+                  label="Copy"
+                  variant="ghost"
+                  className="h-auto w-full justify-start px-2 py-1.5 text-xs font-normal" />
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger className="text-xs">
                     <FileOutput className="size-4 text-muted-foreground" />
