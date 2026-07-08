@@ -6,7 +6,7 @@ export default function StoreLoading() {
       <h1 className="mb-8 text-2xl font-semibold">Store</h1>
       <div className="flex flex-col gap-10">
         {[1, 2, 3].map(i => (
-          <div key={i}>
+          <div className="asset-section mb-80" key={i}>
             <Skeleton className="mb-3 h-6 w-24" />
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
               {Array.from({ length: 6 }).map((_, j) => (
