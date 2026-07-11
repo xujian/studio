@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import { AssetCard } from '@/components/asset-card'
 import { AssetForm, AssetFormHandle } from '@/components/asset-form'
 import { Sidepane } from '@/components/sidepane'
+import { Sorting } from '@/components/sorting'
 import { Button } from '@/components/button'
 import type { Asset, AssetType, AssetWithPurchaseInfo } from '@/lib/types'
 import { useAssets } from '@/hooks/use-assets'
@@ -13,6 +14,7 @@ import { PurchaseModal } from './purchase'
 import { useBus } from '@/lib/bus'
 import { usePromoteAsset } from '@/hooks/use-promote-asset'
 import { useDeleteAsset, useRemovePurchase } from '@/hooks/use-delete-asset'
+import { assetSortOptions, assetSorters, AssetSortKey } from '@/lib/asset-sorting'
 
 interface AssetsManagerProps {
   type: AssetType
@@ -26,7 +28,10 @@ export function AssetsManager({ type, onClose }: AssetsManagerProps) {
     [buyModalOpen, setBuyModalOpen] = useState(false)
 
   const { data: assets = [] } = useAssets()
-  const filtered = assets.filter(a => a.type === type && a.name !== '')
+  const [sortBy, setSortBy] = useState<AssetSortKey>('newest')
+  const filtered = assets
+    .filter(a => a.type === type && a.name !== '')
+    .sort(assetSorters[sortBy])
   const label = type.charAt(0).toUpperCase() + type.slice(1)
   const [activeItem, setActiveItem] = useState<Asset | undefined>(undefined)
   const promoteAsset = usePromoteAsset()
@@ -65,6 +70,11 @@ export function AssetsManager({ type, onClose }: AssetsManagerProps) {
             </p>
           </div>
         </div>
+        <Sorting
+          options={assetSortOptions}
+          value={sortBy}
+          onChange={setSortBy}
+        />
       </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-5">
         {filtered.map(asset => (

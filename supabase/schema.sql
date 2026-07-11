@@ -462,7 +462,8 @@ RETURNS TABLE (
   content text,
   price integer,
   created timestamptz,
-  purchased boolean
+  purchased boolean,
+  owners bigint
 )
 LANGUAGE SQL
 STABLE
@@ -472,7 +473,8 @@ AS $$
   SELECT
     a.id, a."user", a.name, a.title, a.description,
     a.type, a.path, a.content, a.price, a.created,
-    (p.id IS NOT NULL) AS purchased
+    (p.id IS NOT NULL) AS purchased,
+    (SELECT COUNT(*) FROM public.purchases op WHERE op.asset = a.id) AS owners
   FROM public.assets a
   LEFT JOIN public.purchases p ON p.asset = a.id AND p.buyer = user_uuid
   WHERE a.name != ''
@@ -498,7 +500,8 @@ RETURNS TABLE (
   content text,
   price integer,
   created timestamptz,
-  purchased boolean
+  purchased boolean,
+  owners bigint
 )
 LANGUAGE SQL
 STABLE
@@ -511,7 +514,8 @@ AS $$
     EXISTS (
       SELECT 1 FROM public.purchases p
       WHERE p.asset = a.id AND p.buyer = user_uuid
-    ) AS purchased
+    ) AS purchased,
+    (SELECT COUNT(*) FROM public.purchases op WHERE op.asset = a.id) AS owners
   FROM public.assets a
   WHERE a.price IS NOT NULL
   ORDER BY a.type, a.created DESC;

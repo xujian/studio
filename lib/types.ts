@@ -187,6 +187,7 @@ export type AssetRunMode = 'text' | 'image'
 
 export type AssetWithPurchaseInfo = Asset & {
   purchased: boolean             // was: is_purchased
+  owners: number                 // count of purchases rows for this asset
 }
 
 export type JsonPrompt = Partial<Record<AssetType, string | Record<string, string>>>
