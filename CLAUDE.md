@@ -61,32 +61,7 @@ All clients use the **publishable key** (format: `sb_publishable_xxx`) which res
 
 ### Image Generation Flow
 
-**API Route** (`/api/photo` POST):
-1. Validate request with Zod (`engineRequestSchema`)
-2. Authenticate user via Supabase session
-3. Create or load moment record (baseline prompt + mixins)
-4. Load asset data from database based on mixins
-5. Call `engine.generate({ userId, prompt, assets, reference })`
-6. Upload base64 image to Supabase Storage (`{userId}/{momentId}/{photoId}.{ext}`)
-7. Insert photo record with deltas (only differences from moment baseline)
-8. Return complete moment with all photos
-
-**Engine** (`lib/engine.ts`) — pure generation function, no auth:
-1. **Analyze inputs** → structured JSON baseline
-   - Reference image → `ImageAnalyzer` (full scene description)
-   - Text prompt → `PromptAnalyzer` (only explicit mentions)
-   - Deep merge: prompt overrides reference
-2. **Build assets** → face image parts + text sections
-   - Face defaults to system face (`defaultAssets.face`) when not provided
-   - `AssetsBuilder` produces image parts (face) and text sections (other assets)
-   - Asset sections override corresponding JSON keys
-3. **Assemble prompt** → face image parts + single combined JSON
-4. **Generate** → Gemini API (9:16 portrait, 2K resolution)
-
-**Key Services:**
-- **ImageAnalyzer** (`lib/image-analyzer.ts`) - Analyzes reference images using Gemini Vision, extracts detailed structured data, caches results for 30 minutes
-- **PromptAnalyzer** (`lib/prompt-analyzer.ts`) - Converts natural language prompts to structured JSON format matching ImageAnalyzer output, enables prompt merging
-- **Engine** (`lib/engine.ts`) - Pure generation function: takes userId, prompt, assets, reference; returns base64 image. No auth or database access.
+Full pipeline (API route → engine → analyzers → storage, deep-merge order, delta storage rationale) is documented in the `image-generation-flow` skill — invoke it when working on `/api/photo`, `lib/engine.ts`, or the analyzers.
 
 ### Data Fetching Pattern
 
@@ -112,54 +87,7 @@ Create a Postgres function and call via RPC instead of writing complex client-si
 
 ### Database Schema
 
-Core tables with RLS policies:
-
-1. **`profiles`** - User profiles (auto-created via trigger on signup)
-   - Fields: `id`, `name`, `avatar`, `credits`, `customer`, `tier`, `created`
-   - RLS: Users can only view/update own profile
-
-2. **`moments`** - Generation sessions (baseline prompt + mixins)
-   - Fields: `id`, `user`, `prompt`, `mixins` (JSONB), `final`, `status`, `created`
-   - RLS: Users can only view/insert/delete own moments
-   - A moment represents a creation session with baseline settings
-
-3. **`photos`** - Generated images (delta storage)
-   - Fields: `id`, `moment`, `user`, `prompt` (delta), `mixins` (delta), `created`
-   - RLS: Users can only view/insert/delete photos for their moments
-   - Only stores **differences** from moment baseline (efficient storage)
-   - Display logic: `photo.prompt || moment.prompt` and `{ ...moment.mixins, ...photo.mixins }`
-
-4. **`assets`** - Reusable prompt components (faces, styles, scenes, etc.)
-   - Fields: `id`, `user`, `name`, `type`, `path`, `content`, `price`, `created`
-   - Types: face, makeup, hair, outfit, scene, lighting, camera
-   - Supports both image-based (path) and text-based (content) assets
-   - Marketplace functionality with credits system
-
-5. **`purchases`** - Asset marketplace transactions
-   - Fields: `id`, `buyer`, `asset`, `price`, `created`
-   - Tracks which assets users have purchased
-   - Used by `get_user_assets()` RPC to return owned + purchased assets
-
-6. **`posts`** - Community sharing
-   - Fields: `id`, `user`, `moment` (UNIQUE), `created`
-   - One moment → one post enforced via UNIQUE constraint on `moment`
-   - RLS: Users can insert own posts; public read for published posts
-
-7. **`likes`** - User-post reactions (many-to-many)
-   - Fields: `id`, `post`, `user`, `created`
-   - One like per user per post enforced via UNIQUE constraint
-   - RLS: Users can insert/delete own likes; public read
-
-8. **`transactions`** - Credit ledger
-   - Fields: `id`, `user`, `amount` (signed int), `type`, `ref`, `created`
-   - `amount` is signed: positive = credit, negative = debit
-   - Types: `asset_purchase`, `generation_cost`, `credit_purchase`, `refund`
-   - RLS: Users can only view own transactions
-
-9. **`subscriptions`** - Stripe subscription state
-   - Fields: `id`, `user`, `subscription`, `customer`, `tier`, `status`, `end`, `created`, `updated`
-   - One active subscription per user; tiers: `free`, `basic`, `pro`, `max`
-   - `profiles` table also has `customer` and `tier` columns
+See `supabase/schema.sql` for full table/field definitions and RLS policies (9 tables — don't assume fewer, see Common Mistakes #5).
 
 ### Component Architecture
 
@@ -172,48 +100,7 @@ Core tables with RLS policies:
 
 ### TypeScript Types
 
-All database and domain types are defined in `lib/types.ts`:
-- `Profile` - User profile schema
-- `Moment` - Generation session schema
-- `Photo` - Generated image schema
-- `MomentWithPhotos` - Moment with related photos array
-- `Asset` - Reusable prompt component schema (see `docs/ASSET.md`)
-- `AssetType` - Union type for asset categories
-- `Mixins` / `Assets` / `AssetMap` - Asset selection types (see `docs/MIXIN.md`)
-- `JsonPrompt` - Structured prompt format (output from ImageAnalyzer/PromptAnalyzer)
-  - Contains: subject, outfit, pose, scene, makeup, lighting, camera sections
-  - Used for merging reference image analysis with text prompt analysis
-
-Always use these types instead of inline definitions.
-
-## File Structure
-
-```
-/app
-  /api/photo        # Image generation endpoint (POST)
-  /auth/callback    # OAuth callback handler
-  /studio           # Generation interface (protected)
-  /gallery          # Generation history (protected)
-  /login            # Auth page
-/components         # React components (mix of server/client)
-  /producer         # Main generation UI component
-  /face-picker      # Face asset selector
-/hooks              # TanStack Query hooks (all client-side)
-  use-engine.ts     # Generation mutation hook
-  use-assets.ts     # Asset fetching hook
-/lib
-  /supabase         # Three client implementations
-  engine.ts         # Image generation engine (pure function, no auth)
-  image-analyzer.ts # Reference image analyzer service (cached)
-  prompt-analyzer.ts # Text prompt structuring service (cached)
-  prompts.ts        # Prompt constants and templates
-  types.ts          # TypeScript type definitions
-  validations.ts    # Zod schemas
-  constants.ts      # Asset types and configuration
-  utils.ts          # Utility functions
-/supabase
-  schema.sql        # Database schema, RLS policies, triggers, functions
-```
+All database and domain types are defined in `lib/types.ts` (see `docs/ASSET.md` and `docs/MIXIN.md` for `Asset`/`Mixins` details) — always use these instead of inline definitions.
 
 ## Environment Variables
 
