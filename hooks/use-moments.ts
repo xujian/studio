@@ -90,27 +90,29 @@ export const useDeletePhoto = () => {
       momentId: string
       photoId: string
     }) => {
-      // Fetch this photo's mixins to find ad-hoc assets
+      // Fetch this photo's mixins + parent moment (mixins, sibling photos)
       const { data: photo } = await supabase
         .from('photos')
         .select('mixins')
         .eq('id', photoId)
         .single()
 
+      const { data: moment } = await supabase
+        .from('moments')
+        .select('mixins, photos(id, mixins)')
+        .eq('id', momentId)
+        .single()
+
+      const siblingPhotos = (moment?.photos ?? [] as { id: string; mixins: Record<string, string> | null }[])
+        .filter((p: { id: string }) => p.id !== photoId)
+      const isLastPhoto = siblingPhotos.length === 0
+
       const photoMixinIds = collectMixinIds(photo?.mixins)
       if (photoMixinIds.length) {
-        // Fetch parent moment + sibling photos to find which ad-hoc IDs are still referenced
-        const { data: moment } = await supabase
-          .from('moments')
-          .select('mixins, photos(id, mixins)')
-          .eq('id', momentId)
-          .single()
-
+        // Which ad-hoc IDs are still referenced elsewhere
         const otherIds = new Set([
           ...collectMixinIds(moment?.mixins),
-          ...(moment?.photos ?? [] as { id: string; mixins: Record<string, string> | null }[])
-            .filter((p: { id: string }) => p.id !== photoId)
-            .flatMap((p: { mixins: Record<string, string> | null }) => collectMixinIds(p.mixins))
+          ...siblingPhotos.flatMap((p: { mixins: Record<string, string> | null }) => collectMixinIds(p.mixins))
         ])
 
         const orphanIds = photoMixinIds.filter(id => !otherIds.has(id))
@@ -129,6 +131,16 @@ export const useDeletePhoto = () => {
         .delete()
         .eq('id', photoId)
       if (error) throw error
+
+      if (isLastPhoto) {
+        // No photos left — remove the now-empty moment and its own ad-hoc assets
+        await deleteAdhocAssets(supabase, collectMixinIds(moment?.mixins))
+        const { error: momentError } = await supabase
+          .from('moments')
+          .delete()
+          .eq('id', momentId)
+        if (momentError) throw momentError
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['moments'] })
