@@ -18,6 +18,7 @@ type Events = {
   'generation:complete': MomentWithPhotos
   'generation:error': Error
   'moment:resume': MomentResumePayload
+  'moment:deleted': { momentId: string }
   'mixin:select': MixinSelectPayload
   'assets:open': { type: AssetType }
   'assets:close': void

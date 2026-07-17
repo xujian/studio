@@ -6,6 +6,7 @@ import {
   useQueryClient
 } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
+import { useBus } from '@/lib/bus'
 import type { MomentWithPhotos } from '@/lib/types'
 
 const PAGE_SIZE = 10
@@ -80,6 +81,7 @@ export const useMoments = () => {
 export const useDeletePhoto = () => {
   const queryClient = useQueryClient()
   const supabase = createClient()
+  const $bus = useBus()
   return useMutation({
     mutationFn: async ({
       userId,
@@ -140,6 +142,7 @@ export const useDeletePhoto = () => {
           .delete()
           .eq('id', momentId)
         if (momentError) throw momentError
+        $bus.emit('moment:deleted', { momentId })
       }
     },
     onSuccess: () => {
@@ -168,6 +171,7 @@ export const useUpdateMomentTitle = () => {
 export const useDeleteMoment = () => {
   const queryClient = useQueryClient()
   const supabase = createClient()
+  const $bus = useBus()
   return useMutation({
     mutationFn: async (id: string) => {
       // Fetch moment + photos (ids, mixins) for storage cleanup and ad-hoc asset cleanup
@@ -198,6 +202,7 @@ export const useDeleteMoment = () => {
       // Delete moment (photos cascade-deleted from DB)
       const { error } = await supabase.from('moments').delete().eq('id', id)
       if (error) throw error
+      $bus.emit('moment:deleted', { momentId: id })
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['moments'] })

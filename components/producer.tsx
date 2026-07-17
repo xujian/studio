@@ -85,6 +85,10 @@ export function Producer({ className, onGenerationComplete }: ProducerProps) {
     setDirty(false)
   })
 
+  $bus.on('moment:deleted', ({ momentId: deletedId }) => {
+    if (deletedId === momentId) handleNew()
+  })
+
   $bus.on('mixin:select', (payload: MixinSelectPayload) => {
     setMixins(prev => ({ ...prev, [payload.type]: payload.assetId }))
   })
