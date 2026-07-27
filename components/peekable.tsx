@@ -9,7 +9,6 @@ import {
 } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { Size } from '@/lib/types'
-import { isFunction } from 'util'
 
 const IMAGE_EXT_RE = /\.(jpg|jpeg|png|gif|webp|svg|avif|bmp)(\?.*)?$/i
 
