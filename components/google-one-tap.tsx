@@ -1,8 +1,10 @@
 'use client'
 
-import Script from 'next/script'
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+
+const GSI_SRC = 'https://accounts.google.com/gsi/client'
 
 declare global {
   interface Window {
@@ -69,10 +71,25 @@ export function GoogleOneTap() {
     }
   }
 
-  return (
-    <Script
-      src="https://accounts.google.com/gsi/client"
-      onReady={() => { void initialize() }}
-    />
-  )
+  useEffect(() => {
+    if (window.google?.accounts?.id) {
+      void initialize()
+      return
+    }
+
+    const existing = document.querySelector<HTMLScriptElement>(`script[src="${GSI_SRC}"]`)
+    if (existing) {
+      existing.addEventListener('load', () => { void initialize() }, { once: true })
+      return
+    }
+
+    const script = document.createElement('script')
+    script.src = GSI_SRC
+    script.async = true
+    script.addEventListener('load', () => { void initialize() }, { once: true })
+    document.head.appendChild(script)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  return null
 }
