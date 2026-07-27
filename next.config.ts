@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
     loader: 'custom',
     loaderFile: './lib/supabase-image-loader.ts',
   },
+  allowedDevOrigins: ['kanojostudio.io'],
 };
 
 export default nextConfig;
