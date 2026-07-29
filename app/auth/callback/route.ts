@@ -23,15 +23,11 @@ export async function GET(request: Request) {
       redirectUrl = `${origin}${next}`
     }
 
-    // Collect cookies that will be set during the auth exchange
+    // Collect cookies that will be set during the auth exchange.
+    // exchangeCodeForSession() calls setAll() synchronously before it
+    // resolves, so cookiesToSet is fully populated by the time we get here.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const cookiesToSet: Array<{ name: string; value: string; options?: Record<string, any> }> = []
-
-    // Create a promise that resolves when setAll is called
-    let resolveSetAll: () => void
-    const setAllPromise = new Promise<void>((resolve) => {
-      resolveSetAll = resolve
-    })
 
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -61,22 +57,13 @@ export async function GET(request: Request) {
                 // Cookie store is read-only in this context
               }
             })
-
-            // Resolve the promise once cookies are collected
-            resolveSetAll()
           },
         },
       }
     )
 
-    // Exchange code for session (this will trigger setAll asynchronously)
+    // Exchange code for session (this calls setAll() above before resolving)
     const { error } = await supabase.auth.exchangeCodeForSession(code)
-
-    // Wait for setAll to be called (with a timeout)
-    await Promise.race([
-      setAllPromise,
-      new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 1000)),
-    ])
 
     if (!error) {
       // Create the redirect response
