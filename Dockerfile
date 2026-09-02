@@ -2,12 +2,12 @@
 FROM node:22-alpine AS base
 
 # Install pnpm
-RUN corepack enable && corepack prepare pnpm@10.28.2 --activate
+RUN corepack enable && corepack prepare pnpm@12.2.1 --activate
 
 # ── deps stage ──────────────────────────────────────────────
 FROM base AS deps
 WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile
 
